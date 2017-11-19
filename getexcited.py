@@ -94,7 +94,7 @@ from getexcited_package.tdiagonal import tdiagonal
 
 funq = input('\nSelect a task from the following list:\n\n[1] Prepare input files for single-point calculations\n[2] Generate an optical spectrum from single-point calculations\n[3] Prepare input files for NEXMD\n[4] Prepare input files for adiabatic dynamics with geometries from NEXMD\n[5] Collect populations from NEXMD\n[6] Collect pess and nacts from NEXMD\n[7] Prepare restart input files for NEXMD\n[8] Clean out the directories of NEXMD trajectories that are incomplete\n[9] Access options for geometry analysis\n[10] Access options for dipole analysis\n[11] Access options for transition density analysis\n[12] Access options for pump-push-probe spectroscopy (*** UNDER DEVELOPMENT, DO NOT USE ***)\n[13] Access code testing tools\n\nEnter the number corresponding to the desired task: ')
 if funq not in [1,2,3,4,5,6,7,8,9,10,11,12,13]:
-    print 'answer must be 1 through 13.'
+    print 'Answer must be 1 through 13.'
     sys.exit()
 if funq == 1:
     spcalc()
@@ -131,7 +131,7 @@ if funq == 10:
     if advq == 1:
         permdipole(pathtopack)
 if funq == 11:
-    advq = input('\nSelect a task from the following list:\n\n[1] Analyze induced charge according to diagonal elements of the transition density matrix\n\nEnter the number corresponding to the desired task: ')
+    advq = input('\nSelect a task from the following list:\n\n[1] Analyze induced charge from diagonal elements of the transition density matrix\n\nEnter the number corresponding to the desired task: ')
     if advq not in [1]:
         print 'Answer must be 1.'
         sys.exit()

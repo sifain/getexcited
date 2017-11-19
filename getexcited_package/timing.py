@@ -27,7 +27,7 @@ import glob
 
 cwd = os.getcwd()
 
-def TIMING(pathtotime):
+def timing(pathtotime):
 
     print 'Collecting timings from trajectories.'
 

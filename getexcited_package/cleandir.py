@@ -25,7 +25,7 @@ import sys
 import shutil
 import glob
 
-def CLEANDIR():
+def cleandir():
     
     print 'Cleaning directories of unfinished trajectories.'
     

@@ -2,17 +2,17 @@
 
 '''
     
-This function collects PESs and NACTs from NEXMD during adiabatic or 
+This function collects pess and nacts from NEXMD during adiabatic or 
 non-adiabatic dynamics.
 
 A maximum total of four output files will be generated in the current 
-working directory if collecting PESs and NACTs is requested.  In 
-'pes_raw_ensemble.out' and 'nact_raw_ensemble.out', the PESs and NACTs
+working directory if collecting pess and nacts is requested.  In 
+'pes_raw_ensemble.out' and 'nact_raw_ensemble.out', the pess and nacts
 at all time-steps or up to a time defined by the user are shown, 
 respectively.  In 'pes_raw_ensemble.out', columns from left to right are: 
-directory of trajectory, current state, new state, followed by all PESs.  
+directory of trajectory, current state, new state, followed by all pess.  
 Likewise, 'nact_raw_ensemble.out' is in similar format.  The columns 
-showing NACTs are consecutive rows of the NACT matrix, same as that 
+showing nacts are consecutive rows of the nact matrix, same as that 
 shown in 'nact.out', located in the directory of each trajectory.  
 In 'pes_hop_ensemble.out' and 'nact_hop_ensemble.out' are same data as 
 '...raw_ensemble.out', but only at time-steps where hops occur.  If the 
@@ -28,21 +28,21 @@ Type of calculation
 
 [1a] All time-steps
 In 'pes_raw_ensemble.out':
-> trajectory directory, current state, new state, PESs
+> trajectory directory, current state, new state, pess
 In 'nact_raw_ensemble.out':
-> trajectory directory, current state, new state, NACTs
+> trajectory directory, current state, new state, nacts
 
 [2a] All up to user-defined time
 In 'pes_raw_ensemble.out':
-> trajectory directory, current state, new state, PESs
+> trajectory directory, current state, new state, pess
 In 'nact_raw_ensemble.out':
-> trajectory directory, current state, new state, NACTs
+> trajectory directory, current state, new state, nacts
 
 [2b] Hops up to user-defined time
 In 'pes_hop_ensemble.out':
-> trajectory directory, current state, new state, PESs
+> trajectory directory, current state, new state, pess
 In 'nact_hop_ensemble.out':
-> trajectory directory, current state, new state, NACTs
+> trajectory directory, current state, new state, nacts
 Note: current state will not equal new state for ..._hops_...
 output files
 
@@ -60,700 +60,700 @@ import os
 import sys
 import glob
 
-CWD = os.getcwd()
+cwd = os.getcwd()
 
-def PESNACT():
+def pesnact():
 
-    print 'Collecting PESs and/or NACTs.'
+    print 'Collecting pess and/or nacts.'
 
-    ## TYPE OF CALCULATON AND DIRECTORY ##
-    NEXMDIR = raw_input('NEXMD directory: ')
-    if not os.path.exists(NEXMDIR):
-        print 'Path %s does not exist.' % (NEXMDIR)
+    ## Type of calculaton and directory ##
+    NEXMDir = raw_input('NEXMD directory: ')
+    if not os.path.exists(NEXMDir):
+        print 'Path %s does not exist.' % (NEXMDir)
         sys.exit()
-    TYPEQ = input('Output PESs and/or NACTs at all time-steps and trajectories, up to some user-defined time, or hops only?\nAnswer ALL [0], USER-DEFINED TIME [1], or HOPS [2]: ')
-    if TYPEQ not in [0,1,2]:
+    typeq = input('Output pess and/or nacts at all time-steps and trajectories, up to some user-defined time, or hops only?\nanswer all [0], user-defined time [1], or hops [2]: ')
+    if typeq not in [0,1,2]:
         print 'Answer must be 0, 1, or 2.'
         sys.exit()
 
-    ## INFORMATION FROM HEADER ##
-    if not os.path.exists('%s/header' % (NEXMDIR)):
-        print 'Path %s/header does not exist.' % (NEXMDIR)
+    ## Information from header ##
+    if not os.path.exists('%s/header' % (NEXMDir)):
+        print 'Path %s/header does not exist.' % (NEXMDir)
         sys.exit()
-    HEADER = open('%s/header'% (NEXMDIR),'r')
-    HEADER = HEADER.readlines()
-    NUM = 0
-    TLINE = len(HEADER)
-    VERB = None
-    STATEINIT = None
-    for LINE in HEADER:
-        if 'bo_dynamics_flag' in LINE:
-            BOFLAG = np.int(LINE.split()[0][len('bo_dynamics_flag='):-1])
-        if 'exc_state_init=' in LINE:
-            STATEINIT = np.int(LINE.split()[0][len('exc_state_init='):-1])
-        if 'n_exc_states_propagate' in LINE:
-            NSTATES = np.int(LINE.split()[0][len('n_exc_states_propagate='):-1])
-        if 'time_init' in LINE:
-            TINITH = np.float(LINE.split()[0][len('time_init='):-1])
-        if 'time_step' in LINE:
-            DT = np.float(LINE.split()[0][len('time_step='):-1])
-        if 'n_class_steps' in LINE:
-            TSMAX = np.int(LINE.split()[0][len('n_class_steps='):-1]) + 1
-        if 'n_quant_steps' in LINE:
-            NQSTEP = np.int(LINE.split()[0][len('n_quant_steps='):-1])
-            if NQSTEP == 0:
-                NQSTEP = 1
-        if '&moldyn' in LINE:
-            TLINE = NUM
-        if 'verbosity' in LINE and NUM > TLINE and VERB is None:
-            VERB = np.int(LINE.split()[0][len('verbosity='):-1])
-        if 'out_data_steps' in LINE:
-            ODATA = np.int(LINE.split()[0][len('out_data_steps='):-1])
-            if ODATA == 0:
+    header = open('%s/header'% (NEXMDir),'r')
+    header = header.readlines()
+    num = 0
+    tline = len(header)
+    verb = none
+    stateinit = none
+    for line in header:
+        if 'bo_dynamics_flag' in line:
+            boflag = np.int(line.split()[0][len('bo_dynamics_flag='):-1])
+        if 'exc_state_init=' in line:
+            stateinit = np.int(line.split()[0][len('exc_state_init='):-1])
+        if 'n_exc_states_propagate' in line:
+            nstates = np.int(line.split()[0][len('n_exc_states_propagate='):-1])
+        if 'time_init' in line:
+            tinith = np.float(line.split()[0][len('time_init='):-1])
+        if 'time_step' in line:
+            dt = np.float(line.split()[0][len('time_step='):-1])
+        if 'n_class_steps' in line:
+            tsmax = np.int(line.split()[0][len('n_class_steps='):-1]) + 1
+        if 'n_quant_steps' in line:
+            nqstep = np.int(line.split()[0][len('n_quant_steps='):-1])
+            if nqstep == 0:
+                nqstep = 1
+        if '&moldyn' in line:
+            tline = num
+        if 'verbosity' in line and num > tline and verb is none:
+            verb = np.int(line.split()[0][len('verbosity='):-1])
+        if 'out_data_steps' in line:
+            odata = np.int(line.split()[0][len('out_data_steps='):-1])
+            if odata == 0:
                 print 'No data has been printed to files because out_data_steps = 0 in header.'
                 sys.exit()
-        NUM += 1
-    if BOFLAG == 1 and STATEINIT == None:
+        num += 1
+    if boflag == 1 and stateinit == none:
         print 'Dynamics are set to Born-Oppenheimer, but the initial state is not set.\nPlease check bo_dynamics_flag and exc_state_init in header.'
         sys.exit()
-    if BOFLAG == 1 and TYPEQ == 2:
-        print 'Dynamics are set to Born-Oppenheimer. Hops only occur during non-Born-Oppenheimer dynamics.\nPlease check bo_dynamics_flag in header.'
+    if boflag == 1 and typeq == 2:
+        print 'Dynamics are set to Born-Oppenheimer. hops only occur during non-born-oppenheimer dynamics.\nPlease check bo_dynamics_flag in header.'
         sys.exit()
-    
-    ## COLLECTION TIME ##
-    if TYPEQ == 0: ## ALL TIME-STEPS
-        TCOLL = (TSMAX - 1)*DT
-    if TYPEQ == 1 or TYPEQ == 2: ## USER-DEFINED TIME OR TIME-STEPS AT HOPS ONLY
-        TCOLL = input('Collect data up to what time in femtoseconds: ')
-        if isinstance(TCOLL, int) == False and isinstance(TCOLL, float) == False:
+
+    ## Collection time ##
+    if typeq == 0: ## all time-steps
+        tcoll = (tsmax - 1)*dt
+    if typeq == 1 or typeq == 2: ## user-defined time or time-steps at hops only
+        tcoll = input('Collect data up to what time in femtoseconds: ')
+        if isinstance(tcoll, int) == false and isinstance(tcoll, float) == false:
             print 'Time must be integer or float.'
             sys.exit()
-        if TCOLL < 0:
+        if tcoll < 0:
             print 'Time must be integer or float greater than zero.'
             sys.exit()
-        TCOLL = np.float(TCOLL)
-        NSTEPS = 1
-        while NSTEPS*DT <= TCOLL:
-            NSTEPS += 1
-        TCOLL = (NSTEPS - 1)*DT
-        if TCOLL > (TSMAX - 1)*DT:
-            TCOLL = (TSMAX - 1)*DT
+        tcoll = np.float(tcoll)
+        nsteps = 1
+        while nsteps*dt <= tcoll:
+            nsteps += 1
+        tcoll = (nsteps - 1)*dt
+        if tcoll > (tsmax - 1)*dt:
+            tcoll = (tsmax - 1)*dt
 
-    ## NUMBER OF CLASSICAL STEPS ##
-    TSCOL = 0
-    while TSCOL*DT*ODATA <= TCOLL:
-        TSCOL += 1
+    ## Number of classical steps ##
+    tscol = 0
+    while tscol*dt*odata <= tcoll:
+        tscol += 1
 
-    ## DATA TYPE ##
-    if BOFLAG == 0: ## NON-ADIABATIC
-        DTYPEQ = input('Collect PESs [1], NACTs [2], or BOTH [3]: ')
-    if BOFLAG == 1: ## ADIABATIC
-        DTYPEQ = 1
-    if DTYPEQ not in [1,2,3]:
+    ## Data type ##
+    if boflag == 0: ## non-adiabatic
+        dtypeq = input('Collect pess [1], nacts [2], or both [3]: ')
+    if boflag == 1: ## adiabatic
+        dtypeq = 1
+    if dtypeq not in [1,2,3]:
         print 'Answer must be 1, 2, or 3.'
         sys.exit()
 
-    ## LINE NUMBER ARRAY ##
-    if VERB == 3:
-        if TSTEPQ == 0 and NQSTEP != 1:
-            LINENUMS = np.arange(NQSTEP, TSCOL*NQSTEP - (NQSTEP - 1), NQSTEP)
+    ## Line number array ##
+    if verb == 3:
+        if tstepq == 0 and nqstep != 1:
+            linenums = np.arange(nqstep, tscol*nqstep - (nqstep - 1), nqstep)
         else:
-            LINENUMS = np.arange(0, TSCOL)
+            linenums = np.arange(0, tscol)
     else:
-        LINENUMS = np.arange(0, TSCOL)
+        linenums = np.arange(0, tscol)
 
-    ## TIME ARRAY ##
-    if DTYPEQ == 1:
-        TIMES = np.around(np.linspace(TINITH, TCOLL, TSCOL), decimals = 3)
-    if DTYPEQ == 2 or DTYPEQ == 3:
-        TIMES = np.around(np.linspace(TINITH + DT*ODATA, TCOLL, TSCOL - 1), decimals = 3)
+    ## Time array ##
+    if dtypeq == 1:
+        times = np.around(np.linspace(tinith, tcoll, tscol), decimals = 3)
+    if dtypeq == 2 or dtypeq == 3:
+        times = np.around(np.linspace(tinith + dt*odata, tcoll, tscol - 1), decimals = 3)
 
-    ## INDICES TO CUT EXTRANEOUS NACT DATA ##
-    INDICES = np.array([])
-    INDEX = NSTATES
-    for TERM in np.split(np.arange(NSTATES*NSTATES),NSTATES):
-        INDICES = np.append(INDICES,TERM[-INDEX::])
-        INDEX -= 1
-    INDICES = np.int_(np.insert(INDICES + 1, 0, 0, 0))
+    ## Indices to cut extraneous nact data ##
+    indices = np.array([])
+    index = nstates
+    for term in np.split(np.arange(nstates*nstates),nstates):
+        indices = np.append(indices,term[-index::])
+        index -= 1
+    indices = np.int_(np.insert(indices + 1, 0, 0, 0))
 
-    ## CHECK FOR NEXMD FOLDERS ##
-    NEXMDS = glob.glob('%s/NEXMD*/' % (NEXMDIR))
-    NEXMDS.sort()
-    if len(NEXMDS) == 0:
-        print 'There are no NEXMD folders in %s.' % (NEXMDIR)
+    ## Check for NEXMD folders ##
+    NEXMDs = glob.glob('%s/NEXMD*/' % (NEXMDir))
+    NEXMDs.sort()
+    if len(NEXMDs) == 0:
+        print 'There are no NEXMD folders in %s.' % (NEXMDir)
         sys.exit()
 
-    ### ADIABATIC ###
-    if BOFLAG == 1:
-        ## ALL TIME-STEPS ##
-        if TYPEQ == 0:
-            ## GENERATE OUTPUT/ERROR FILES ##
-            PESALL = open('%s/pes_raw_ensemble.out' % (CWD),'w')
-            ERROR = open('%s/pesnact.err' % (CWD),'w')
-            ## BEGIN LOOPING OVER DIRECTORIES ##
-            TTRAJ = 0
-            CTRAJ = 0
-            ETRAJ = 0
-            ERRFLAG = 0
-            for NEXMD in NEXMDS:
+    ### Adiabatic ###
+    if boflag == 1:
+        ## All time-steps ##
+        if typeq == 0:
+            ## Generate output/error files ##
+            pesall = open('%s/pes_raw_ensemble.out' % (cwd),'w')
+            error = open('%s/pesnact.err' % (cwd),'w')
+            ## Begin looping over directories ##
+            ttraj = 0
+            ctraj = 0
+            etraj = 0
+            errflag = 0
+            for NEXMD in NEXMDs:
                 if not os.path.exists('%s/dirlist1' % (NEXMD)):
                     print 'Path %dirlist1 does not exist.' % (NEXMD)
                     sys.exit()
-                DIRLIST1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(DIRLIST1,int) == True:
-                    DIRLIST1 = np.array([DIRLIST1])
-                for DIR in DIRLIST1:
-                    ## DETERMINE COMPLETED NUMBER OF TIME-STEPS ##
-                    if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,DIR)):
-                        print >> ERROR, '%s%04d/energy-ev.out' % (NEXMD,DIR), 'does not exist'
-                        ERRFLAG = 1
-                        TTRAJ += 1
+                dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
+                if isinstance(dirlist1,int) == true:
+                    dirlist1 = np.array([dirlist1])
+                for dir in dirlist1:
+                    ## Determine completed number of time-steps ##
+                    if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
+                        print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
+                        errflag = 1
+                        ttraj += 1
                         continue
-                    DATA = open('%s/%04d/energy-ev.out' % (NEXMD,DIR),'r')
-                    DATA = DATA.readlines()
-                    TSTEPS = len(DATA) - 1
-                    ## DETERMINE IF PES FILES EXIST AND OPEN THEM ##
-                    if not os.path.exists('%s/%04d/pes.out' % (NEXMD,DIR)):
-                        print >> ERROR, '%s%04d/pes.out' % (NEXMD,DIR), 'does not exist'
-                        ERRFLAG = 1
-                        TTRAJ += 1
+                    data = open('%s/%04d/energy-ev.out' % (NEXMD,dir),'r')
+                    data = data.readlines()
+                    tsteps = len(data) - 1
+                    ## Determine if pes files exist and open them ##
+                    if not os.path.exists('%s/%04d/pes.out' % (NEXMD,dir)):
+                        print >> error, 'Path %s%04d/pes.out does not exist.' % (NEXMD,dir)
+                        errflag = 1
+                        ttraj += 1
                         continue
-                    PES = open('%s/%04d/pes.out' % (NEXMD,DIR),'r')
-                    PES = PES.readlines()
-                    LINES = LINENUMS[0:len(PES):1]
-                    ## COLLECT DATA ##
-                    TFLAG = 0
-                    INDEX = 0
-                    for LINE in LINES:
-                        PESS = np.float_(PES[LINE].split())
-                        TIME = np.around(PESS[0], decimals = 3)
-                        if TIME != TIMES[INDEX]:
-                            print >> ERROR, 'There is an inconsistency in time-step in %s%04d at %.3f fs' % (NEXMD,DIR,TIMES[INDEX])
-                            TFLAG = 1
-                            ERRFLAG = 1
+                    pes = open('%s/%04d/pes.out' % (NEXMD,dir),'r')
+                    pes = pes.readlines()
+                    lines = linenums[0:len(pes):1]
+                    ## Collect data ##
+                    tflag = 0
+                    index = 0
+                    for line in lines:
+                        pess = np.float_(pes[line].split())
+                        time = np.around(pess[0], decimals = 3)
+                        if time != times[index]:
+                            print >> error, 'There is an inconsistency in time-step in %s%04d at %.3f fs' % (NEXMD,dir,times[index])
+                            tflag = 1
+                            errflag = 1
                             break
-                        print >> PESALL, '%s%04d' % (NEXMD,DIR), '%d' % (STATEINIT), '%d' % (STATEINIT), ' '.join(str('%.10f') % (x) for x in PESS)
-                        INDEX += 1
-                    if TFLAG == 0:
-                        CTRAJ += 1
-                        if TSTEPS == TSMAX:
-                            ETRAJ += 1
-                    print '%s%04d' % (NEXMD,DIR), '%0*.2f' % (len(str((TSMAX))) + 2, (TSTEPS - 1)*DT)
-                    TTRAJ += 1
-            ## SUMMARY OF RESULTS ##
-            if CTRAJ == 0:
-                print 'No trajectories completed within %0*.2f fs.' % (len(str(TSMAX)), TCOLL)
-                os.remove('%s/pes_raw_ensemble.out' % (CWD))
+                        print >> pesall, '%s%04d' % (NEXMD,dir), '%d' % (stateinit), '%d' % (stateinit), ' '.join(str('%.10f') % (x) for x in pess)
+                        index += 1
+                    if tflag == 0:
+                        ctraj += 1
+                        if tsteps == tsmax:
+                            etraj += 1
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    ttraj += 1
+            ## Summary of results ##
+            if ctraj == 0:
+                print 'No trajectories completed within %0*.2f fs.' % (len(str(tsmax)), tcoll)
+                os.remove('%s/pes_raw_ensemble.out' % (cwd))
             else:
-                print 'Total Trajectories:', '%04d' % (TTRAJ)
-                print 'Completed Trajectories:', '%04d' % (CTRAJ)
-                print 'Excellent Trajectories:', '%04d' % (ETRAJ)
-            if ERRFLAG == 1:
-                print 'One or more trajectories did not finish within %0*.2f femtoseconds, check pesnact.err.' % (len(str(TSMAX)),TCOLL)
+                print 'Total trajectories:', '%04d' % (ttraj)
+                print 'Completed trajectories:', '%04d' % (ctraj)
+                print 'Excellent trajectories:', '%04d' % (etraj)
+            if errflag == 1:
+                print 'One or more trajectories did not finish within %0*.2f femtoseconds, check pesnact.err.' % (len(str(tsmax)),tcoll)
             else:
-                os.remove('%s/pesnact.err' % (CWD))
+                os.remove('%s/pesnact.err' % (cwd))
 
-        ## USER-DEFINED TIME-STEPS ##
-        if TYPEQ == 1:
-            ## GENERATE OUTPUT/ERROR FILES ##
-            PESALL = open('%s/pes_raw_ensemble.out' % (CWD),'w')
-            ERROR = open('%s/pesnact.err' % (CWD),'w')
-            ## BEGIN LOOPING OVER DIRECTORIES ##
-            TTRAJ = 0
-            CTRAJ = 0
-            ETRAJ = 0
-            ERRFLAG = 0
-            for NEXMD in NEXMDS:
+        ## User-defined time-steps ##
+        if typeq == 1:
+            ## Generate output/error files ##
+            pesall = open('%s/pes_raw_ensemble.out' % (cwd),'w')
+            error = open('%s/pesnact.err' % (cwd),'w')
+            ## Begin looping over directories ##
+            ttraj = 0
+            ctraj = 0
+            etraj = 0
+            errflag = 0
+            for NEXMD in NEXMDs:
                 if not os.path.exists('%s/dirlist1' % (NEXMD)):
                     print 'Path %dirlist1 does not exist.' % (NEXMD)
                     sys.exit()
-                DIRLIST1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(DIRLIST1,int) == True:
-                    DIRLIST1 = np.array([DIRLIST1])
-                for DIR in DIRLIST1:
-                    ## DETERMINE COMPLETED NUMBER OF TIME-STEPS ##
-                    if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,DIR)):
-                        print >> ERROR, '%s%04d/energy-ev.out' % (NEXMD,DIR), 'does not exist'
-                        ERRFLAG = 1
-                        TTRAJ += 1
+                dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
+                if isinstance(dirlist1,int) == true:
+                    dirlist1 = np.array([dirlist1])
+                for dir in dirlist1:
+                    ## Determine completed number of time-steps ##
+                    if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
+                        print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
+                        errflag = 1
+                        ttraj += 1
                         continue
-                    DATA = open('%s/%04d/energy-ev.out' % (NEXMD,DIR),'r')
-                    DATA = DATA.readlines()
-                    TSTEPS = len(DATA) - 1
-                    ## DETERMINE IF PES FILES EXIST AND OPEN THEM ##
-                    if not os.path.exists('%s/%04d/pes.out' % (NEXMD,DIR)):
-                        print >> ERROR, '%s%04d/pes.out' % (NEXMD,DIR), 'does not exist'
-                        ERRFLAG = 1
-                        TTRAJ += 1
+                    data = open('%s/%04d/energy-ev.out' % (NEXMD,dir),'r')
+                    data = data.readlines()
+                    tsteps = len(data) - 1
+                    ## Determine if pes files exist and open them ##
+                    if not os.path.exists('%s/%04d/pes.out' % (NEXMD,dir)):
+                        print >> error, 'Path %s%04d/pes.out does not exist.' % (NEXMD,dir)
+                        errflag = 1
+                        ttraj += 1
                         continue
-                    PES = open('%s/%04d/pes.out' % (NEXMD,DIR),'r')
-                    PES = PES.readlines()
-                    LINES = LINENUMS[0:len(PES):1]
-                    ## COMPARE COMPLETED TIME-STEPS TO COLLECTION TIME-STEPS AND COLLECT DATA ##
-                    if TSTEPS >= TSCOL:
-                        TFLAG = 0
-                        INDEX = 0
-                        for LINE in LINES:
-                            PESS = np.float_(PES[LINE].split())
-                            TIME = np.around(PESS[0], decimals = 3)
-                            if TIME != TIMES[INDEX]:
-                                print >> ERROR, 'There is an inconsistency in time-step in %s%04d at %.3f fs' % (NEXMD,DIR,TIMES[INDEX])
-                                TFLAG = 1
-                                ERRFLAG = 1
+                    pes = open('%s/%04d/pes.out' % (NEXMD,dir),'r')
+                    pes = pes.readlines()
+                    lines = linenums[0:len(pes):1]
+                    ## Compare completed time-steps to collection time-steps and collect data ##
+                    if tsteps >= tscol:
+                        tflag = 0
+                        index = 0
+                        for line in lines:
+                            pess = np.float_(pes[line].split())
+                            time = np.around(pess[0], decimals = 3)
+                            if time != times[index]:
+                                print >> error, 'There is an inconsistency in time-step in %s%04d at %.3f fs' % (NEXMD,dir,times[index])
+                                tflag = 1
+                                errflag = 1
                                 break
-                            print >> PESALL, '%s%04d' % (NEXMD,DIR), '%d' % (STATEINIT), '%d' % (STATEINIT), ' '.join(str('%.10f') % (x) for x in PESS)
-                            INDEX += 1
-                        if TFLAG == 0:
-                            CTRAJ += 1
-                            if TSTEPS == TSMAX:
-                                ETRAJ += 1
+                            print >> pesall, '%s%04d' % (NEXMD,dir), '%d' % (stateinit), '%d' % (stateinit), ' '.join(str('%.10f') % (x) for x in pess)
+                            index += 1
+                        if tflag == 0:
+                            ctraj += 1
+                            if tsteps == tsmax:
+                                etraj += 1
                     else:
-                        print >> ERROR, '%s%04d' % (NEXMD,DIR), '%0*.2f' % (len(str((TSMAX))) + 2, (TSTEPS - 1)*DT)
-                        ERRFLAG = 1
-                    print '%s%04d' % (NEXMD,DIR), '%0*.2f' % (len(str((TSMAX))) + 2, (TSTEPS - 1)*DT)
-                    TTRAJ += 1
-            ## SUMMARY OF RESULTS ##
-            if CTRAJ == 0:
-                print 'No trajectories completed within %0*.2f fs.' % (len(str(TSMAX)), TCOLL)
-                os.remove('%s/pes_raw_ensemble.out' % (CWD))
+                        print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                        errflag = 1
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    ttraj += 1
+            ## Summary of results ##
+            if ctraj == 0:
+                print 'No trajectories completed within %0*.2f fs.' % (len(str(tsmax)), tcoll)
+                os.remove('%s/pes_raw_ensemble.out' % (cwd))
             else:
-                print 'Total Trajectories:', '%04d' % (TTRAJ)
-                print 'Completed Trajectories:', '%04d' % (CTRAJ)
-                print 'Excellent Trajectories:', '%04d' % (ETRAJ)
-            if ERRFLAG == 1:
-                print 'One or more trajectories did not finish within %0*.2f femtoseconds, check pesnact.err.' % (len(str(TSMAX)),TCOLL)
+                print 'Total trajectories:', '%04d' % (ttraj)
+                print 'Completed trajectories:', '%04d' % (ctraj)
+                print 'Excellent trajectories:', '%04d' % (etraj)
+            if errflag == 1:
+                print 'One or more trajectories did not finish within %0*.2f femtoseconds, check pesnact.err.' % (len(str(tsmax)),tcoll)
             else:
-                os.remove('%s/pesnact.err' % (CWD))
+                os.remove('%s/pesnact.err' % (cwd))
 
-    ### NON-ADIABATIC ###
-    if BOFLAG == 0:
-        ## ALL TIME-STEPS ##
-        if TYPEQ == 0:
-            ## GENERATE OUTPUT/ERROR FILES ##
-            if DTYPEQ == 1:
-                PESALL = open('%s/pes_raw_ensemble.out' % (CWD),'w')
-            if DTYPEQ == 2:
-                NACTALL = open('%s/nact_raw_ensemble.out' % (CWD),'w')
-            if DTYPEQ == 3:
-                PESALL = open('%s/pes_raw_ensemble.out' % (CWD),'w')
-                NACTALL = open('%s/nact_raw_ensemble.out' % (CWD),'w')
-            ERROR = open('%s/pesnact.err' % (CWD),'w')
-            ## BEGIN LOOPING OVER DIRECTORIES ##
-            TTRAJ = 0
-            CTRAJ = 0
-            ETRAJ = 0
-            ERRFLAG = 0
-            for NEXMD in NEXMDS:
+    ### Non-adiabatic ###
+    if boflag == 0:
+        ## All time-steps ##
+        if typeq == 0:
+            ## Generate output/error files ##
+            if dtypeq == 1:
+                pesall = open('%s/pes_raw_ensemble.out' % (cwd),'w')
+            if dtypeq == 2:
+                nactall = open('%s/nact_raw_ensemble.out' % (cwd),'w')
+            if dtypeq == 3:
+                pesall = open('%s/pes_raw_ensemble.out' % (cwd),'w')
+                nactall = open('%s/nact_raw_ensemble.out' % (cwd),'w')
+            error = open('%s/pesnact.err' % (cwd),'w')
+            ## Begin looping over directories ##
+            ttraj = 0
+            ctraj = 0
+            etraj = 0
+            errflag = 0
+            for NEXMD in NEXMDs:
+                if not os.path.exists('%s/dirlist1' % (NEXMD)):
+                    print 'path %sdirlist1 does not exist.' % (NEXMD)
+                    sys.exit()
+                dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
+                if isinstance(dirlist1,int) == true:
+                    dirlist1 = np.array([dirlist1])
+                for dir in dirlist1:
+                    ## Determine completed number of time-steps ##
+                    if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
+                        print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
+                        errflag = 1
+                        ttraj += 1
+                        continue
+                    data = open('%s/%04d/energy-ev.out' % (NEXMD,dir),'r')
+                    data = data.readlines()
+                    tsteps = len(data) - 1
+                    ## Determine if pes/nact files exist and open them ##
+                    if not os.path.exists('%s/%04d/coeff-n.out' % (NEXMD,dir)):
+                        print >> error, 'Path %s%04d/coeff-n.out does not exist.' % (NEXMD,dir)
+                        errflag = 1
+                        ttraj += 1
+                        continue
+                    hops = open('%s/%04d/coeff-n.out' % (NEXMD,dir),'r')
+                    hops = hops.readlines()
+                    hsteps = len(hops)
+                    if dtypeq == 1:
+                        if not os.path.exists('%s/%04d/pes.out' % (NEXMD,dir)):
+                            print >> error, 'Path %s%04d/pes.out does not exist.' % (NEXMD,dir)
+                            errflag = 1
+                            ttraj += 1
+                            continue
+                        pes = open('%s/%04d/pes.out' % (NEXMD,dir),'r')
+                        pes = pes.readlines()
+                        lines = linenums[0:len(pes):1]
+                    if dtypeq == 2:
+                        if not os.path.exists('%s/%04d/nact.out' % (NEXMD,dir)):
+                            print >> error, 'Path %s%04d/nact.out does not exist.' % (NEXMD,dir)
+                            errflag = 1
+                            ttraj += 1
+                            continue
+                        nact = open('%s/%04d/nact.out' % (NEXMD,dir),'r')
+                        nact = nact.readlines()
+                        lines = linenums[1:len(nact) + 1:1]
+                    if dtypeq == 3:
+                        if not os.path.exists('%s/%04d/pes.out' % (NEXMD,dir)):
+                            print >> error, 'Path %s%04d/pes.out does not exist.' % (NEXMD,dir)
+                            errflag = 1
+                            ttraj += 1
+                            continue
+                        pes = open('%s/%04d/pes.out' % (NEXMD,dir),'r')
+                        pes = pes.readlines()
+                        lines = linenums[1:len(pes):1]
+                        if not os.path.exists('%s/%04d/nact.out' % (NEXMD,dir)):
+                            print >> error, 'Path %s%04d/nact.out does not exist.' % (NEXMD,dir)
+                            errflag = 1
+                            ttraj += 1
+                            continue
+                        nact = open('%s/%04d/nact.out' % (NEXMD,dir),'r')
+                        nact = nact.readlines()
+                    ## Collect data ##
+                    tflag = 0
+                    index = 0
+                    cstate = np.int(hops[0].split()[0])
+                    for line in lines:
+                        if line <= hsteps - 1:
+                            nstate = np.int(hops[line].split()[0])
+                        if dtypeq in [1,3]:
+                            pess = np.float_(pes[line].split())
+                            time = np.around(pess[0], decimals = 3)
+                            if time != times[index]:
+                                print >> error, 'There is an inconsistency in time-step in %s%04d at %.3f fs.' % (NEXMD,dir,times[index])
+                                tflag = 1
+                                errflag = 1
+                                break
+                        if dtypeq in [2,3]:
+                            if line <= hsteps - 1:
+                                nacts = np.float_(nact[line - 1].split())[indices]
+                                time = np.around(nacts[0], decimals = 3)
+                                if time != times[index]:
+                                    print >> error, 'There is an inconsistency in time-step in %s%04d at %.3f fs.' % (NEXMD,dir,times[index])
+                                    tflag = 1
+                                    errflag = 1
+                                    break
+                        if dtypeq == 1:
+                            print >> pesall, '%s%04d' % (NEXMD,dir), '%d' % (cstate), '%d' % (nstate), ' '.join(str('%.10f') % (x) for x in pess)
+                            cstate = nstate
+                            index += 1
+                            continue
+                        if dtypeq == 2:
+                            if line <= hsteps - 1:
+                                print >> nactall, '%s%04d' % (NEXMD,dir), '%d' % (cstate), '%d' % (nstate), ' '.join(str('%.10f') % (x) for x in nacts)
+                                cstate = nstate
+                                index += 1
+                                continue
+                        if dtypeq == 3:
+                            print >> pesall, '%s%04d' % (NEXMD,dir), '%d' % (cstate), '%d' % (nstate), ' '.join(str('%.10f') % (x) for x in pess)
+                            if line <= hsteps - 1:
+                                print >> nactall, '%s%04d' % (NEXMD,dir), '%d' % (cstate), '%d' % (nstate), ' '.join(str('%.10f') % (x) for x in nacts)
+                        cstate = nstate
+                        index += 1
+                    if tflag == 0:
+                        ctraj += 1
+                        if tsteps == tsmax:
+                            etraj += 1
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    ttraj += 1
+            ## Summary of results ##
+            if ctraj == 0:
+                print 'No trajectories completed within %0*.2f fs.' % (len(str(tsmax)), tcoll)
+                if dtypeq == 1:
+                    os.remove('%s/pes_raw_ensemble.out' % (cwd))
+                if dtypeq == 2:
+                    os.remove('%s/nact_raw_ensemble.out' % (cwd))
+                if dtypeq == 3:
+                    os.remove('%s/pes_raw_ensemble.out' % (cwd))
+                    os.remove('%s/nact_raw_ensemble.out' % (cwd))
+            else:
+                print 'Total trajectories:', '%04d' % (ttraj)
+                print 'Completed trajectories:', '%04d' % (ctraj)
+                print 'Excellent trajectories:', '%04d' % (etraj)
+            if errflag == 1:
+                print 'One of more trajectories have experienced an error, check pesnact.err.' % (len(str(tsmax)), tcoll)
+            else:
+                os.remove('%s/pesnact.err' % (cwd))
+
+        ## User-defined time-steps ##
+        if typeq == 1:
+            ## Generate output/error files ##
+            if dtypeq == 1:
+                pesall = open('%s/pes_raw_ensemble.out' % (cwd),'w')
+            if dtypeq == 2:
+                nactall = open('%s/nact_raw_ensemble.out' % (cwd),'w')
+            if dtypeq == 3:
+                pesall = open('%s/pes_raw_ensemble.out' % (cwd),'w')
+                nactall = open('%s/nact_raw_ensemble.out' % (cwd),'w')
+            error = open('%s/pesnact.err' % (cwd),'w')
+            ## Begin looping over directories ##
+            ttraj = 0
+            ctraj = 0
+            etraj = 0
+            errflag = 0
+            for NEXMD in NEXMDs:
                 if not os.path.exists('%s/dirlist1' % (NEXMD)):
                     print 'Path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
-                DIRLIST1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(DIRLIST1,int) == True:
-                    DIRLIST1 = np.array([DIRLIST1])
-                for DIR in DIRLIST1:
-                    ## DETERMINE COMPLETED NUMBER OF TIME-STEPS ##
-                    if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,DIR)):
-                        print >> ERROR, '%s%04d/energy-ev.out' % (NEXMD,DIR), 'does not exist'
-                        ERRFLAG = 1
-                        TTRAJ += 1
+                dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
+                if isinstance(dirlist1,int) == true:
+                    dirlist1 = np.array([dirlist1])
+                for dir in dirlist1:
+                    ## Determine number of completed time-steps ##
+                    if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
+                        print 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
+                        sys.exit()
+                    data = open('%s/%04d/energy-ev.out' % (NEXMD,dir),'r')
+                    data = data.readlines()
+                    tsteps = len(data) - 1
+                    ## Determine if pes/nact files exist ##
+                    if not os.path.exists('%s/%04d/coeff-n.out' % (NEXMD,dir)):
+                        print >> error, 'Path %s%04d/coeff-n.out does not exist.' % (NEXMD,dir)
+                        errflag = 1
+                        ttraj += 1
                         continue
-                    DATA = open('%s/%04d/energy-ev.out' % (NEXMD,DIR),'r')
-                    DATA = DATA.readlines()
-                    TSTEPS = len(DATA) - 1
-                    ## DETERMINE IF PES/NACT FILES EXIST AND OPEN THEM ##
-                    if not os.path.exists('%s/%04d/coeff-n.out' % (NEXMD,DIR)):
-                        print >> ERROR, '%s%04d/coeff-n.out' % (NEXMD,DIR), 'does not exist'
-                        ERRFLAG = 1
-                        TTRAJ += 1
-                        continue
-                    HOPS = open('%s/%04d/coeff-n.out' % (NEXMD,DIR),'r')
-                    HOPS = HOPS.readlines()
-                    HSTEPS = len(HOPS)
-                    if DTYPEQ == 1:
-                        if not os.path.exists('%s/%04d/pes.out' % (NEXMD,DIR)):
-                            print >> ERROR, '%s%04d/pes.out' % (NEXMD,DIR), 'does not exist'
-                            ERRFLAG = 1
-                            TTRAJ += 1
+                    hops = open('%s/%04d/coeff-n.out' % (NEXMD,dir),'r')
+                    hops = hops.readlines()
+                    htsteps = len(hops)
+                    if dtypeq == 1:
+                        if not os.path.exists('%s/%04d/pes.out' % (NEXMD,dir)):
+                            print >> error, 'Path %s%04d/pes.out does not exist.' % (NEXMD,dir)
+                            errflag = 1
+                            ttraj += 1
                             continue
-                        PES = open('%s/%04d/pes.out' % (NEXMD,DIR),'r')
-                        PES = PES.readlines()
-                        LINES = LINENUMS[0:len(PES):1]
-                    if DTYPEQ == 2:
-                        if not os.path.exists('%s/%04d/nact.out' % (NEXMD,DIR)):
-                            print >> ERROR, '%s%04d/nact.out' % (NEXMD,DIR), 'does not exist'
-                            ERRFLAG = 1
-                            TTRAJ += 1
+                        pes = open('%s/%04d/pes.out' % (NEXMD,dir),'r')
+                        pes = pes.readlines()
+                        lines = linenums[0:len(pes):1]
+                    if dtypeq == 2:
+                        if not os.path.exists('%s/%04d/nact.out' % (NEXMD,dir)):
+                            print >> error, 'Path %s%04d/nact.out does not exist.' % (NEXMD,dir)
+                            errflag = 1
+                            ttraj += 1
                             continue
-                        NACT = open('%s/%04d/nact.out' % (NEXMD,DIR),'r')
-                        NACT = NACT.readlines()
-                        LINES = LINENUMS[1:len(NACT) + 1:1]
-                    if DTYPEQ == 3:
-                        if not os.path.exists('%s/%04d/pes.out' % (NEXMD,DIR)):
-                            print >> ERROR, '%s%04d/pes.out' % (NEXMD,DIR), 'does not exist'
-                            ERRFLAG = 1
-                            TTRAJ += 1
+                        nact = open('%s/%04d/nact.out' % (NEXMD,dir),'r')
+                        nact = nact.readlines()
+                        lines = linenums[1:len(nact) + 1:1]
+                    if dtype == 3:
+                        if not os.path.exists('%s/%04d/pes.out' % (NEXMD,dir)):
+                            print >> error, 'Path %s%04d/pes.out does not exist.' % (NEXMD,dir)
+                            errflag = 1
+                            ttraj += 1
                             continue
-                        PES = open('%s/%04d/pes.out' % (NEXMD,DIR),'r')
-                        PES = PES.readlines()
-                        LINES = LINENUMS[1:len(PES):1]
-                        if not os.path.exists('%s/%04d/nact.out' % (NEXMD,DIR)):
-                            print >> ERROR, '%s%04d/nact.out' % (NEXMD,DIR), 'does not exist'
-                            ERRFLAG = 1
-                            TTRAJ += 1
+                        pes = open('%s/%04d/pes.out' % (NEXMD,dir),'r')
+                        pes = pes.readlines()
+                        lines = linenums[1:len(pes):1]
+                        if not os.path.exists('%s/%04d/nact.out' % (NEXMD,dir)):
+                            print >> error, 'Path %s%04d/nact.out does not exist.' % (NEXMD,dir)
+                            errflag = 1
+                            ttraj += 1
                             continue
-                        NACT = open('%s/%04d/nact.out' % (NEXMD,DIR),'r')
-                        NACT = NACT.readlines()
-                    ## COLLECT DATA ##
-                    TFLAG = 0
-                    INDEX = 0
-                    CSTATE = np.int(HOPS[0].split()[0])
-                    for LINE in LINES:
-                        if LINE <= HSTEPS - 1:
-                            NSTATE = np.int(HOPS[LINE].split()[0])
-                        if DTYPEQ in [1,3]:
-                            PESS = np.float_(PES[LINE].split())
-                            TIME = np.around(PESS[0], decimals = 3)
-                            if TIME != TIMES[INDEX]:
-                                print >> ERROR, 'There is an inconsistency in time-step in %s%04d at %.3f fs' % (NEXMD,DIR,TIMES[INDEX])
-                                TFLAG = 1
-                                ERRFLAG = 1
-                                break
-                        if DTYPEQ in [2,3]:
-                            if LINE <= HSTEPS - 1:
-                                NACTS = np.float_(NACT[LINE - 1].split())[INDICES]
-                                TIME = np.around(NACTS[0], decimals = 3)
-                                if TIME != TIMES[INDEX]:
-                                    print >> ERROR, 'There is an inconsistency in time-step in %s%04d at %.3f fs' % (NEXMD,DIR,TIMES[INDEX])
-                                    TFLAG = 1
-                                    ERRFLAG = 1
+                        nact = open('%s/%04d/nact.out' % (NEXMD,dir),'r')
+                        nact = nact.readlines()
+                    ## Compare completed time-steps to collection time-steps and collect data ##
+                    if tsteps >= tscol:
+                        tflag = 0
+                        index = 0
+                        cstate = np.int(hops[0].split()[0])
+                        for line in lines:
+                            if line <= htsteps - 1:
+                                nstate = np.int(hops[line].split()[0])
+                            if dtypeq in [1,3]:
+                                pess = np.float_(pes[line].split())
+                                time = np.around(pess[0], decimals = 3)
+                                if time != times[index]:
+                                    print >> error, 'There is an inconsistency in time-step in %s%04d at %.3f fs.' % (NEXMD,dir,times[index])
+                                    tflag = 1
+                                    errflag = 1
                                     break
-                        if DTYPEQ == 1:
-                            print >> PESALL, '%s%04d' % (NEXMD,DIR), '%d' % (CSTATE), '%d' % (NSTATE), ' '.join(str('%.10f') % (x) for x in PESS)
-                            CSTATE = NSTATE
-                            INDEX += 1
-                            continue
-                        if DTYPEQ == 2:
-                            if LINE <= HSTEPS - 1:
-                                print >> NACTALL, '%s%04d' % (NEXMD,DIR), '%d' % (CSTATE), '%d' % (NSTATE), ' '.join(str('%.10f') % (x) for x in NACTS)
-                                CSTATE = NSTATE
-                                INDEX += 1
+                            if dtypeq in [2,3]:
+                                if line <= htsteps - 1:
+                                    nacts = np.float_(nact[line-1].split())[indices]
+                                    time = np.around(nacts[0], decimals = 3)
+                                    if time != times[index]:
+                                        print >> error, 'There is an inconsistency in time-step in %s%04d at %.3f fs.' % (NEXMD,dir,times[index])
+                                        tflag = 1
+                                        errflag = 1
+                                        break
+                            if dtypeq == 1:
+                                print >> pesall, '%s%04d' % (NEXMD,dir), '%d' % (cstate), '%d' % (nstate), ' '.join(str('%.10f') % (x) for x in pess)
+                                cstate = nstate
+                                index += 1
                                 continue
-                        if DTYPEQ == 3:
-                            print >> PESALL, '%s%04d' % (NEXMD,DIR), '%d' % (CSTATE), '%d' % (NSTATE), ' '.join(str('%.10f') % (x) for x in PESS)
-                            if LINE <= HSTEPS - 1:
-                                print >> NACTALL, '%s%04d' % (NEXMD,DIR), '%d' % (CSTATE), '%d' % (NSTATE), ' '.join(str('%.10f') % (x) for x in NACTS)
-                        CSTATE = NSTATE
-                        INDEX += 1
-                    if TFLAG == 0:
-                        CTRAJ += 1
-                        if TSTEPS == TSMAX:
-                            ETRAJ += 1
-                    print '%s%04d' % (NEXMD,DIR), '%0*.2f' % (len(str((TSMAX))) + 2, (TSTEPS - 1)*DT)
-                    TTRAJ += 1
-            ## SUMMARY OF RESULTS ##
-            if CTRAJ == 0:
-                print 'No trajectories completed within %0*.2f fs.' % (len(str(TSMAX)), TCOLL)
-                if DTYPEQ == 1:
-                    os.remove('%s/pes_raw_ensemble.out' % (CWD))
-                if DTYPEQ == 2:
-                    os.remove('%s/nact_raw_ensemble.out' % (CWD))
-                if DTYPEQ == 3:
-                    os.remove('%s/pes_raw_ensemble.out' % (CWD))
-                    os.remove('%s/nact_raw_ensemble.out' % (CWD))
+                            if dtypeq == 2:
+                                if line <= htsteps - 1:
+                                    print >> nactall, '%s%04d' % (NEXMD,dir), '%d' % (cstate), '%d' % (nstate), ' '.join(str('%.10f') % (x) for x in nacts)
+                                    cstate = nstate
+                                    index += 1
+                                    continue
+                            if dtypeq == 3:
+                                print >> pesall, '%s%04d' % (NEXMD,dir), '%d' % (cstate), '%d' % (nstate), ' '.join(str('%.10f') % (x) for x in pess)
+                                if line <= htsteps - 1:
+                                    print >> nactall, '%s%04d' % (NEXMD,dir), '%d' % (cstate), '%d' % (nstate), ' '.join(str('%.10f') % (x) for x in nacts)
+                            cstate = nstate
+                            index += 1
+                        if tflag == 0:
+                            ctraj += 1
+                            if tsteps == tsmax:
+                                etraj += 1
+                    else:
+                        print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                        errflag = 1
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    ttraj += 1
+            ## Summary of results ##
+            if ctraj == 0:
+                print 'No trajectories completed within %0*.2f fs.' % (len(str(tsmax)), tcoll)
+                if dtypeq == 1:
+                    os.remove('%s/pes_raw_ensemble.out' % (cwd))
+                if dtypeq == 2:
+                    os.remove('%s/nact_raw_ensemble.out' % (cwd))
+                if dtypeq == 3:
+                    os.remove('%s/pes_raw_ensemble.out' % (cwd))
+                    os.remove('%s/nact_raw_ensemble.out' % (cwd))
             else:
-                print 'Total Trajectories:', '%04d' % (TTRAJ)
-                print 'Completed Trajectories:', '%04d' % (CTRAJ)
-                print 'Excellent Trajectories:', '%04d' % (ETRAJ)
-            if ERRFLAG == 1:
-                print 'One of more trajectories have experienced an error, check pesnact.err.' % (len(str(TSMAX)), TCOLL)
+                print 'Total trajectories:', '%04d' % (ttraj)
+                print 'Completed trajectories:', '%04d' % (ctraj)
+                print 'Excellent trajectories:', '%04d' % (etraj)
+            if errflag == 1:
+                print 'One or more trajectories did not finish within %0*.2f femtoseconds, check pesnact.err.' % (len(str(tsmax)),tcoll)
             else:
-                os.remove('%s/pesnact.err' % (CWD))
+                os.remove('%s/pesnact.err' % (cwd))
 
-        ## USER-DEFINED TIME-STEPS ##
-        if TYPEQ == 1:
-            ## GENERATE OUTPUT/ERROR FILES ##
-            if DTYPEQ == 1:
-                PESALL = open('%s/pes_raw_ensemble.out' % (CWD),'w')
-            if DTYPEQ == 2:
-                NACTALL = open('%s/nact_raw_ensemble.out' % (CWD),'w')
-            if DTYPEQ == 3:
-                PESALL = open('%s/pes_raw_ensemble.out' % (CWD),'w')
-                NACTALL = open('%s/nact_raw_ensemble.out' % (CWD),'w')
-            ERROR = open('%s/pesnact.err' % (CWD),'w')
-            ## BEGIN LOOPING OVER DIRECTORIES ##
-            TTRAJ = 0
-            CTRAJ = 0
-            ETRAJ = 0
-            ERRFLAG = 0
-            for NEXMD in NEXMDS:
+        ## Time-steps at hops only ##
+        if typeq == 2:
+            ## Generate output/error files ##
+            if dtypeq == 1:
+                peshop = open('%s/pes_hop_ensemble.out' % (cwd),'w')
+            if dtypeq == 2:
+                nacthop = open('%s/nact_hop_ensemble.out' % (cwd),'w')
+            if dtypeq == 3:
+                peshop = open('%s/pes_hop_ensemble.out' % (cwd),'w')
+                nacthop = open('%s/nact_hop_ensemble.out' % (cwd),'w')
+            error = open('%s/pesnact.err' % (cwd),'w')
+            ## Begin looping over directories ##
+            ttraj = 0
+            ctraj = 0
+            etraj = 0
+            errflag = 0
+            for NEXMD in NEXMDs:
                 if not os.path.exists('%s/dirlist1' % (NEXMD)):
                     print 'Path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
-                DIRLIST1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(DIRLIST1,int) == True:
-                    DIRLIST1 = np.array([DIRLIST1])
-                for DIR in DIRLIST1:
-                    ## DETERMINE NUMBER OF COMPLETED TIME-STEPS ##
-                    if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,DIR)):
-                        print 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,DIR)
+                dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
+                if isinstance(dirlist1,int) == true:
+                    dirlist1 = np.array([dirlist1])
+                for dir in dirlist1:
+                    ## determine number of completed time-steps ##
+                    if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
+                        print 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
                         sys.exit()
-                    DATA = open('%s/%04d/energy-ev.out' % (NEXMD,DIR),'r')
-                    DATA = DATA.readlines()
-                    TSTEPS = len(DATA) - 1
-                    ## DETERMINE IF PES/NACT FILES EXIST ##
-                    if not os.path.exists('%s/%04d/coeff-n.out' % (NEXMD,DIR)):
-                        print >> ERROR, '%s%04d/coeff-n.out' % (NEXMD,DIR), 'does not exist'
-                        ERRFLAG = 1
-                        TTRAJ += 1
+                    data = open('%s/%04d/energy-ev.out' % (NEXMD,dir),'r')
+                    data = data.readlines()
+                    tsteps = len(data) - 1
+                    ## determine if pes/nact files exist ##
+                    if not os.path.exists('%s/%04d/coeff-n.out' % (NEXMD,dir)):
+                        print >> error, 'Path %s%04d/coeff-n.out does not exist.' % (NEXMD,dir)
+                        errflag = 1
+                        ttraj += 1
                         continue
-                    HOPS = open('%s/%04d/coeff-n.out' % (NEXMD,DIR),'r')
-                    HOPS = HOPS.readlines()
-                    HTSTEPS = len(HOPS)
-                    if DTYPEQ == 1:
-                        if not os.path.exists('%s/%04d/pes.out' % (NEXMD,DIR)):
-                            print >> ERROR, '%s%04d/pes.out' % (NEXMD,DIR), 'does not exist'
-                            ERRFLAG = 1
-                            TTRAJ += 1
+                    hops = open('%s/%04d/coeff-n.out' % (NEXMD,dir),'r')
+                    hops = hops.readlines()
+                    hsteps = len(hops)
+                    if dtypeq == 1:
+                        if not os.path.exists('%s/%04d/pes.out' % (NEXMD,dir)):
+                            print >> error, 'Path %s%04d/pes.out does not exist.' % (NEXMD,dir)
+                            errflag = 1
+                            ttraj += 1
                             continue
-                        PES = open('%s/%04d/pes.out' % (NEXMD,DIR),'r')
-                        PES = PES.readlines()
-                        LINES = LINENUMS[0:len(PES):1]
-                    if DTYPEQ == 2:
-                        if not os.path.exists('%s/%04d/nact.out' % (NEXMD,DIR)):
-                            print >> ERROR, '%s%04d/nact.out' % (NEXMD,DIR), 'does not exist'
-                            ERRFLAG = 1
-                            TTRAJ += 1
+                        pes = open('%s/%04d/pes.out' % (NEXMD,dir),'r')
+                        pes = pes.readlines()
+                        lines = linenums[0:len(pes):1]
+                    if dtypeq == 2:
+                        if not os.path.exists('%s/%04d/nact.out' % (NEXMD,dir)):
+                            print >> error, 'Path %s%04d/nact.out does not exist.' % (NEXMD,dir)
+                            errflag = 1
+                            ttraj += 1
                             continue
-                        NACT = open('%s/%04d/nact.out' % (NEXMD,DIR),'r')
-                        NACT = NACT.readlines()
-                        LINES = LINENUMS[1:len(NACT) + 1:1]
-                    if DTYPE == 3:
-                        if not os.path.exists('%s/%04d/pes.out' % (NEXMD,DIR)):
-                            print >> ERROR, '%s%04d/pes.out' % (NEXMD,DIR), 'does not exist'
-                            ERRFLAG = 1
-                            TTRAJ += 1
+                        nact = open('%s/%04d/nact.out' % (NEXMD,dir),'r')
+                        nact = nact.readlines()
+                        lines = linenums[1:len(nact) + 1:1]
+                    if dtypeq == 3:
+                        if not os.path.exists('%s/%04d/pes.out' % (NEXMD,dir)):
+                            print >> error, 'Path %s%04d/pes.out does not exist.' % (NEXMD,dir)
+                            errflag = 1
+                            ttraj += 1
                             continue
-                        PES = open('%s/%04d/pes.out' % (NEXMD,DIR),'r')
-                        PES = PES.readlines()
-                        LINES = LINENUMS[1:len(PES):1]
-                        if not os.path.exists('%s/%04d/nact.out' % (NEXMD,DIR)):
-                            print >> ERROR, '%s%04d/nact.out' % (NEXMD,DIR), 'does not exist'
-                            ERRFLAG = 1
-                            TTRAJ += 1
+                        pes = open('%s/%04d/pes.out' % (NEXMD,dir),'r')
+                        pes = pes.readlines()
+                        lines = linenums[1:len(pes):1]
+                        if not os.path.exists('%s/%04d/nact.out' % (NEXMD,dir)):
+                            print >> error, 'Path %s%04d/nact.out does not exist.' % (NEXMD,dir)
+                            errflag = 1
+                            ttraj += 1
                             continue
-                        NACT = open('%s/%04d/nact.out' % (NEXMD,DIR),'r')
-                        NACT = NACT.readlines()
-                    ## COMPARE COMPLETED TIME-STEPS TO COLLECTION TIME-STEPS AND COLLECT DATA ##
-                    if TSTEPS >= TSCOL:
-                        TFLAG = 0
-                        INDEX = 0
-                        CSTATE = np.int(HOPS[0].split()[0])
-                        for LINE in LINES:
-                            if LINE <= HTSTEPS - 1:
-                                NSTATE = np.int(HOPS[LINE].split()[0])
-                            if DTYPEQ in [1,3]:
-                                PESS = np.float_(PES[LINE].split())
-                                TIME = np.around(PESS[0], decimals = 3)
-                                if TIME != TIMES[INDEX]:
-                                    print >> ERROR, 'There is an inconsistency in time-step in %s%04d at %.3f fs' % (NEXMD,DIR,TIMES[INDEX])
-                                    TFLAG = 1
-                                    ERRFLAG = 1
+                        nact = open('%s/%04d/nact.out' % (NEXMD,dir),'r')
+                        nact = nact.readlines()
+                    ## Compare completed time-steps to collection time-steps and collect data ##
+                    if tsteps >= tscol:
+                        tflag = 0
+                        cstate = np.int(hops[0].split()[0])
+                        index = 0
+                        for line in lines:
+                            if line <= hsteps - 1:
+                                nstate = np.int(hops[line].split()[0])
+                            if dtypeq in [1,3]:
+                                pess = np.float_(pes[line].split())
+                                time = np.around(pess[0], decimals = 3)
+                                if time != times[index]:
+                                    print >> error, 'There is an inconsistency in time-step in %s%04d at %.3f fs.' % (NEXMD,dir,times[index])
+                                    tflag = 1
+                                    errflag = 1
                                     break
-                            if DTYPEQ in [2,3]:
-                                if LINE <= HTSTEPS - 1:
-                                    NACTS = np.float_(NACT[LINE-1].split())[INDICES]
-                                    TIME = np.around(NACTS[0], decimals = 3)
-                                    if TIME != TIMES[INDEX]:
-                                        print >> ERROR, 'There is an inconsistency in time-step in %s%04d at %.3f fs' % (NEXMD,DIR,TIMES[INDEX])
-                                        TFLAG = 1
-                                        ERRFLAG = 1
+                            if dtypeq in [2,3]:
+                                if line <= hsteps - 1:
+                                    nacts = np.float_(nact[line - 1].split())[indices]
+                                    time = np.around(nacts[0], decimals = 3)
+                                    if time != times[index]:
+                                        print >> error, 'There is an inconsistency in time-step in %s%04d at %.3f fs.' % (NEXMD,dir,times[index])
+                                        tflag = 1
+                                        errflag = 1
                                         break
-                            if DTYPEQ == 1:
-                                print >> PESALL, '%s%04d' % (NEXMD,DIR), '%d' % (CSTATE), '%d' % (NSTATE), ' '.join(str('%.10f') % (x) for x in PESS)
-                                CSTATE = NSTATE
-                                INDEX += 1
-                                continue
-                            if DTYPEQ == 2:
-                                if LINE <= HTSTEPS - 1:
-                                    print >> NACTALL, '%s%04d' % (NEXMD,DIR), '%d' % (CSTATE), '%d' % (NSTATE), ' '.join(str('%.10f') % (x) for x in NACTS)
-                                    CSTATE = NSTATE
-                                    INDEX += 1
+                            if nstate != cstate:
+                                if dtypeq == 1:
+                                    print >> peshop, '%s%04d' % (NEXMD,dir), '%d' % (cstate), '%d' % (nstate), ' '.join(str('%.10f') % (x) for x in pess)
+                                    cstate = nstate
+                                    index += 1
                                     continue
-                            if DTYPEQ == 3:
-                                print >> PESALL, '%s%04d' % (NEXMD,DIR), '%d' % (CSTATE), '%d' % (NSTATE), ' '.join(str('%.10f') % (x) for x in PESS)
-                                if LINE <= HTSTEPS - 1:
-                                    print >> NACTALL, '%s%04d' % (NEXMD,DIR), '%d' % (CSTATE), '%d' % (NSTATE), ' '.join(str('%.10f') % (x) for x in NACTS)
-                            CSTATE = NSTATE
-                            INDEX += 1
-                        if TFLAG == 0:
-                            CTRAJ += 1
-                            if TSTEPS == TSMAX:
-                                ETRAJ += 1
-                    else:
-                        print >> ERROR, '%s%04d' % (NEXMD,DIR), '%0*.2f' % (len(str((TSMAX))) + 2, (TSTEPS - 1)*DT)
-                        ERRFLAG = 1
-                    print '%s%04d' % (NEXMD,DIR), '%0*.2f' % (len(str((TSMAX))) + 2, (TSTEPS - 1)*DT)
-                    TTRAJ += 1
-            ## SUMMARY OF RESULTS ##
-            if CTRAJ == 0:
-                print 'No trajectories completed within %0*.2f fs.' % (len(str(TSMAX)), TCOLL)
-                if DTYPEQ == 1:
-                    os.remove('%s/pes_raw_ensemble.out' % (CWD))
-                if DTYPEQ == 2:
-                    os.remove('%s/nact_raw_ensemble.out' % (CWD))
-                if DTYPEQ == 3:
-                    os.remove('%s/pes_raw_ensemble.out' % (CWD))
-                    os.remove('%s/nact_raw_ensemble.out' % (CWD))
-            else:
-                print 'Total Trajectories:', '%04d' % (TTRAJ)
-                print 'Completed Trajectories:', '%04d' % (CTRAJ)
-                print 'Excellent Trajectories:', '%04d' % (ETRAJ)
-            if ERRFLAG == 1:
-                print 'One or more trajectories did not finish within %0*.2f femtoseconds, check pesnact.err.' % (len(str(TSMAX)),TCOLL)
-            else:
-                os.remove('%s/pesnact.err' % (CWD))
-
-        ## TIME-STEPS AT HOPS ONLY ##
-        if TYPEQ == 2:
-            ## GENERATE OUTPUT/ERROR FILES ##
-            if DTYPEQ == 1:
-                PESHOP = open('%s/pes_hop_ensemble.out' % (CWD),'w')
-            if DTYPEQ == 2:
-                NACTHOP = open('%s/nact_hop_ensemble.out' % (CWD),'w')
-            if DTYPEQ == 3:
-                PESHOP = open('%s/pes_hop_ensemble.out' % (CWD),'w')
-                NACTHOP = open('%s/nact_hop_ensemble.out' % (CWD),'w')
-            ERROR = open('%s/pesnact.err' % (CWD),'w')
-            ## BEGIN LOOPING OVER DIRECTORIES ##
-            TTRAJ = 0
-            CTRAJ = 0
-            ETRAJ = 0
-            ERRFLAG = 0
-            for NEXMD in NEXMDS:
-                if not os.path.exists('%s/dirlist1' % (NEXMD)):
-                    print 'Path %sdirlist1 does not exist' % (NEXMD)
-                    sys.exit()
-                DIRLIST1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(DIRLIST1,int) == True:
-                    DIRLIST1 = np.array([DIRLIST1])
-                for DIR in DIRLIST1:
-                    ## DETERMINE NUMBER OF COMPLETED TIME-STEPS ##
-                    if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,DIR)):
-                        print 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,DIR)
-                        sys.exit()
-                    DATA = open('%s/%04d/energy-ev.out' % (NEXMD,DIR),'r')
-                    DATA = DATA.readlines()
-                    TSTEPS = len(DATA) - 1
-                    ## DETERMINE IF PES/NACT FILES EXIST ##
-                    if not os.path.exists('%s/%04d/coeff-n.out' % (NEXMD,DIR)):
-                        print >> ERROR, '%s%04d/coeff-n.out' % (NEXMD,DIR), 'does not exist'
-                        ERRFLAG = 1
-                        TTRAJ += 1
-                        continue
-                    HOPS = open('%s/%04d/coeff-n.out' % (NEXMD,DIR),'r')
-                    HOPS = HOPS.readlines()
-                    HSTEPS = len(HOPS)
-                    if DTYPEQ == 1:
-                        if not os.path.exists('%s/%04d/pes.out' % (NEXMD,DIR)):
-                            print >> ERROR, '%s%04d/pes.out' % (NEXMD,DIR), 'does not exist'
-                            ERRFLAG = 1
-                            TTRAJ += 1
-                            continue
-                        PES = open('%s/%04d/pes.out' % (NEXMD,DIR),'r')
-                        PES = PES.readlines()
-                        LINES = LINENUMS[0:len(PES):1]
-                    if DTYPEQ == 2:
-                        if not os.path.exists('%s/%04d/nact.out' % (NEXMD,DIR)):
-                            print >> ERROR, '%s%04d/nact.out' % (NEXMD,DIR), 'does not exist'
-                            ERRFLAG = 1
-                            TTRAJ += 1
-                            continue
-                        NACT = open('%s/%04d/nact.out' % (NEXMD,DIR),'r')
-                        NACT = NACT.readlines()
-                        LINES = LINENUMS[1:len(NACT) + 1:1]
-                    if DTYPEQ == 3:
-                        if not os.path.exists('%s/%04d/pes.out' % (NEXMD,DIR)):
-                            print >> ERROR, '%s%04d/pes.out' % (NEXMD,DIR), 'does not exist'
-                            ERRFLAG = 1
-                            TTRAJ += 1
-                            continue
-                        PES = open('%s/%04d/pes.out' % (NEXMD,DIR),'r')
-                        PES = PES.readlines()
-                        LINES = LINENUMS[1:len(PES):1]
-                        if not os.path.exists('%s/%04d/nact.out' % (NEXMD,DIR)):
-                            print >> ERROR, '%s%04d/nact.out' % (NEXMD,DIR), 'does not exist'
-                            ERRFLAG = 1
-                            TTRAJ += 1
-                            continue
-                        NACT = open('%s/%04d/nact.out' % (NEXMD,DIR),'r')
-                        NACT = NACT.readlines()
-                    ## COMPARE COMPLETED TIME-STEPS TO COLLECTION TIME-STEPS AND COLLECT DATA ##
-                    if TSTEPS >= TSCOL:
-                        TFLAG = 0
-                        CSTATE = np.int(HOPS[0].split()[0])
-                        INDEX = 0
-                        for LINE in LINES:
-                            if LINE <= HSTEPS - 1:
-                                NSTATE = np.int(HOPS[LINE].split()[0])
-                            if DTYPEQ in [1,3]:
-                                PESS = np.float_(PES[LINE].split())
-                                TIME = np.around(PESS[0], decimals = 3)
-                                if TIME != TIMES[INDEX]:
-                                    print >> ERROR, 'There is an inconsistency in time-step in %s%04d at %.3f fs' % (NEXMD,DIR,TIMES[INDEX])
-                                    TFLAG = 1
-                                    ERRFLAG = 1
-                                    break
-                            if DTYPEQ in [2,3]:
-                                if LINE <= HSTEPS - 1:
-                                    NACTS = np.float_(NACT[LINE - 1].split())[INDICES]
-                                    TIME = np.around(NACTS[0], decimals = 3)
-                                    if TIME != TIMES[INDEX]:
-                                        print >> ERROR, 'There is an inconsistency in time-step in %s%04d at %.3f fs' % (NEXMD,DIR,TIMES[INDEX])
-                                        TFLAG = 1
-                                        ERRFLAG = 1
-                                        break
-                            if NSTATE != CSTATE:
-                                if DTYPEQ == 1:
-                                    print >> PESHOP, '%s%04d' % (NEXMD,DIR), '%d' % (CSTATE), '%d' % (NSTATE), ' '.join(str('%.10f') % (x) for x in PESS)
-                                    CSTATE = NSTATE
-                                    INDEX += 1
-                                    continue
-                                if DTYPEQ == 2:
-                                    if LINE <= HSTEPS - 1:
-                                        print >> NACTHOP, '%s%04d' % (NEXMD,DIR), '%d' % (CSTATE), '%d' % (NSTATE), ' '.join(str('%.10f') % (x) for x in NACTS)
-                                        CSTATE = NSTATE
-                                        INDEX += 1
+                                if dtypeq == 2:
+                                    if line <= hsteps - 1:
+                                        print >> nacthop, '%s%04d' % (NEXMD,dir), '%d' % (cstate), '%d' % (nstate), ' '.join(str('%.10f') % (x) for x in nacts)
+                                        cstate = nstate
+                                        index += 1
                                         continue
-                                if DTYPEQ == 3:
-                                    print >> PESHOP, '%s%04d' % (NEXMD,DIR), '%d' % (CSTATE), '%d' % (NSTATE), ' '.join(str('%.10f') % (x) for x in PESS)
-                                    if LINE <= HSTEPS - 1:
-                                        print >> NACTHOP, '%s%04d' % (NEXMD,DIR), '%d' % (CSTATE), '%d' % (NSTATE), ' '.join(str('%.10f') % (x) for x in NACTS)
-                            CSTATE = NSTATE
-                            INDEX += 1
-                        if TFLAG == 0:
-                            CTRAJ += 1
-                            if TSTEPS == TSMAX:
-                                ETRAJ += 1
+                                if dtypeq == 3:
+                                    print >> peshop, '%s%04d' % (NEXMD,dir), '%d' % (cstate), '%d' % (nstate), ' '.join(str('%.10f') % (x) for x in pess)
+                                    if line <= hsteps - 1:
+                                        print >> nacthop, '%s%04d' % (NEXMD,dir), '%d' % (cstate), '%d' % (nstate), ' '.join(str('%.10f') % (x) for x in nacts)
+                            cstate = nstate
+                            index += 1
+                        if tflag == 0:
+                            ctraj += 1
+                            if tsteps == tsmax:
+                                etraj += 1
                     else:
-                        print >> ERROR, '%s%04d' % (NEXMD,DIR), '%0*.2f' % (len(str((TSMAX))) + 2, (TSTEPS - 1)*DT)
-                        ERRFLAG = 1
-                    print '%s%04d' % (NEXMD,DIR), '%0*.2f' % (len(str((TSMAX))) + 2, (TSTEPS - 1)*DT)
-                    TTRAJ += 1
-            ## SUMMARY OF RESULTS ##
-            if CTRAJ == 0:
-                print 'No trajectories completed within %0*.2f fs.' % (len(str(TSMAX)), TCOLL)
-                if DTYPEQ == 1:
-                    os.remove('%s/pes_hop_ensemble.out' % (CWD))
-                if DTYPEQ == 2:
-                    os.remove('%s/nact_hop_ensemble.out' % (CWD))
-                if DTYPEQ == 3:
-                    os.remove('%s/pes_hop_ensemble.out' % (CWD))
-                    os.remove('%s/nact_hop_ensemble.out' % (CWD))
+                        print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                        errflag = 1
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    ttraj += 1
+            ## Summary of results ##
+            if ctraj == 0:
+                print 'No trajectories completed within %0*.2f fs.' % (len(str(tsmax)), tcoll)
+                if dtypeq == 1:
+                    os.remove('%s/pes_hop_ensemble.out' % (cwd))
+                if dtypeq == 2:
+                    os.remove('%s/nact_hop_ensemble.out' % (cwd))
+                if dtypeq == 3:
+                    os.remove('%s/pes_hop_ensemble.out' % (cwd))
+                    os.remove('%s/nact_hop_ensemble.out' % (cwd))
             else:
-                print 'Total Trajectories:', '%04d' % (TTRAJ)
-                print 'Completed Trajectories:', '%04d' % (CTRAJ)
-                print 'Excellent Trajectories:', '%04d' % (ETRAJ)
-            if ERRFLAG == 1:
-                print 'One or more trajectories did not finish within %0*.2f femtoseconds, check pesnact.err.' % (len(str(TSMAX)),TCOLL)
+                print 'Total trajectories:', '%04d' % (ttraj)
+                print 'Completed trajectories:', '%04d' % (ctraj)
+                print 'Excellent trajectories:', '%04d' % (etraj)
+            if errflag == 1:
+                print 'One or more trajectories did not finish within %0*.2f femtoseconds, check pesnact.err.' % (len(str(tsmax)),tcoll)
             else:
-                os.remove('%s/pesnact.err' % (CWD))
+                os.remove('%s/pesnact.err' % (cwd))

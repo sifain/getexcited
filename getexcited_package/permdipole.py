@@ -52,839 +52,839 @@ import subprocess
 import shlex
 import fileinput
 
-CWD = os.getcwd()
+cwd = os.getcwd()
 
-def PERMDIPOLE(PATHTODIPOLE):
+def permdipole(pathtodipole):
 
     print 'Calculating excited-state permanent dipole moment as a function of time.'
 
-    ## TYPE OF CALCULATION AND DIRECTORY CHECK ##
-    DYNQ = input('Calculate dipole moment along one trajectory or an ensemble of trajectories?\nAnswer ONE [1] or ENSEMBLE [0]: ')
-    if DYNQ not in [1,0]:
+    ## Type of calculation and directory check ##
+    dynq = input('Calculate dipole moment along one trajectory or an ensemble of trajectories?\nAnswer one [1] or ensemble [0]: ')
+    if dynq not in [1,0]:
         print 'Answer must be 1 or 0.'
         sys.exit()
-    if DYNQ == 0: ## ENSEMBLE
-        NEXMDIR = raw_input('Ensemble directory [e.g. nexmd]: ')
-        if not os.path.exists(NEXMDIR):
-            print 'Path %s does not exist.' % (NEXMDIR)
+    if dynq == 0: ## ensemble
+        NEXMDir = raw_input('Ensemble directory [e.g. NEXMD]: ')
+        if not os.path.exists(NEXMDir):
+            print 'Path %s does not exist.' % (NEXMDir)
             sys.exit()
-        ## CHECK IF NEXMD FOLDERS EXIST ##
-        NEXMDS = glob.glob('%s/NEXMD*/' % (NEXMDIR))
-        NEXMDS.sort()
-        if len(NEXMDS) == 0:
-            print 'There are no NEXMD folders in %s.' % (NEXMDIR)
+        ## check if NEXMD folders exist ##
+        NEXMDs = glob.glob('%s/NEXMD*/' % (NEXMDir))
+        NEXMDs.sort()
+        if len(NEXMDs) == 0:
+            print 'There are no NEXMD folders in %s.' % (NEXMDir)
             sys.exit()
-        ## DETERMINE MEAN OR ALL ##
-        TYPEQ = input('Output mean dipole in time or output dipoles at all time-steps and trajectories?\nAnswer MEAN [0] or ALL [1]: ')
-        if TYPEQ not in [0,1]:
+        ## Determine mean or all ##
+        typeq = input('Output mean dipole in time or output dipoles at all time-steps and trajectories?\nAnswer mean [0] or all [1]: ')
+        if typeq not in [0,1]:
             print 'Answer must be 0 or 1.'
             sys.exit()
-    if DYNQ == 1: ## SINGLE TRAJECTORY
-        TYPEQ = 0
-        NEXMDIR = raw_input('Single trajectory directory: ')
-        if not os.path.exists(NEXMDIR):
-            print 'Path %s does not exist.' % (NEXMDIR)
+    if dynq == 1: ## single trajectory
+        typeq = 0
+        NEXMDir = raw_input('Single trajectory directory: ')
+        if not os.path.exists(NEXMDir):
+            print 'Path %s does not exist.' % (NEXMDir)
             sys.exit()
 
-    ## USER-DEFINED LENGTH OF ANALYSIS AND INITIALIZE ARRAYS ##
-    if DYNQ == 0: ## ENSEMBLE
-        if not os.path.exists('%s/header' % (NEXMDIR)):
-            print 'Path %s/header does not exist.' % (NEXMDIR)
+    ## User-defined length of analysis and initialize arrays ##
+    if dynq == 0: ## ensemble
+        if not os.path.exists('%s/header' % (NEXMDir)):
+            print 'Path %s/header does not exist.' % (NEXMDir)
             sys.exit()
-        HEADER = open('%s/header' % (NEXMDIR),'r')
-        HEADER = HEADER.readlines()
-    if DYNQ == 1: ## SINGLE TRAJECTORY
-        if not os.path.exists('%s/input.ceon' % (NEXMDIR)):
-            print 'Path %s/input.ceon does not exist.' % (NEXMDIR)
+        header = open('%s/header' % (NEXMDir),'r')
+        header = header.readlines()
+    if dynq == 1: ## single trajectory
+        if not os.path.exists('%s/input.ceon' % (NEXMDir)):
+            print 'Path %s/input.ceon does not exist.' % (NEXMDir)
             sys.exit()
-        HEADER = open('%s/input.ceon' % (NEXMDIR),'r')
-        HEADER = HEADER.readlines()
-    STATEINIT = None
-    for LINE in HEADER:
-        if 'bo_dynamics_flag' in LINE:
-            BOFLAG = np.int(LINE.split()[0][len('bo_dynamics_flag='):-1])
-        if 'exc_state_init=' in LINE:
-            STATEINIT = np.int(LINE.split()[0][len('exc_state_init='):-1])
-        if 'n_exc_states_propagate' in LINE:
-            NSTATES = np.int(LINE.split()[0][len('n_exc_states_propagate='):-1])
-        if 'time_init' in LINE:
-            TINITH = np.float(LINE.split()[0][len('time_init='):-1])
-        if 'time_step' in LINE:
-            DT = np.float(LINE.split()[0][len('time_step='):-1])
-        if 'n_class_steps' in LINE:
-            TSMAX = np.int(LINE.split()[0][len('n_class_steps='):-1]) + 1
-        if 'out_data_steps' in LINE:
-            ODATA = np.int(LINE.split()[0][len('out_data_steps='):-1])
-        if 'out_coords_steps' in LINE:
-            CDATA = np.int(LINE.split()[0][len('out_coords_steps='):-1])
-        if 'natoms' in LINE:
-            NATOMS = np.int(LINE.split()[0][len('natoms='):-1])
-    if BOFLAG == 1 and STATEINIT == None:
-        print 'Dynamics are set to Born-Oppenheimer, but the initial state is not set.\nPlease check bo_dynamics_flag and exc_state_init in header.'
+        header = open('%s/input.ceon' % (NEXMDir),'r')
+        header = header.readlines()
+    stateinit = none
+    for line in header:
+        if 'bo_dynamics_flag' in line:
+            boflag = np.int(line.split()[0][len('bo_dynamics_flag='):-1])
+        if 'exc_state_init=' in line:
+            stateinit = np.int(line.split()[0][len('exc_state_init='):-1])
+        if 'n_exc_states_propagate' in line:
+            nstates = np.int(line.split()[0][len('n_exc_states_propagate='):-1])
+        if 'time_init' in line:
+            tinith = np.float(line.split()[0][len('time_init='):-1])
+        if 'time_step' in line:
+            dt = np.float(line.split()[0][len('time_step='):-1])
+        if 'n_class_steps' in line:
+            tsmax = np.int(line.split()[0][len('n_class_steps='):-1]) + 1
+        if 'out_data_steps' in line:
+            odata = np.int(line.split()[0][len('out_data_steps='):-1])
+        if 'out_coords_steps' in line:
+            cdata = np.int(line.split()[0][len('out_coords_steps='):-1])
+        if 'natoms' in line:
+            natoms = np.int(line.split()[0][len('natoms='):-1])
+    if boflag == 1 and stateinit == none:
+        print 'Dynamics are set to born-oppenheimer, but the initial state is not set.\nPlease check bo_dynamics_flag and exc_state_init in header.'
         sys.exit()
-    
-    ## COLLECTION TIME ##
-    if TYPEQ == 0: ## MEAN DIPOLE
-        if DYNQ == 0: ## ENSEMBLE
-            TCOLL = input('Calculate dipole up to what time in femtoseconds?\nNote that averaged results will only include trajectories that are complete up to this time: ')
-        if DYNQ == 1: ## SINGLE TRAJECTORY
-            TCOLL = input('Calculate dipole up to what time in femtoseconds? ')
-        if isinstance(TCOLL, int) == False and isinstance(TCOLL, float) == False:
+
+    ## Collection time ##
+    if typeq == 0: ## mean dipole
+        if dynq == 0: ## ensemble
+            tcoll = input('Calculate dipole up to what time in femtoseconds?\nNote that averaged results will only include trajectories that are complete up to this time: ')
+        if dynq == 1: ## single trajectory
+            tcoll = input('Calculate dipole up to what time in femtoseconds? ')
+        if isinstance(tcoll, int) == false and isinstance(tcoll, float) == false:
             print 'Time must be integer or float.'
             sys.exit()
-        if TCOLL < 0:
+        if tcoll < 0:
             print 'Time must be integer or float greater than zero.'
             sys.exit()
-        TCOLL = np.float(TCOLL)
-        if TCOLL > (TSMAX - 1)*DT:
-            TCOLL = (TSMAX - 1)*DT
-    if TYPEQ == 1: ## ALL DIPOLES
-        TCOLL = (TSMAX - 1)*DT
+        tcoll = np.float(tcoll)
+        if tcoll > (tsmax - 1)*dt:
+            tcoll = (tsmax - 1)*dt
+    if typeq == 1: ## all dipoles
+        tcoll = (tsmax - 1)*dt
 
-    ## DETERMINE DIRECTION OF DIPOLE ##
-    DOTQ = input('Find the angle between the dipole and a user-defined vector on the molecule?\nAnswer YES [1] or NO [0]: ')
-    if DOTQ not in [1,0]:
+    ## Determine direction of dipole ##
+    dotq = input('Find the angle between the dipole and a user-defined vector on the molecule?\nAnswer yes [1] or no [0]: ')
+    if dotq not in [1,0]:
         print 'Answer must be 1 or 0.'
         sys.exit()
-    if DOTQ == 0:
-        if NATOMS < 2:
+    if dotq == 0:
+        if natoms < 2:
             print 'Number of atoms set under natoms is less than zero.\nPlease check header (for ensemble) or input.ceon (for single trajectory).'
             sys.exit()
         else:
-            LINES = [0,1]
-    if DOTQ == 1:
-        LINES = input('Input an array of the form [atom1, atom2], where atom# = line number of atom (0 is the first line).\nThese two atoms will be used to construct a vector: ')
-        if isinstance(LINES, list) == False:
+            lines = [0,1]
+    if dotq == 1:
+        lines = input('Input an array of the form [atom1, atom2], where atom# = line number of atom (0 is the first line).\nThese two atoms will be used to construct a vector: ')
+        if isinstance(lines, list) == false:
             print 'Input must be an array of the form [atom 1, atom2], where atom# = line number of atom (0 is the first line).'
             sys.exit()
-        if len(LINES) != 2:
+        if len(lines) != 2:
             print 'Input must be an array with two elements labeling the line numbers of two atoms.'
             sys.exit()
-        INDEX = 0
-        for i in LINES:
-            if isinstance(i, int) == False:
-                print 'Element number %d of input array must be integer.\nUser inputted [%s, %s], which is not allowed.' % (INDEX + 1, LINES[0], LINES[1])
+        index = 0
+        for i in lines:
+            if isinstance(i, int) == false:
+                print 'Element number %d of input array must be integer.\nUser inputted [%s, %s], which is not allowed.' % (index + 1, lines[0], lines[1])
                 sys.exit()
             if i < 0:
-                print 'Element number %d of input array must be a positive integer.\nUser inputted [%s, %s], which is not allowed.' % (INDEX + 1, LINES[0], LINES[1])
+                print 'Element number %d of input array must be a positive integer.\nUser inputted [%s, %s], which is not allowed.' % (index + 1, lines[0], lines[1])
                 sys.exit()
-            if i > NATOMS - 1:
-                print 'Element number %d of input array must be less than the max number of atoms (-1).\nUser inputted [%s, %s], which is not allowed.' % (INDEX + 1, LINES[0], LINES[1])
+            if i > natoms - 1:
+                print 'Element number %d of input array must be less than the max number of atoms (-1).\nUser inputted [%s, %s], which is not allowed.' % (index + 1, lines[0], lines[1])
                 sys.exit()
-            INDEX += 1
-        if len(np.unique(LINES)) != 2:
-            print 'All elements of input array must be unique.\nUser inputted [%s, %s], which is not allowed.' % (LINES[0], LINES[1])
+            index += 1
+        if len(np.unique(lines)) != 2:
+            print 'All elements of input array must be unique.\nUser inputted [%s, %s], which is not allowed.' % (lines[0], lines[1])
             sys.exit()
 
-    ## NUMBER OF CLASSICAL TIME-STEPS ##
-    TSCOL = 0
-    while TSCOL*DT*ODATA <= TCOLL:
-        TSCOL += 1
-    CCOLL = 0
+    ## Number of classical time-steps ##
+    tscol = 0
+    while tscol*dt*odata <= tcoll:
+        tscol += 1
+    ccoll = 0
     
-    ## NUMBER OF TIME-STEPS FOR COORDINATES ##
-    NUM = 0
-    while CCOLL <= TCOLL:
-        CCOLL += DT*ODATA*CDATA
-        NUM += 1
+    ## Number of time-steps for coordinates ##
+    num = 0
+    while ccoll <= tcoll:
+        ccoll += dt*odata*cdata
+        num += 1
     
-    ## NUMBER OF DIPOLES ##
-    EDIPOLES = CCOLL
+    ## Number of dipoles ##
+    edipoles = ccoll
 
-    ## COLLECTION TIME ARRAY ##
-    TIMES = np.linspace(TINITH, CCOLL - DT*ODATA*CDATA, NUM)
+    ## Collection time array ##
+    times = np.linspace(tinith, ccoll - dt*odata*cdata, num)
 
-    ## GREP PERMANENT DIPOLE MOMENTS AND STATES FROM ENSEMBLES ##
-    if DYNQ == 0: ## ENSEMBLE
+    ## Grep permanent dipole moments and states from ensembles ##
+    if dynq == 0: ## ensemble
         print 'Checking permanent dipole moments and states.  Please wait ...'
-        ## CHECKS TO MAKE SURE SCRIPTS ARE AVAILABLE ##
-        if not os.path.exists('%s/getexcited_package/collectdipline.sh' % (PATHTODIPOLE)):
+        ## Checks to make sure scripts are available ##
+        if not os.path.exists('%s/getexcited_package/collectdipline.sh' % (pathtodipole)):
             print 'The script, collectdipline.sh, must be in the getexcited_package.'
             sys.exit()
-        if not os.path.exists('%s/getexcited_package/collectpermdipole.sh' % (PATHTODIPOLE)):
+        if not os.path.exists('%s/getexcited_package/collectpermdipole.sh' % (pathtodipole)):
             print 'The script, collectpermdipole.sh, must be in the getexcited_package.'
             sys.exit()
-        ## GENERATION OF ERROR FILE ##
-        ERROR = open('%s/dipole_collection_ensemble.err' % (CWD),'w')
-        ERRFLAG = 0
-        for NEXMD in NEXMDS:
-            ## CHECK AND OPEN LIST OF DIRECTORIES ##
-            if not os.path.exists('%s/%s/dirlist1' % (CWD,NEXMD)):
-                print 'Path %s/%s/dirlist1 does not exist.' % (CWD,NEXMD)
+        ## Generation of error file ##
+        error = open('%s/dipole_collection_ensemble.err' % (cwd),'w')
+        errflag = 0
+        for NEXMD in NEXMDs:
+            ## Check and open list of directories ##
+            if not os.path.exists('%s/%s/dirlist1' % (cwd,NEXMD)):
+                print 'Path %s/%s/dirlist1 does not exist.' % (cwd,NEXMD)
                 sys.exit()
-            DIRLIST1 = np.int_(np.genfromtxt('%s/%s/dirlist1' % (CWD,NEXMD)))
-            if isinstance(DIRLIST1,int) == True:
-                DIRLIST1 = np.array([DIRLIST1])
-            for DIR in DIRLIST1:
-                ## CHECK IF DIRECTORY EXISTS ##
-                if not os.path.exists('%s/%s/%04d' % (CWD,NEXMD,DIR)):
-                    print >> ERROR, '%s%04d' % (NEXMD,DIR), 'does not exist'
-                    ERRFLAG = 1
+            dirlist1 = np.int_(np.genfromtxt('%s/%s/dirlist1' % (cwd,NEXMD)))
+            if isinstance(dirlist1,int) == true:
+                dirlist1 = np.array([dirlist1])
+            for dir in dirlist1:
+                ## Check if directory exists ##
+                if not os.path.exists('%s/%s/%04d' % (cwd,NEXMD,dir)):
+                    print >> error, 'Path %s%04d does not exist.' % (NEXMD,dir)
+                    errflag = 1
                     continue
-                ## GO TO DIRECTORY ##
-                os.chdir('%s/%s/%04d' % (CWD,NEXMD,DIR))
-                ## CHECK IF STANDARD OUTPUT EXISTS ##
-                if not os.path.exists('%s/%s/%04d/md.out' % (CWD,NEXMD,DIR)):
-                    print >> ERROR, '%s%04d/md.out' % (NEXMD,DIR), 'does not exist'
-                    ERRFLAG = 1
+                ## Go to directory ##
+                os.chdir('%s/%s/%04d' % (cwd,NEXMD,dir))
+                ## Check if standard output exists ##
+                if not os.path.exists('%s/%s/%04d/md.out' % (cwd,NEXMD,dir)):
+                    print >> error, 'Path %s%04d/md.out does not exist.' % (NEXMD,dir)
+                    errflag = 1
                     continue
-                ## GREP LINE NUMBER OF CLASSICAL STEP AND CLASSICAL STEP ##
-                subprocess.call(shlex.split('sh %s/getexcited_package/collectdipline.sh %d' % (PATHTODIPOLE, ODATA*CDATA)))
-                if not os.path.exists('%s/%s/%04d/dipline.out' % (CWD,NEXMD,DIR)):
-                    print >> ERROR, '%s%04d/dipline.out' % (NEXMD,DIR), 'does not exist'
-                    ERRFLAG = 1
+                ## Grep line number of classical step and classical step ##
+                subprocess.call(shlex.split('sh %s/getexcited_package/collectdipline.sh %d' % (pathtodipole, odata*cdata)))
+                if not os.path.exists('%s/%s/%04d/dipline.out' % (cwd,NEXMD,dir)):
+                    print >> error, 'Path %s%04d/dipline.out does not exist.' % (NEXMD,dir)
+                    errflag = 1
                     continue
-                print '%s%04d' % (NEXMD,DIR), 'dipole lines in md.out found'
-                ## DATA = [LINE NUMBER OF CLASSICAL STEP, CLASSICAL STEP] ##
-                DATA = np.genfromtxt('%s/%s/%04d/dipline.out' % (CWD,NEXMD,DIR))
-                TDIPOLES = len(DATA)
-                ## CHECK TO ENSURE DIPOLE CALCULATION ##
-                if np.array_equal(np.around(DATA[1:EDIPOLES:1,1]*DT, decimals = 3), TIMES[1:EDIPOLES:1]) == False:
-                    print >> ERROR, 'There is an inconsistency in time-step in %s%04d/dipline.out' % (NEXMD,DIR)
-                    ERRFLAG = 1
+                print '%s%04d' % (NEXMD,dir), 'dipole lines in md.out found'
+                ## data = [line number of classical step, classical step] ##
+                data = np.genfromtxt('%s/%s/%04d/dipline.out' % (cwd,NEXMD,dir))
+                tdipoles = len(data)
+                ## Check to ensure dipole calculation ##
+                if np.array_equal(np.around(data[1:edipoles:1,1]*dt, decimals = 3), times[1:edipoles:1]) == false:
+                    print >> error, 'There is an inconsistency in time-step in %s%04d/dipline.out.' % (NEXMD,dir)
+                    errflag = 1
                     continue
-                ## DELETE PREVIOUS PERMDIPOLE.OUT IF EXISTS ##
-                if os.path.exists('%s/%s/%04d/permdipole.out' % (CWD,NEXMD,DIR)):
-                    os.remove('%s/%s/%04d/permdipole.out' % (CWD,NEXMD,DIR))
-                ## GREP DIPOLES FROM STANDARD OUTPUT ##
-                subprocess.call(shlex.split('sh %s/getexcited_package/collectpermdipole.sh %d' % (PATHTODIPOLE, NSTATES + 2)))
-                if not os.path.exists('%s/%s/%04d/permdipole.out' % (CWD,NEXMD,DIR)):
-                    print >> ERROR, '%s%04d/permdipole.out' % (NEXMD,DIR), 'does not exist'
-                    ERRFLAG = 1
+                ## Delete previous permdipole.out if exists ##
+                if os.path.exists('%s/%s/%04d/permdipole.out' % (cwd,NEXMD,dir)):
+                    os.remove('%s/%s/%04d/permdipole.out' % (cwd,NEXMD,dir))
+                ## Grep dipoles from standard output ##
+                subprocess.call(shlex.split('sh %s/getexcited_package/collectpermdipole.sh %d' % (pathtodipole, nstates + 2)))
+                if not os.path.exists('%s/%s/%04d/permdipole.out' % (cwd,NEXMD,dir)):
+                    print >> error, 'Path %s%04d/permdipole.out does not exist.' % (NEXMD,dir)
+                    errflag = 1
                     continue
-                print '%s%04d' % (NEXMD,DIR), 'dipoles in md.out extracted'
-                ## ANOTHER CHECK TO ENSURE DIPOLE CALCULATION ##
-                with open('%s/%s/%04d/permdipole.out' % (CWD,NEXMD,DIR),'r') as DATA:
-                    if len(DATA.readlines()) != TDIPOLES*(NSTATES + 3):
-                        print >> ERROR, '%s%04d/permdipole.out' % (NEXMD,DIR), 'is incomplete'
-                        ERRFLAG = 1
-                        os.remove('%s/%s/%04d/permdipole.out' % (CWD,NEXMD,DIR))
+                print '%s%04d' % (NEXMD,dir), 'dipoles in md.out extracted'
+                ## Another check to ensure dipole calculation ##
+                with open('%s/%s/%04d/permdipole.out' % (cwd,NEXMD,dir),'r') as data:
+                    if len(data.readlines()) != tdipoles*(nstates + 3):
+                        print >> error, 'Path %s%04d/permdipole.out is incomplete.' % (NEXMD,dir)
+                        errflag = 1
+                        os.remove('%s/%s/%04d/permdipole.out' % (cwd,NEXMD,dir))
                         continue
-                ## DELETE PREVIOUS POP.OUT IF EXISTS ##
-                if os.path.exists('%s/%s/%04d/pop.out' % (CWD,NEXMD,DIR)):
-                    os.remove('%s/%s/%04d/pop.out' % (CWD,NEXMD,DIR))
-                ## GET STATES ##
-                if BOFLAG == 1: ## ADIABATIC
-                    STATES = np.int_(np.ones(EDIPOLES)*STATINIT)
-                if BOFLAG == 0: ## NONADIABATIC
-                    ## CHECK COEFFICIENT FILE EXISTS ##
-                    if not os.path.exists('%s/%s/%04d/coeff-n.out' % (CWD,NEXMD,DIR)):
-                        print >> ERROR, '%s%04d/coeff-n.out' % (NEXMD,DIR), 'does not exist'
-                        ERRFLAG = 1
+                ## Delete previous pop.out if exists ##
+                if os.path.exists('%s/%s/%04d/pop.out' % (cwd,NEXMD,dir)):
+                    os.remove('%s/%s/%04d/pop.out' % (cwd,NEXMD,dir))
+                ## Get states ##
+                if boflag == 1: ## adiabatic
+                    states = np.int_(np.ones(edipoles)*statinit)
+                if boflag == 0: ## nonadiabatic
+                    ## Check coefficient file exists ##
+                    if not os.path.exists('%s/%s/%04d/coeff-n.out' % (cwd,NEXMD,dir)):
+                        print >> error, 'Path %s%04d/coeff-n.out does not exist.' % (NEXMD,dir)
+                        errflag = 1
                         continue
-                    DATA = open('%s/%s/%04d/coeff-n.out' % (CWD,NEXMD,DIR),'r')
-                    DATA = DATA.readlines()
-                    STATES = np.zeros(EDIPOLES)
-                    INDEX = 0
-                    for LINE in DATA[0:TSCOL:ODATA*CDATA]:
-                        VAL = LINE.split()
-                        PES = np.int(VAL[0])
-                        TIME = np.around(np.float(VAL[1]), decimals = 3)
-                        ## ANOTHER CHECK TO ENSURE DIPOLE CALCULATION ##
-                        if TIME != TIMES[INDEX]:
-                            print >> ERROR, 'There is an inconsistency in time-step in %s%04d/coeff-n.out at %.3f fs' % (NEXMD,DIR,TIMES[INDEX])
-                            ERRFLAG = 1
+                    data = open('%s/%s/%04d/coeff-n.out' % (cwd,NEXMD,dir),'r')
+                    data = data.readlines()
+                    states = np.zeros(edipoles)
+                    index = 0
+                    for line in data[0:tscol:odata*cdata]:
+                        val = line.split()
+                        pes = np.int(val[0])
+                        time = np.around(np.float(val[1]), decimals = 3)
+                        ## another check to ensure dipole calculation ##
+                        if time != times[index]:
+                            print >> error, 'There is an inconsistency in time-step in %s%04d/coeff-n.out at %.3f fs' % (NEXMD,dir,times[index])
+                            errflag = 1
                             break
-                        STATES[INDEX] = PES
-                        INDEX += 1
-                    ## IF SIMULATION BECOMES ADIABATIC AFTER NONADIABATIC ##
-                    if len(DATA[0:TSCOL:ODATA*CDATA]) < EDIPOLES:
-                        STATES[INDEX::] = PES
-                ## SAVE POPULATIONS TO FILE ##
-                np.savetxt('pop.out', np.transpose([TIMES,STATES]), fmt=['%10.5e','%d'])
-        if ERRFLAG == 1:
+                        states[index] = pes
+                        index += 1
+                    ## if simulation becomes adiabatic after nonadiabatic ##
+                    if len(data[0:tscol:odata*cdata]) < edipoles:
+                        states[index::] = pes
+                ## save populations to file ##
+                np.savetxt('pop.out', np.transpose([times,states]), fmt=['%10.5e','%d'])
+        if errflag == 1:
             print 'One or more trajectories have experienced an error, check dipole_collection_ensemble.err.'
-            CONTQ = input('Continue? Answer YES [1] or NO [0]: ')
-            if CONTQ not in [1,0]:
+            contq = input('Continue? Answer yes [1] or no [0]: ')
+            if contq not in [1,0]:
                 print 'Answer must to be 1 or 0.'
                 sys.exit()
-            if CONTQ == 0:
+            if contq == 0:
                 sys.exit()
         else:
-            os.remove('%s/dipole_collection_ensemble.err' % (CWD))
+            os.remove('%s/dipole_collection_ensemble.err' % (cwd))
 
-    ## GREP PERMANENT DIPOLE MOMENTS AND STATES FROM SINGLE TRAJECTORY ##
-    if DYNQ == 1: ## SINGLE TRAJECTORY
+    ## Grep permanent dipole moments and states from single trajectory ##
+    if dynq == 1: ## single trajectory
         print 'Checking permanent dipole moments and states.  Please wait ...'
-        ## CHECKS TO MAKE SURE SCRIPTS ARE AVAILABLE ##
-        if not os.path.exists('%s/getexcited_package/collectdipline.sh' % (PATHTODIPOLE)):
+        ## Checks to make sure scripts are available ##
+        if not os.path.exists('%s/getexcited_package/collectdipline.sh' % (pathtodipole)):
             print 'The script, collectdipline.sh, must be in the getexcited_package.'
             sys.exit()
-        if not os.path.exists('%s/getexcited_package/collectpermdipole.sh' % (PATHTODIPOLE)):
+        if not os.path.exists('%s/getexcited_package/collectpermdipole.sh' % (pathtodipole)):
             print 'The script, collectpermdipole.sh, must be in the getexcited_package.'
             sys.exit()
-        ## GO TO DIRECTORY ##
-        os.chdir('%s/%s' % (CWD,NEXMDIR))
-        ## CHECK IF STANDARD OUTPUT EXISTS ##
-        if not os.path.exists('%s/%s/md.out' % (CWD,NEXMDIR)):
-            print '%s/md.out' % (NEXMDIR), 'does not exist'
+        ## Go to directory ##
+        os.chdir('%s/%s' % (cwd,NEXMDir))
+        ## Check if standard output exists ##
+        if not os.path.exists('%s/%s/md.out' % (cwd,NEXMDir)):
+            print 'Path %s/md.out does not exist.' % (NEXMDir)
             sys.exit()
-        ## GREP LINE NUMBER OF CLASSICAL STEP AND CLASSICAL STEP ##
-        subprocess.call(shlex.split('sh %s/getexcited_package/collectdipline.sh %d' % (PATHTODIPOLE, ODATA*CDATA)))
-        if not os.path.exists('%s/%s/dipline.out' % (CWD,NEXMDIR)):
-            print '%s/dipline.out' % (NEXMDIR), 'does not exist'
+        ## Grep line number of classical step and classical step ##
+        subprocess.call(shlex.split('sh %s/getexcited_package/collectdipline.sh %d' % (pathtodipole, odata*cdata)))
+        if not os.path.exists('%s/%s/dipline.out' % (cwd,NEXMDir)):
+            print 'Path %s/dipline.out does not exist.' % (NEXMDir)
             sys.exit()
-        print '%s' % (NEXMDIR), 'dipole lines in md.out found'
-        ## DATA = [LINE NUMBER OF CLASSICAL STEP, CLASSICAL STEP] ##
-        DATA = np.genfromtxt('%s/%s/dipline.out' % (CWD,NEXMDIR))
-        TDIPOLES = len(DATA)
-        ## CHECK TO ENSURE DIPOLE CALCULATION ##
-        if np.array_equal(np.around(DATA[1:EDIPOLES:1,1]*DT, decimals = 3), TIMES[1:EDIPOLES:1]) == False:
-            print 'There is an inconsistency in time-step in %s/dipline.out' % (NEXMDIR)
+        print '%s' % (NEXMDir), 'dipole lines in md.out found'
+        ## data = [line number of classical step, classical step] ##
+        data = np.genfromtxt('%s/%s/dipline.out' % (cwd,NEXMDir))
+        tdipoles = len(data)
+        ## Check to ensure dipole calculation ##
+        if np.array_equal(np.around(data[1:edipoles:1,1]*dt, decimals = 3), times[1:edipoles:1]) == false:
+            print 'There is an inconsistency in time-step in %s/dipline.out.' % (NEXMDir)
             sys.exit()
-        ## DELETE PREVIOUS PERMDIPOLE.OUT IF EXISTS ##
-        if os.path.exists('%s/%s/permdipole.out' % (CWD,NEXMDIR)):
-            os.remove('%s/%s/permdipole.out' % (CWD,NEXMDIR))
-        ## GREP DIPOLES FROM STANDARD OUTPUT ##
-        subprocess.call(shlex.split('sh %s/getexcited_package/collectpermdipole.sh %d' % (PATHTODIPOLE, NSTATES + 2)))
-        if not os.path.exists('%s/%s/permdipole.out' % (CWD,NEXMDIR)):
-            print '%s/permdipole.out' % (NEXMDIR), 'does not exist'
+        ## Delete previous permdipole.out if exists ##
+        if os.path.exists('%s/%s/permdipole.out' % (cwd,NEXMDir)):
+            os.remove('%s/%s/permdipole.out' % (cwd,NEXMDir))
+        ## Grep dipoles from standard output ##
+        subprocess.call(shlex.split('sh %s/getexcited_package/collectpermdipole.sh %d' % (pathtodipole, nstates + 2)))
+        if not os.path.exists('%s/%s/permdipole.out' % (cwd,NEXMDir)):
+            print 'Path %s/permdipole.out does not exist.' % (NEXMDir)
             sys.exit()
-        print '%s' % (NEXMDIR), 'dipoles in md.out extracted'
-        ## ANOTHER CHECK TO ENSURE DIPOLE CALCULATION ##
-        with open('%s/%s/permdipole.out' % (CWD,NEXMDIR),'r') as DATA:
-            if len(DATA.readlines()) != TDIPOLES*(NSTATES + 3):
-                print '%s/permdipole.out' % (NEXMDIR), 'is incomplete'
+        print '%s dipoles in md.out extracted' % (NEXMDir)
+        ## Another check to ensure dipole calculation ##
+        with open('%s/%s/permdipole.out' % (cwd,NEXMDir),'r') as data:
+            if len(data.readlines()) != tdipoles*(nstates + 3):
+                print 'Path %s/permdipole.out is incomplete.' % (NEXMDir)
                 sys.exit()
-        ## DELETE PREVIOUS POP.OUT IF EXISTS ##
-        if os.path.exists('%s/%s/pop.out' % (CWD,NEXMDIR)):
-            os.remove('%s/%s/pop.out' % (CWD,NEXMDIR))
-        ## GET STATES ##
-        if BOFLAG == 1: ## ADIABATIC
-            STATES = np.int_(np.ones(EDIPOLES)*STATINIT)
-        if BOFLAG == 0: ## NONADIABATIC
-            ## CHECK COEFFICIENT FILE EXISTS ##
-            if not os.path.exists('%s/%s/coeff-n.out' % (CWD,NEXMDIR)):
-                print '%s/coeff-n.out' % (NEXMDIR), 'does not exist'
+        ## Delete previous pop.out if exists ##
+        if os.path.exists('%s/%s/pop.out' % (cwd,NEXMDir)):
+            os.remove('%s/%s/pop.out' % (cwd,NEXMDir))
+        ## Get states ##
+        if boflag == 1: ## adiabatic
+            states = np.int_(np.ones(edipoles)*statinit)
+        if boflag == 0: ## nonadiabatic
+            ## Check coefficient file exists ##
+            if not os.path.exists('%s/%s/coeff-n.out' % (cwd,NEXMDir)):
+                print 'Path %s/coeff-n.out does not exist.' % (NEXMDir)
                 sys.exit()
-            DATA = open('%s/%s/coeff-n.out' % (CWD,NEXMDIR),'r')
-            DATA = DATA.readlines()
-            STATES = np.zeros(EDIPOLES)
-            INDEX = 0
-            for LINE in DATA[0:TSCOL:ODATA*CDATA]:
-                VAL = LINE.split()
-                PES = np.int(VAL[0])
-                TIME = np.around(np.float(VAL[1]), decimals = 3)
-                ## ANOTHER CHECK TO ENSURE DIPOLE CALCULATION ##
-                if TIME != TIMES[INDEX]:
-                    print 'There is an inconsistency in time-step in %s/coeff-n.out at %.3f fs' % (NEXMDIR,TIMES[INDEX])
+            data = open('%s/%s/coeff-n.out' % (cwd,NEXMDir),'r')
+            data = data.readlines()
+            states = np.zeros(edipoles)
+            index = 0
+            for line in data[0:tscol:odata*cdata]:
+                val = line.split()
+                pes = np.int(val[0])
+                time = np.around(np.float(val[1]), decimals = 3)
+                ## Another check to ensure dipole calculation ##
+                if time != times[index]:
+                    print 'There is an inconsistency in time-step in %s/coeff-n.out at %.3f fs.' % (NEXMDir,times[index])
                     sys.exit()
-                STATES[INDEX] = PES
-                INDEX += 1
-            ## IF SIMULATION BECOMES ADIABATIC AFTER NONADIABATIC ##
-            if len(DATA[0:TSCOL:ODATA*CDATA]) < EDIPOLES:
-                STATES[INDEX::] = PES
-        ## SAVE POPULATIONS TO FILE ##
-        np.savetxt('pop.out', np.transpose([TIMES,STATES]), fmt=['%10.5e','%d'])
-            
-    ## COLLECT USER-DEFINED VECTOR IN THE MOLECULE TO DETERMINE DIPOLE DIRECTION FOR ENSEMBLES ##
-    if DYNQ == 0: ## ENSEMBLE
-        os.chdir('%s' % (CWD))
+                states[index] = pes
+                index += 1
+            ## If simulation becomes adiabatic after nonadiabatic ##
+            if len(data[0:tscol:odata*cdata]) < edipoles:
+                states[index::] = pes
+        ## Save populations to file ##
+        np.savetxt('pop.out', np.transpose([times,states]), fmt=['%10.5e','%d'])
+    
+    ## Collect user-defined vector in the molecule to determine dipole direction for ensembles ##
+    if dynq == 0: ## ensemble
+        os.chdir('%s' % (cwd))
         print 'Checking coordinate files for vector generation.  Please wait ...'
-        ## GENERATION OF ERROR FILE ##
-        ERROR = open('%s/uservec_collection.err' % (CWD),'w')
-        ERRFLAG = 0
-        for NEXMD in NEXMDS:
-            ## CHECK AND OPEN LIST OF DIRECTORIES ##
+        ## Generation of error file ##
+        error = open('%s/uservec_collection.err' % (cwd),'w')
+        errflag = 0
+        for NEXMD in NEXMDs:
+            ## Check and open list of directories ##
             if not os.path.exists('%s/dirlist1' % (NEXMD)):
                 print 'Path %s/dirlist1 does not exist.' % (NEXMD)
                 sys.exit()
-            DIRLIST1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-            if isinstance(DIRLIST1,int) == True:
-                DIRLIST1 = np.array([DIRLIST1])
-            for DIR in DIRLIST1:
-                ## CHECK IF TRAJECTORY DIRECTORY EXISTS ##
-                if not os.path.exists('%s/%04d' % (NEXMD,DIR)):
-                    print >> ERROR, '%s%04d' % (NEXMD,DIR), 'does not exist'
-                    ERRFLAG = 1
+            dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
+            if isinstance(dirlist1,int) == true:
+                dirlist1 = np.array([dirlist1])
+            for dir in dirlist1:
+                ## Check if trajectory directory exists ##
+                if not os.path.exists('%s/%04d' % (NEXMD,dir)):
+                    print >> error, 'Path %s%04d does not exist.' % (NEXMD,dir)
+                    errflag = 1
                     continue
-                ## CHECK IF COORDINATE FILE EXISTS ##
-                if not os.path.exists('%s/%04d/coords.xyz' % (NEXMD,DIR)):
-                    print >> ERROR, '%s%04d/coords.xyz' % (NEXMD,DIR), 'does not exist'
-                    ERRFLAG = 1
+                ## Check if coordinate file exists ##
+                if not os.path.exists('%s/%04d/coords.xyz' % (NEXMD,dir)):
+                    print >> error, 'Path %s%04d/coords.xyz does not exist.' % (NEXMD,dir)
+                    errflag = 1
                     continue
-                ## FIND GEOMETRIES ##
-                DATA = open('%s/%04d/coords.xyz' % (NEXMD,DIR),'r')
-                DATA = DATA.readlines()
-                LENC = len(DATA)
-                NCOORDS = 0
-                INDEX = 0
-                TFLAG1 = 0
-                TFLAG2 = 0
-                TFLAG3 = 0
-                ARRAY = np.array([])
-                for LINE in DATA:
-                    if 'time' in LINE:
-                        if NCOORDS == 0:
-                            TINIT = np.float(LINE.split()[-1])
-                            if TINIT != TINITH:
-                                TFLAG1 = 1
+                ## Find geometries ##
+                data = open('%s/%04d/coords.xyz' % (NEXMD,dir),'r')
+                data = data.readlines()
+                lenc = len(data)
+                ncoords = 0
+                index = 0
+                tflag1 = 0
+                tflag2 = 0
+                tflag3 = 0
+                array = np.array([])
+                for line in data:
+                    if 'time' in line:
+                        if ncoords == 0:
+                            tinit = np.float(line.split()[-1])
+                            if tinit != tinith:
+                                tflag1 = 1
                                 break
                         else:
-                            TIME = np.around(np.float(LINE.split()[-1]), decimals = 3)
-                            if TIME > TCOLL:
-                                TFLAG3 = 1
+                            time = np.around(np.float(line.split()[-1]), decimals = 3)
+                            if time > tcoll:
+                                tflag3 = 1
                                 break
-                            if TIME != TIMES[NCOORDS]:
-                                TFLAG2 = 1
+                            if time != times[ncoords]:
+                                tflag2 = 1
                                 break
-                        NCOORDS += 1
-                        ARRAY = np.append(ARRAY,INDEX)
-                    INDEX += 1
-                if TFLAG1 == 1:
-                    print >> ERROR, 'Initial time in %s%04d/coords.xyz does not match time_init in %s%04d/input.ceon.' % (NEXMD,DIR)
-                    ERRFLAG = 1
+                        ncoords += 1
+                        array = np.append(array,index)
+                    index += 1
+                if tflag1 == 1:
+                    print >> error, 'Initial time in %s%04d/coords.xyz does not match time_init in %s%04d/input.ceon.' % (NEXMD,dir)
+                    errflag = 1
                     continue
-                if TFLAG2 == 1:
-                    print >> ERROR, 'There is an inconsistency in time-step in %s%04d/coords.xyz.' % (NEXMD,DIR)
-                    ERRFLAG = 1
+                if tflag2 == 1:
+                    print >> error, 'There is an inconsistency in time-step in %s%04d/coords.xyz.' % (NEXMD,dir)
+                    errflag = 1
                     continue
-                if TFLAG3 == 1:
-                    ARRAY = np.append(ARRAY,INDEX)
+                if tflag3 == 1:
+                    array = np.append(array,index)
                 else:
-                    ARRAY = np.append(ARRAY, LENC + 1)
-                ARRAY = np.int_(ARRAY)
-                ## CHECKS TO ENSURE USER-DEFINED VECTOR CALCULATION ##
-                if NCOORDS == 0:
-                    print >> ERROR, 'No coordinates were found in %s%04d.' % (NEXMD,DIR)
-                    ERRFLAG = 1
+                    array = np.append(array, lenc + 1)
+                array = np.int_(array)
+                ## Checks to ensure user-defined vector calculation ##
+                if ncoords == 0:
+                    print >> error, 'No coordinates were found in %s%04d.' % (NEXMD,dir)
+                    errflag = 1
                     continue
-                if NCOORDS == 1:
-                    print >> ERROR, 'Only initial coordinates, at %.2f fs, were found in %s%04d.' % (TINIT,NEXMD,DIR)
-                    ERRFLAG = 1
+                if ncoords == 1:
+                    print >> error, 'Only initial coordinates, at %.2f fs, were found in %s%04d.' % (tinit,NEXMD,dir)
+                    errflag = 1
                     continue
-                ## GENERATION OF USER-DEFINED VECTOR FILE ##
-                OUTPUT = open('%s/%04d/uservec.out' % (NEXMD,DIR),'w')
-                ## PRINT USER-DEFINED VECTOR TO FILE ##
-                for NCOORD in np.arange(NCOORDS):
-                    COORDS = DATA[ARRAY[NCOORD] + 1: ARRAY[NCOORD + 1] - 1:1]
-                    VEC0 = np.float_(COORDS[LINES[0]].split()[1:])
-                    VEC1 = np.float_(COORDS[LINES[1]].split()[1:])
-                    UVEC = np.subtract(VEC1, VEC0)
-                    OUTPUT.write('{:>12}  {:>12}  {:>12}  {:>12}\n'.format(TIMES[NCOORD],UVEC[0],UVEC[1],UVEC[2]))
-                print '%s%04d' % (NEXMD,DIR), 'user-defined vector from coords.xyz extracted'
-        if ERRFLAG == 1:
+                ## Generation of user-defined vector file ##
+                output = open('%s/%04d/uservec.out' % (NEXMD,dir),'w')
+                ## Print user-defined vector to file ##
+                for ncoord in np.arange(ncoords):
+                    coords = data[array[ncoord] + 1: array[ncoord + 1] - 1:1]
+                    vec0 = np.float_(coords[lines[0]].split()[1:])
+                    vec1 = np.float_(coords[lines[1]].split()[1:])
+                    uvec = np.subtract(vec1, vec0)
+                    output.write('{:>12}  {:>12}  {:>12}  {:>12}\n'.format(times[ncoord],uvec[0],uvec[1],uvec[2]))
+                print '%s%04d user-defined vector from coords.xyz extracted' % (NEXMD,dir)
+        if errflag == 1:
             print 'One or more trajectories have experienced an error, check uservec_collection.err.'
-            CONTQ = input('Continue? Answer YES [1] or NO [0]: ')
-            if CONTQ not in [1,0]:
+            contq = input('Continue? Answer yes [1] or no [0]: ')
+            if contq not in [1,0]:
                 print 'Answer must to be 1 or 0.'
                 sys.exit()
-            if CONTQ == 0:
+            if contq == 0:
                 sys.exit()
         else:
-            os.remove('%s/uservec_collection.err' % (CWD))
+            os.remove('%s/uservec_collection.err' % (cwd))
 
-    ## COLLECT USER-DEFINED VECTOR IN THE MOLECULE TO DETERMINE DIPOLE DIRECTION FOR SINGLE TRAJECTORY ##
-    if DYNQ == 1: ## SINGLE TRAJECTORY
-        os.chdir('%s' % (CWD))
+    ## Collect user-defined vector in the molecule to determine dipole direction for single trajectory ##
+    if dynq == 1: ## single trajectory
+        os.chdir('%s' % (cwd))
         print 'Checking coordinate files for vector generation.  Please wait ...'
-        ## CHECK IF TRAJECTORY DIRECTORY EXISTS ##
-        if not os.path.exists('%s' % (NEXMDIR)):
-            print '%s' % (NEXMDIR), 'does not exist'
+        ## Check if trajectory directory exists ##
+        if not os.path.exists('%s' % (NEXMDir)):
+            print 'Path %s does not exist.' % (NEXMDir)
             sys.exit()
-        ## CHECK IF COORDINATE FILE EXISTS ##
-        if not os.path.exists('%s/coords.xyz' % (NEXMDIR)):
-            print '%s/coords.xyz' % (NEXMDIR), 'does not exist'
+        ## Check if coordinate file exists ##
+        if not os.path.exists('%s/coords.xyz' % (NEXMDir)):
+            print 'Path %s/coords.xyz does not exist.' % (NEXMDir)
             sys.exit()
-        ## FIND GEOMETRIES ##
-        DATA = open('%s/coords.xyz' % (NEXMDIR),'r')
-        DATA = DATA.readlines()
-        LENC = len(DATA)
-        NCOORDS = 0
-        INDEX = 0
-        TFLAG1 = 0
-        TFLAG2 = 0
-        TFLAG3 = 0
-        ARRAY = np.array([])
-        for LINE in DATA:
-            if 'time' in LINE:
-                if NCOORDS == 0:
-                    TINIT = np.float(LINE.split()[-1])
-                    if TINIT != TINITH:
-                        TFLAG1 = 1
+        ## Find geometries ##
+        data = open('%s/coords.xyz' % (NEXMDir),'r')
+        data = data.readlines()
+        lenc = len(data)
+        ncoords = 0
+        index = 0
+        tflag1 = 0
+        tflag2 = 0
+        tflag3 = 0
+        array = np.array([])
+        for line in data:
+            if 'time' in line:
+                if ncoords == 0:
+                    tinit = np.float(line.split()[-1])
+                    if tinit != tinith:
+                        tflag1 = 1
                         break
                 else:
-                    TIME = np.around(np.float(LINE.split()[-1]), decimals = 3)
-                    if TIME > TCOLL:
-                        TFLAG3 = 1
+                    time = np.around(np.float(line.split()[-1]), decimals = 3)
+                    if time > tcoll:
+                        tflag3 = 1
                         break
-                    if TIME != TIMES[NCOORDS]:
-                        TFLAG2 = 1
+                    if time != times[ncoords]:
+                        tflag2 = 1
                         break
-                NCOORDS += 1
-                ARRAY = np.append(ARRAY,INDEX)
-            INDEX += 1
-        if TFLAG1 == 1:
-            print >> ERROR, 'Initial time in %s/coords.xyz does not match time_init in %s/input.ceon.' % (NEXMDIR)
+                ncoords += 1
+                array = np.append(array,index)
+            index += 1
+        if tflag1 == 1:
+            print >> error, 'Initial time in %s/coords.xyz does not match time_init in %s/input.ceon.' % (NEXMDir)
             sys.exit()
-        if TFLAG2 == 1:
-            print >> ERROR, 'There is an inconsistency in time-step in %s/coords.xyz.' % (NEXMDIR)
+        if tflag2 == 1:
+            print >> error, 'There is an inconsistency in time-step in %s/coords.xyz.' % (NEXMDir)
             sys.exit()
-        if TFLAG3 == 1:
-            ARRAY = np.append(ARRAY,INDEX)
+        if tflag3 == 1:
+            array = np.append(array,index)
         else:
-            ARRAY = np.append(ARRAY, LENC + 1)
-        ARRAY = np.int_(ARRAY)
-        ## CHECKS TO ENSURE USER-DEFINED VECTOR CALCULATION ##
-        if NCOORDS == 0:
-            print >> ERROR, 'No coordinates were found in %s/coords.xyz.' % (NEXMDIR)
+            array = np.append(array, lenc + 1)
+        array = np.int_(array)
+        ## Checks to ensure user-defined vector calculation ##
+        if ncoords == 0:
+            print >> error, 'No coordinates were found in %s/coords.xyz.' % (NEXMDir)
             sys.exit()
-        if NCOORDS == 1:
-            print >> ERROR, 'Only initial coordinates, at %.2f fs, were found in %s/coords.xyz.' % (TINIT,NEXMDIR)
+        if ncoords == 1:
+            print >> error, 'Only initial coordinates, at %.2f fs, were found in %s/coords.xyz.' % (tinit,NEXMDir)
             sys.exit()
-        ## GENERATION OF USER-DEFINED VECTOR FILE ##
-        OUTPUT = open('%s/uservec.out' % (NEXMDIR),'w')
-        ## PRINT USER-DEFINED VECTOR TO FILE ##
-        for NCOORD in np.arange(NCOORDS):
-            COORDS = DATA[ARRAY[NCOORD] + 1: ARRAY[NCOORD + 1] - 1:1]
-            VEC0 = np.float_(COORDS[LINES[0]].split()[1:])
-            VEC1 = np.float_(COORDS[LINES[1]].split()[1:])
-            UVEC = np.subtract(VEC1, VEC0)
-            OUTPUT.write('{:>12}  {:>12}  {:>12}  {:>12}\n'.format(TIMES[NCOORD],UVEC[0],UVEC[1],UVEC[2]))
-        print '%s' % (NEXMDIR), 'user-defined vector from coords.xyz extracted'
+        ## Generation of user-defined vector file ##
+        output = open('%s/uservec.out' % (NEXMDir),'w')
+        ## Print user-defined vector to file ##
+        for ncoord in np.arange(ncoords):
+            coords = data[array[ncoord] + 1: array[ncoord + 1] - 1:1]
+            vec0 = np.float_(coords[lines[0]].split()[1:])
+            vec1 = np.float_(coords[lines[1]].split()[1:])
+            uvec = np.subtract(vec1, vec0)
+            output.write('{:>12}  {:>12}  {:>12}  {:>12}\n'.format(times[ncoord],uvec[0],uvec[1],uvec[2]))
+        print '%s user-defined vector from coords.xyz extracted' % (NEXMDir)
             
-    ## COLLECT DIPOLE MOMENT ALONG A SINGLE TRAJECTORY ##
-    if DYNQ == 1: ## SINGLE TRAJECTORY
-        os.chdir('%s' % (CWD))
+    ## Collect dipole moment along a single trajectory ##
+    if dynq == 1: ## single trajectory
+        os.chdir('%s' % (cwd))
         print 'Collecting permanent dipole moment along a single trajectory.  Please wait ...'
-        ## GENERATE OUTPUT FILE ##
-        OUTPUT = open('%s/permdipole_single.out' % (CWD),'w')
-        TTRAJ = 0
-        CTRAJ = 0
-        ETRAJ = 0
-        ## DETERMINE COMPLETED NUMBER OF TIME-STEPS ##
-        if not os.path.exists('%s/energy-ev.out' % (NEXMDIR)):
-            print 'Path %s/energy-ev.out does not exist.' % (NEXMDIR)
+        ## Generate output file ##
+        output = open('%s/permdipole_single.out' % (cwd),'w')
+        ttraj = 0
+        ctraj = 0
+        etraj = 0
+        ## Determine completed number of time-steps ##
+        if not os.path.exists('%s/energy-ev.out' % (NEXMDir)):
+            print 'Path %s/energy-ev.out does not exist.' % (NEXMDir)
             sys.exit()
-        DATA = open('%s/energy-ev.out' % (NEXMDIR),'r')
-        DATA = DATA.readlines()
-        TSTEPS = len(DATA) - 1
-        ## GENERATE ARRAY WITH INDICES OF THE DIPOLE BLOCKS ALONG TRAJECTORY ##
-        if TSTEPS >= TSCOL:
-            if not os.path.exists('%s/permdipole.out' % (NEXMDIR)):
-                print 'Path %s/permdipole.out does not exist.' % (NEXMDIR)
+        data = open('%s/energy-ev.out' % (NEXMDir),'r')
+        data = data.readlines()
+        tsteps = len(data) - 1
+        ## Generate array with indices of the dipole blocks along trajectory ##
+        if tsteps >= tscol:
+            if not os.path.exists('%s/permdipole.out' % (NEXMDir)):
+                print 'Path %s/permdipole.out does not exist.' % (NEXMDir)
                 sys.exit()
-            DATA = open('%s/permdipole.out' % (NEXMDIR),'r')
-            DATA = DATA.readlines()
-            LEND = len(DATA)
-            NDIPOLES = 0
-            TFLAG = 0
-            INDEX = 0
-            ARRAY = np.array([])
-            for LINE in DATA:
-                if 'Frequencies (eV) and Total Molecular Dipole Moments (Debye)' in LINE:
-                    if NDIPOLES == 0:
-                        TIME = TINITH
+            data = open('%s/permdipole.out' % (NEXMDir),'r')
+            data = data.readlines()
+            lend = len(data)
+            ndipoles = 0
+            tflag = 0
+            index = 0
+            array = np.array([])
+            for line in data:
+                if 'Frequencies (eV) and Total Molecular Dipole Moments (Debye)' in line:
+                    if ndipoles == 0:
+                        time = tinith
                     else:
-                        TIME += DT*ODATA*CDATA
-                        if TIME > TCOLL:
-                            TFLAG = 1
+                        time += dt*odata*cdata
+                        if time > tcoll:
+                            tflag = 1
                             break
-                    NDIPOLES += 1
-                    ARRAY = np.append(ARRAY,INDEX)
-                INDEX += 1
-            ## ANOTHER CHECK TO ENSURE DIPOLE CALCULATION ##
-            if NDIPOLES != EDIPOLES:
-                print 'Number of dipoles detected in %s/permdipole.out, %d, does not match the expected %d.' % (NEXMDIR,NDIPOLES,EDIPOLES)
+                    ndipoles += 1
+                    array = np.append(array,index)
+                index += 1
+            ## Another check to ensure dipole calculation ##
+            if ndipoles != edipoles:
+                print 'Number of dipoles detected in %s/permdipole.out, %d, does not match the expected %d.' % (NEXMDir,ndipoles,edipoles)
                 sys.exit()
-            ## APPEND LINES FOR LAST DIPOLE SET ##
-            if TFLAG == 1:
-                ARRAY = np.append(ARRAY, INDEX)
+            ## Append lines for last dipole set ##
+            if tflag == 1:
+                array = np.append(array, index)
             else:
-                ARRAY = np.append(ARRAY, LEND + 1)
-            ARRAY = np.int_(ARRAY)
-            ## ANOTHER CHECK TO ENSURE DIPOLE CALCULATION ##
-            if NDIPOLES == 0:
-                print 'No dipoles were found in %s/permdipole.out' % (NEXMDIR)
+                array = np.append(array, lend + 1)
+            array = np.int_(array)
+            ## Another check to ensure dipole calculation ##
+            if ndipoles == 0:
+                print 'No dipoles were found in %s/permdipole.out' % (NEXMDir)
                 sys.exit()
-            ## OPEN THE USER-DEFINED VECTOR FILE = [TIME, Vx, Vy, Vz] ##
-            if not os.path.exists('%s/uservec.out' % (NEXMDIR)):
-                print 'Path %s/uservec.out' % (NEXMDIR), 'does not exist'
+            ## Open the user-defined vector file = [time, vx, vy, vz] ##
+            if not os.path.exists('%s/uservec.out' % (NEXMDir)):
+                print 'Path %s/uservec.out does not exist.' % (NEXMDir)
                 sys.exit()
-            USERVEC = np.genfromtxt('%s/uservec.out' % (NEXMDIR))
-            ## OPEN POPULATION DATA = [TIME, STATE] ##
-            STATES = np.genfromtxt('%s/pop.out' % (NEXMDIR))
-            ## COLLECT DIPOLE ALONG A SINGLE TRAJECTORY ##
-            SDIPOLE = np.zeros((NDIPOLES,2))
-            for NDIPOLE in np.arange(NDIPOLES):
-                DIPOLES = DATA[ARRAY[NDIPOLE] + 1:ARRAY[NDIPOLE + 1]:1]
-                VDIPOLE = np.float_(DIPOLES[np.int(STATES[NDIPOLE, 1])].split()[2:5:1]) ## EXTRACTS DIPOLE VECTOR
-                MDIPOLE = np.float(DIPOLES[np.int(STATES[NDIPOLE, 1])].split()[5]) ## EXTRACTS DIPOLE MAGNITUDE
-                COSINE = np.arccos(np.dot(VDIPOLE, USERVEC[NDIPOLE,1:4:1])/(np.linalg.norm(VDIPOLE)*np.linalg.norm(USERVEC[NDIPOLE,1:4:1]))) if DOTQ == 1 else 0 ## INVERSE COSINE OF THE DOT PRODUCT
-                SDIPOLE[NDIPOLE] = np.array([MDIPOLE, COSINE])
-            ## DELETE EXTRANEOUS DATA ##
-            os.remove('%s/permdipole.out' % (NEXMDIR))
-            os.remove('%s/pop.out' % (NEXMDIR))
-            os.remove('%s/uservec.out' % (NEXMDIR))
-            print '%s' % (NEXMDIR), '%0*.2f' % (len(str((TSMAX))) + 2, (TSTEPS - 1)*DT)
-            CTRAJ += 1
-            if TSTEPS == TSMAX:
-                ETRAJ += 1
+            uservec = np.genfromtxt('%s/uservec.out' % (NEXMDir))
+            ## Open population data = [time, state] ##
+            states = np.genfromtxt('%s/pop.out' % (NEXMDir))
+            ## Collect dipole along a single trajectory ##
+            sdipole = np.zeros((ndipoles,2))
+            for ndipole in np.arange(ndipoles):
+                dipoles = data[array[ndipole] + 1:array[ndipole + 1]:1]
+                vdipole = np.float_(dipoles[np.int(states[ndipole, 1])].split()[2:5:1]) ## extracts dipole vector
+                mdipole = np.float(dipoles[np.int(states[ndipole, 1])].split()[5]) ## extracts dipole magnitude
+                cosine = np.arccos(np.dot(vdipole, uservec[ndipole,1:4:1])/(np.linalg.norm(vdipole)*np.linalg.norm(uservec[ndipole,1:4:1]))) if dotq == 1 else 0 ## inverse cosine of the dot product
+                sdipole[ndipole] = np.array([mdipole, cosine])
+            ## Delete extraneous data ##
+            os.remove('%s/permdipole.out' % (NEXMDir))
+            os.remove('%s/pop.out' % (NEXMDir))
+            os.remove('%s/uservec.out' % (NEXMDir))
+            print '%s' % (NEXMDir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+            ctraj += 1
+            if tsteps == tsmax:
+                etraj += 1
         else:
-            print '%s' % (NEXMDIR), '%0*.2f' % (len(str((TSMAX))) + 2, (TSTEPS - 1)*DT)
-        TTRAJ += 1
-        ## SUMMARY OF RESULTS ##
-        if CTRAJ == 0:
-            print 'No trajectories completed within %0*.2f.' % (len(str(TSMAX)), TCOLL)
+            print '%s' % (NEXMDir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+        ttraj += 1
+        ## Summary of results ##
+        if ctraj == 0:
+            print 'No trajectories completed within %0*.2f.' % (len(str(tsmax)), tcoll)
         else:
-            print 'Total Trajectories:', '%04d' % (TTRAJ)
-            print 'Completed Trajectories:', '%04d' % (CTRAJ)
-            print 'Excellent Trajectories:', '%04d' % (ETRAJ)
-            print >> OUTPUT, 'Total Trajectories: ', '%04d' % (TTRAJ)
-            print >> OUTPUT, 'Completed Trajectories: ', '%04d' % (CTRAJ)
-            print >> OUTPUT, 'Excellent Trajectories: ', '%04d' % (ETRAJ)
-            for NDIPOLE in np.arange(NDIPOLES):
-                print >> OUTPUT, '%0*.2f' % (len(str((TSMAX))) + 2, DT*ODATA*CDATA*NDIPOLE), '%d' % (STATES[NDIPOLE, 1]), '%03.6f' % (SDIPOLE[NDIPOLE,0]), '%.6f' % (np.degrees(SDIPOLE[NDIPOLE,1]))
+            print 'Total trajectories:', '%04d' % (ttraj)
+            print 'Completed trajectories:', '%04d' % (ctraj)
+            print 'Excellent trajectories:', '%04d' % (etraj)
+            print >> output, 'Total trajectories: ', '%04d' % (ttraj)
+            print >> output, 'Completed trajectories: ', '%04d' % (ctraj)
+            print >> output, 'Excellent trajectories: ', '%04d' % (etraj)
+            for ndipole in np.arange(ndipoles):
+                print >> output, '%0*.2f' % (len(str((tsmax))) + 2, dt*odata*cdata*ndipole), '%d' % (states[ndipole, 1]), '%03.6f' % (sdipole[ndipole,0]), '%.6f' % (np.degrees(sdipole[ndipole,1]))
 
-    ## CALCULATE MEAN DIPOLE FROM ENSEMBLE OF TRAJECTORIES ##
-    if DYNQ == 0 and TYPEQ == 0: ## MEAN FROM ENSEMBLE
-        os.chdir('%s' % (CWD))
+    ## Calculate mean dipole from ensemble of trajectories ##
+    if dynq == 0 and typeq == 0: ## mean from ensemble
+        os.chdir('%s' % (cwd))
         print 'Collecting mean permanent dipole moment from ensemble.  Please wait ...'
-        ## DETERMINE TOTAL NUMBER OF TRAJECTORIES IN ENSEMBLE ##
-        with open('%s/totdirlist' % (NEXMDIR),'w') as DATA:
-            for NEXMD in NEXMDS:
+        ## Determine total number of trajectories in ensemble ##
+        with open('%s/totdirlist' % (NEXMDir),'w') as data:
+            for NEXMD in NEXMDs:
                 if not os.path.exists('%s/dirlist1' % (NEXMD)):
                     print 'Path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
-                INPUT = fileinput.input('%s/dirlist1' % (NEXMD))
-                DATA.writelines(INPUT)
-        DIRLIST1 = np.int_(np.genfromtxt('%s/totdirlist' % (NEXMDIR)))
-        if isinstance(DIRLIST1,int) == True:
-            DIRLIST1 = np.array([DIRLIST1])
-        os.remove('%s/totdirlist' % (NEXMDIR))
-        ## GENERATE OUTPUT AND ERROR FILES ##
-        OUTPUT = open('%s/permdipole_mean_ensemble.out' % (CWD),'w')
-        ERROR = open('%s/permdipole_mean_ensemble.err' % (CWD),'w')
-        ## GENERATE DIPOLE ARRAYS FOR FINAL RESULTS ##
-        FDIPOLE = np.zeros(len(TIMES)) ## MAGNITUDE
-        FCOSINE = np.zeros(len(TIMES)) ## DIRECTION
-        EDIPOLE = np.zeros((EDIPOLES, len(DIRLIST1)))
-        ECOSINE = np.zeros((EDIPOLES, len(DIRLIST1)))
-        TTRAJ = 0
-        CTRAJ = 0
-        ETRAJ = 0
-        ERRFLAG = 0
-        for NEXMD in NEXMDS:
+                input = fileinput.input('%s/dirlist1' % (NEXMD))
+                data.writelines(input)
+        dirlist1 = np.int_(np.genfromtxt('%s/totdirlist' % (NEXMDir)))
+        if isinstance(dirlist1,int) == true:
+            dirlist1 = np.array([dirlist1])
+        os.remove('%s/totdirlist' % (NEXMDir))
+        ## Generate output and error files ##
+        output = open('%s/permdipole_mean_ensemble.out' % (cwd),'w')
+        error = open('%s/permdipole_mean_ensemble.err' % (cwd),'w')
+        ## Generate dipole arrays for final results ##
+        fdipole = np.zeros(len(times)) ## magnitude
+        fcosine = np.zeros(len(times)) ## direction
+        edipole = np.zeros((edipoles, len(dirlist1)))
+        ecosine = np.zeros((edipoles, len(dirlist1)))
+        ttraj = 0
+        ctraj = 0
+        etraj = 0
+        errflag = 0
+        for NEXMD in NEXMDs:
             if not os.path.exists('%s/dirlist1' % (NEXMD)):
                 print 'Path %sdirlist1 does not exist.' % (NEXMD)
                 sys.exit()
-            DIRLIST1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-            if isinstance(DIRLIST1, int) == True:
-                DIRLIST1 = np.array([DIRLIST1])
-            for DIR in DIRLIST1:
-                ## DETERMINE COMPLETED NUMBER OF TIME-STEPS ##
-                if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,DIR)):
-                    print >> ERROR, '%s%04d/energy-ev.out' % (NEXMD,DIR), 'does not exist'
-                    ERRFLAG = 1
-                    TTRAJ += 1
+            dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
+            if isinstance(dirlist1, int) == true:
+                dirlist1 = np.array([dirlist1])
+            for dir in dirlist1:
+                ## Determine completed number of time-steps ##
+                if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
+                    print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
+                    errflag = 1
+                    ttraj += 1
                     continue
-                DATA = open('%s/%04d/energy-ev.out' % (NEXMD,DIR),'r')
-                DATA = DATA.readlines()
-                TSTEPS = len(DATA) - 1
-                ## GENERATE ARRAY WITH INDICES OF THE DIPOLE BLOCKS ALONG A SINGLE TRAJECTORY ##
-                if TSTEPS >= TSCOL:
-                    if not os.path.exists('%s/%04d/permdipole.out' % (NEXMD,DIR)):
-                        print >> ERROR, '%s%04d/permdipole.out' % (NEXMD,DIR), 'does not exist'
-                        ERRFLAG = 1
-                        TTRAJ += 1
+                data = open('%s/%04d/energy-ev.out' % (NEXMD,dir),'r')
+                data = data.readlines()
+                tsteps = len(data) - 1
+                ## Generate array with indices of the dipole blocks along a single trajectory ##
+                if tsteps >= tscol:
+                    if not os.path.exists('%s/%04d/permdipole.out' % (NEXMD,dir)):
+                        print >> error, 'Path %s%04d/permdipole.out does not exist.' % (NEXMD,dir)
+                        errflag = 1
+                        ttraj += 1
                         continue
-                    DATA = open('%s/%04d/permdipole.out' % (NEXMD,DIR),'r')
-                    DATA = DATA.readlines()
-                    LEND = len(DATA)
-                    NDIPOLES = 0
-                    TFLAG = 0
-                    INDEX = 0
-                    ARRAY = np.array([])
-                    for LINE in DATA:
-                        if 'Frequencies (eV) and Total Molecular Dipole Moments (Debye)' in LINE:
-                            if NDIPOLES == 0:
-                                TIME = TINITH
+                    data = open('%s/%04d/permdipole.out' % (NEXMD,dir),'r')
+                    data = data.readlines()
+                    lend = len(data)
+                    ndipoles = 0
+                    tflag = 0
+                    index = 0
+                    array = np.array([])
+                    for line in data:
+                        if 'Frequencies (eV) and Total Molecular Dipole Moments (Debye)' in line:
+                            if ndipoles == 0:
+                                time = tinith
                             else:
-                                TIME += DT*ODATA*CDATA
-                                if TIME > TCOLL:
-                                    TFLAG = 1
+                                time += dt*odata*cdata
+                                if time > tcoll:
+                                    tflag = 1
                                     break
-                            NDIPOLES += 1
-                            ARRAY = np.append(ARRAY,INDEX)
-                        INDEX += 1
-                    ## CHECK TO ENSURE DIPOLE CALCULATION ##
-                    if NDIPOLES != EDIPOLES:
-                        print >> ERROR, 'Number of dipoles detected in %s%04d/permdipole.out, %d, does not match the expected %d.' % (NEXMD,DIR,NDIPOLES,EDIPOLES)
-                        ERRFLAG = 1
-                        TTRAJ += 1
+                            ndipoles += 1
+                            array = np.append(array,index)
+                        index += 1
+                    ## Check to ensure dipole calculation ##
+                    if ndipoles != edipoles:
+                        print >> error, 'Number of dipoles detected in %s%04d/permdipole.out, %d, does not match the expected %d.' % (NEXMD,dir,ndipoles,edipoles)
+                        errflag = 1
+                        ttraj += 1
                         continue
-                    ## APPEND LINES FOR LAST DIPOLE SET ##
-                    if TFLAG == 1:
-                        ARRAY = np.append(ARRAY,INDEX)
+                    ## Append lines for last dipole set ##
+                    if tflag == 1:
+                        array = np.append(array,index)
                     else:
-                        ARRAY = np.append(ARRAY, LEND + 1)
-                    ARRAY = np.int_(ARRAY)
-                    ## ANOTHER CHECK TO ENSURE DIPOLE CALCULATION ##
-                    if NDIPOLES == 0:
-                        print >> ERROR, 'No dipoles were found in %s%04d/permdipole.out' % (NEXMD,DIR)
-                        ERRFLAG = 1
-                        TTRAJ += 1
+                        array = np.append(array, lend + 1)
+                    array = np.int_(array)
+                    ## Another check to ensure dipole calculation ##
+                    if ndipoles == 0:
+                        print >> error, 'No dipoles were found in %s%04d/permdipole.out' % (NEXMD,dir)
+                        errflag = 1
+                        ttraj += 1
                         continue
-                    ## OPEN THE USER-DEFINED VECTOR FILE = [TIME, Vx, Vy, Vz] ##
-                    if not os.path.exists('%s/%04d/uservec.out' % (NEXMD,DIR)):
-                        print >> ERROR, 'Path %s/%04d/uservec.out' % (NEXMD,DIR)
-                        ERRFLAG = 1
-                        TTRAJ += 1
+                    ## Open the user-defined vector file = [time, vx, vy, vz] ##
+                    if not os.path.exists('%s/%04d/uservec.out' % (NEXMD,dir)):
+                        print >> error, 'Path %s/%04d/uservec.out' % (NEXMD,dir)
+                        errflag = 1
+                        ttraj += 1
                         continue
-                    USERVEC = np.genfromtxt('%s/%04d/uservec.out' % (NEXMD,DIR))
-                    ## OPEN POPULATION DATA = [TIME, STATE] ##
-                    STATES = np.genfromtxt('%s/%04d/pop.out' % (NEXMD,DIR))
-                    ## COLLECT DIPOLE ALONG A SINGLE TRAJECTORY ##
-                    SDIPOLE = np.zeros(NDIPOLES)
-                    SCOSINE = np.zeros(NDIPOLES)
-                    for NDIPOLE in np.arange(NDIPOLES):
-                        DIPOLES = DATA[ARRAY[NDIPOLE] + 1:ARRAY[NDIPOLE + 1]:1]
-                        VDIPOLE = np.float_(DIPOLES[np.int(STATES[NDIPOLE, 1])].split()[2:5:1]) ## EXTRACTS DIPOLE VECTOR
-                        MDIPOLE = np.float(DIPOLES[np.int(STATES[NDIPOLE, 1])].split()[5]) ## EXTRACTS DIPOLE MAGNITUDE
-                        COSINE = np.arccos(np.dot(VDIPOLE, USERVEC[NDIPOLE,1:4:1])/(np.linalg.norm(VDIPOLE)*np.linalg.norm(USERVEC[NDIPOLE,1:4:1]))) if DOTQ == 1 else 0 ## INVERSE COSINE OF THE DOT PRODUCT
-                        SDIPOLE[NDIPOLE] = MDIPOLE
-                        SCOSINE[NDIPOLE] = COSINE
-                        EDIPOLE[NDIPOLE,CTRAJ] = SDIPOLE[NDIPOLE]
-                        ECOSINE[NDIPOLE,CTRAJ] = SCOSINE[NDIPOLE]
-                    FDIPOLE += SDIPOLE
-                    FCOSINE += SCOSINE
-                    ## DELETE EXTRANEOUS DATA ##
-                    os.remove('%s/%04d/permdipole.out' % (NEXMD,DIR))
-                    os.remove('%s/%04d/pop.out' % (NEXMD,DIR))
-                    os.remove('%s/%04d/uservec.out' % (NEXMD,DIR))
-                    print '%s%04d' % (NEXMD,DIR), '%0*.2f' % (len(str((TSMAX))) + 2, (TSTEPS - 1)*DT)
-                    CTRAJ += 1
-                    if TSTEPS == TSMAX:
-                        ETRAJ += 1
+                    uservec = np.genfromtxt('%s/%04d/uservec.out' % (NEXMD,dir))
+                    ## Open population data = [time, state] ##
+                    states = np.genfromtxt('%s/%04d/pop.out' % (NEXMD,dir))
+                    ## Collect dipole along a single trajectory ##
+                    sdipole = np.zeros(ndipoles)
+                    scosine = np.zeros(ndipoles)
+                    for ndipole in np.arange(ndipoles):
+                        dipoles = data[array[ndipole] + 1:array[ndipole + 1]:1]
+                        vdipole = np.float_(dipoles[np.int(states[ndipole, 1])].split()[2:5:1]) ## extracts dipole vector
+                        mdipole = np.float(dipoles[np.int(states[ndipole, 1])].split()[5]) ## extracts dipole magnitude
+                        cosine = np.arccos(np.dot(vdipole, uservec[ndipole,1:4:1])/(np.linalg.norm(vdipole)*np.linalg.norm(uservec[ndipole,1:4:1]))) if dotq == 1 else 0 ## inverse cosine of the dot product
+                        sdipole[ndipole] = mdipole
+                        scosine[ndipole] = cosine
+                        edipole[ndipole,ctraj] = sdipole[ndipole]
+                        ecosine[ndipole,ctraj] = scosine[ndipole]
+                    fdipole += sdipole
+                    fcosine += scosine
+                    ## Delete extraneous data ##
+                    os.remove('%s/%04d/permdipole.out' % (NEXMD,dir))
+                    os.remove('%s/%04d/pop.out' % (NEXMD,dir))
+                    os.remove('%s/%04d/uservec.out' % (NEXMD,dir))
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    ctraj += 1
+                    if tsteps == tsmax:
+                        etraj += 1
                 else:
-                    print '%s%04d' % (NEXMD,DIR), '%0*.2f' % (len(str((TSMAX))) + 2, (TSTEPS - 1)*DT)
-                TTRAJ += 1
-        ## SUMMARY OF RESULTS ##
-        if CTRAJ == 0:
-            print 'No trajectories completed within %0*.2f.' % (len(str(TSMAX)), TCOLL)
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                ttraj += 1
+        ## Summary of results ##
+        if ctraj == 0:
+            print 'No trajectories completed within %0*.2f.' % (len(str(tsmax)), tcoll)
         else:
-            ## MEAN AND STANDARD DEVIATION FOR DIPOLE MAGNITUDE ##
-            EDIPOLE = np.delete(EDIPOLE, np.arange(CTRAJ, TTRAJ), axis = 1)
-            EDIPOLE = np.std(EDIPOLE, axis = 1)
-            FDIPOLE = FDIPOLE/CTRAJ
-            ## MEAN AND STANDARD DEVIATION FOR DIPOLE DIRECTION ##
-            ECOSINE = np.delete(ECOSINE, np.arange(CTRAJ, TTRAJ), axis = 1)
-            ECOSINE = np.std(ECOSINE, axis = 1)
-            FCOSINE = FCOSINE/CTRAJ
-            ## PRINT FINAL RESULTS ##
-            print 'Total Trajectories:', '%04d' % (TTRAJ)
-            print 'Completed Trajectories:', '%04d' % (CTRAJ)
-            print 'Excellent Trajectories:', '%04d' % (ETRAJ)
-            print >> OUTPUT, 'Total Trajectories:', '%04d' % (TTRAJ)
-            print >> OUTPUT, 'Completed Trajectories:', '%04d' % (CTRAJ)
-            print >> OUTPUT, 'Excellent Trajectories:', '%04d' % (ETRAJ)
-            for NDIPOLE in np.arange(NDIPOLES):
-                print >>  OUTPUT, '%0*.2f' % (len(str((TSMAX))) + 2, DT*ODATA*CDATA*(NDIPOLE)), '%03.6f' % (FDIPOLE[NDIPOLE]), '%03.6f' % (EDIPOLE[NDIPOLE]), '%.6f' % (np.degrees(FCOSINE[NDIPOLE])), '%.6f' % (np.degrees(ECOSINE[NDIPOLE]))
-        if ERRFLAG == 1:
+            ## Mean and standard deviation for dipole magnitude ##
+            edipole = np.delete(edipole, np.arange(ctraj, ttraj), axis = 1)
+            edipole = np.std(edipole, axis = 1)
+            fdipole = fdipole/ctraj
+            ## Mean and standard deviation for dipole direction ##
+            ecosine = np.delete(ecosine, np.arange(ctraj, ttraj), axis = 1)
+            ecosine = np.std(ecosine, axis = 1)
+            fcosine = fcosine/ctraj
+            ## Summary of results ##
+            print 'Total trajectories:', '%04d' % (ttraj)
+            print 'Completed trajectories:', '%04d' % (ctraj)
+            print 'Excellent trajectories:', '%04d' % (etraj)
+            print >> output, 'Total trajectories:', '%04d' % (ttraj)
+            print >> output, 'Completed trajectories:', '%04d' % (ctraj)
+            print >> output, 'Excellent trajectories:', '%04d' % (etraj)
+            for ndipole in np.arange(ndipoles):
+                print >>  output, '%0*.2f' % (len(str((tsmax))) + 2, dt*odata*cdata*(ndipole)), '%03.6f' % (fdipole[ndipole]), '%03.6f' % (edipole[ndipole]), '%.6f' % (np.degrees(fcosine[ndipole])), '%.6f' % (np.degrees(ecosine[ndipole]))
+        if errflag == 1:
             print 'One or more trajectories have experienced an error, check permdipole_mean_ensemble.err.'
         else:
-            os.remove('%s/permdipole_mean_ensemble.err' % (CWD))
-                
-    ## COLLECT DIPOLES FROM ENSEMBLE OF TRAJECTORIES AT ALL TIME-STEPS ##
-    if DYNQ == 0 and TYPEQ == 1: ## ALL FROM ENSEMBLE
-        os.chdir('%s' % (CWD))
+            os.remove('%s/permdipole_mean_ensemble.err' % (cwd))
+    
+    ## Collect dipoles from ensemble of trajectories at all time-steps ##
+    if dynq == 0 and typeq == 1: ## all from ensemble
+        os.chdir('%s' % (cwd))
         print 'Collecting all permanent dipole moments from ensemble.  Please wait ...'
-        ## GENERATE OUTPUT AND ERROR FILES ##
-        OUTPUT = open('%s/permdipole_raw_ensemble.out' % (CWD),'w')
-        ERROR = open('%s/permdipole_raw_ensemble.err' % (CWD),'w')
-        TTRAJ = 0
-        ETRAJ = 0
-        ERRFLAG = 0
-        for NEXMD in NEXMDS:
+        ## Generate output and error files ##
+        output = open('%s/permdipole_raw_ensemble.out' % (cwd),'w')
+        error = open('%s/permdipole_raw_ensemble.err' % (cwd),'w')
+        ttraj = 0
+        etraj = 0
+        errflag = 0
+        for NEXMD in NEXMDs:
             if not os.path.exists('%s/dirlist1' % (NEXMD)):
                 print 'Path %sdirlist1 does not exist.' % (NEXMD)
                 sys.exit()
-            DIRLIST1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-            if isinstance(DIRLIST1, int) == True:
-                DIRLIST1 = np.array([DIRLIST1])
-            for DIR in DIRLIST1:
-                ## DETERMINE NUMBER OF TIME-STEPS COMPLETED ##
-                if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,DIR)):
-                    print >> ERROR, '%s%04d/energy-ev.out' % (NEXMD,DIR), 'does not exist'
-                    ERRFLAG = 1
-                    TTRAJ += 1
+            dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
+            if isinstance(dirlist1, int) == true:
+                dirlist1 = np.array([dirlist1])
+            for dir in dirlist1:
+                ## Determine number of time-steps completed ##
+                if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
+                    print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
+                    errflag = 1
+                    ttraj += 1
                     continue
-                DATA = open('%s/%04d/energy-ev.out' % (NEXMD,DIR),'r')
-                DATA = DATA.readlines()
-                TSTEPS = len(DATA) - 1
-                ## GENERATE ARRAY WITH INDICES OF THE DIPOLE BLOCKS ALONG TRAJECTORY ##
-                if not os.path.exists('%s/%04d/permdipole.out' % (NEXMD,DIR)):
-                    print >> ERROR, '%s%04d/permdipole.out' % (NEXMD,DIR), 'does not exist'
-                    ERRFLAG = 1
-                    TTRAJ += 1
+                data = open('%s/%04d/energy-ev.out' % (NEXMD,dir),'r')
+                data = data.readlines()
+                tsteps = len(data) - 1
+                ## Generate array with indices of the dipole blocks along trajectory ##
+                if not os.path.exists('%s/%04d/permdipole.out' % (NEXMD,dir)):
+                    print >> error, 'Path %s%04d/permdipole.out does not exist.' % (NEXMD,dir)
+                    errflag = 1
+                    ttraj += 1
                     continue
-                DATA = open('%s/%04d/permdipole.out' % (NEXMD,DIR),'r')
-                DATA = DATA.readlines()
-                LEND = len(DATA)
-                NDIPOLES = 0
-                TFLAG = 0
-                INDEX = 0
-                ARRAY = np.array([])
-                for LINE in DATA:
-                    if 'Frequencies (eV) and Total Molecular Dipole Moments (Debye)' in LINE:
-                        if NDIPOLES == 0:
-                            TIME = TINITH
+                data = open('%s/%04d/permdipole.out' % (NEXMD,dir),'r')
+                data = data.readlines()
+                lend = len(data)
+                ndipoles = 0
+                tflag = 0
+                index = 0
+                array = np.array([])
+                for line in data:
+                    if 'Frequencies (eV) and Total Molecular Dipole Moments (Debye)' in line:
+                        if ndipoles == 0:
+                            time = tinith
                         else:
-                            TIME += DT*ODATA*CDATA
-                        NDIPOLES += 1
-                        ARRAY = np.append(ARRAY,INDEX)
-                    INDEX += 1
-                ## ANOTHER CHECK TO ENSURE DIPOLE CALCULATION ##
-                if NDIPOLES != EDIPOLES:
-                    print >> ERROR, 'Number of dipoles detected in %s%04d/permdipole.out, %d, does not match the expected %d.' % (NEXMD,DIR,NDIPOLES,EDIPOLES)
-                    ERRFLAG = 1
-                    TTRAJ += 1
+                            time += dt*odata*cdata
+                        ndipoles += 1
+                        array = np.append(array,index)
+                    index += 1
+                ## Another check to ensure dipole calculation ##
+                if ndipoles != edipoles:
+                    print >> error, 'Number of dipoles detected in %s%04d/permdipole.out, %d, does not match the expected %d.' % (NEXMD,dir,ndipoles,edipoles)
+                    errflag = 1
+                    ttraj += 1
                     continue
-                ## APPEND LINES FOR LAST DIPOLE SET ##
-                ARRAY = np.append(ARRAY, LEND + 1)
-                ARRAY = np.int_(ARRAY)
-                ## ANOTHER CHECK TO ENSURE THE DIPOLE CALCULATION ##
-                if NDIPOLES == 0:
-                    print >> ERROR, 'No dipoles were found in %s%04d/permdipole.out' % (NEXMD,DIR)
-                    ERRFLAG = 1
-                    TTRAJ += 1
+                ## Append lines for last dipole set ##
+                array = np.append(array, lend + 1)
+                array = np.int_(array)
+                ## Another check to ensure the dipole calculation ##
+                if ndipoles == 0:
+                    print >> error, 'No dipoles were found in %s%04d/permdipole.out.' % (NEXMD,dir)
+                    errflag = 1
+                    ttraj += 1
                     continue
-                ## OPEN THE USER-DEFINED VECTOR FILE = [TIME, Vx, Vy, Vz] ##
-                if not os.path.exists('%s/%04d/uservec.out' % (NEXMD,DIR)):
-                    print >> ERROR, 'Path %s/%04d/uservec.out' % (NEXMD,DIR), 'does not exist'
-                    ERRFLAG = 1
-                    TTRAJ += 1
+                ## Open the user-defined vector file = [time, vx, vy, vz] ##
+                if not os.path.exists('%s/%04d/uservec.out' % (NEXMD,dir)):
+                    print >> error, 'Path %s/%04d/uservec.out does not exist.' % (NEXMD,dir)
+                    errflag = 1
+                    ttraj += 1
                     continue
-                USERVEC = np.genfromtxt('%s/%04d/uservec.out' % (NEXMD,DIR))
-                ## OPEN POPULATION DATA = [TIME, STATE] ##
-                if not os.path.exists('%s/%04d/pop.out' % (NEXMD,DIR)):
-                    print >> ERROR, 'Path %s/%04d/pop.out' % (NEXMD,DIR)
-                    ERRFLAG = 1
-                    TTRAJ += 1
+                uservec = np.genfromtxt('%s/%04d/uservec.out' % (NEXMD,dir))
+                ## Open population data = [time, state] ##
+                if not os.path.exists('%s/%04d/pop.out' % (NEXMD,dir)):
+                    print >> error, 'Path %s/%04d/pop.out does not exist.' % (NEXMD,dir)
+                    errflag = 1
+                    ttraj += 1
                     continue
-                STATES = np.genfromtxt('%s/%04d/pop.out' % (NEXMD,DIR))
-                ## COLLECT DIPOLE ALONG A SINGLE TRAJECTORY ##
-                for NDIPOLE in np.arange(NDIPOLES):
-                    DIPOLES = DATA[ARRAY[NDIPOLE] + 1:ARRAY[NDIPOLE + 1]:1]
-                    VDIPOLE = np.float_(DIPOLES[np.int(STATES[NDIPOLE, 1])].split()[2:5:1]) ## EXTRACTS DIPOLE VECTOR
-                    MDIPOLE = np.float(DIPOLES[np.int(STATES[NDIPOLE, 1])].split()[5]) ## EXTRACTS DIPOLE MAGNITUDE
-                    COSINE = np.arccos(np.dot(VDIPOLE, USERVEC[NDIPOLE,1:4:1])/(np.linalg.norm(VDIPOLE)*np.linalg.norm(USERVEC[NDIPOLE,1:4:1]))) if DOTQ == 1 else 0 ## INVERSE COSINE OF THE DOT PRODUCT
-                    print >> OUTPUT,  '%s%04d' % (NEXMD,DIR), '%0*.2f' % (len(str((TSMAX))) + 2, DT*ODATA*CDATA*NDIPOLE), '%d' % (STATES[NDIPOLE, 1]), '%03.6f' % (MDIPOLE), '%.6f' % (np.degrees(COSINE))
-                ## DELETE EXTRANEOUS DATA ##
-                os.remove('%s/%04d/permdipole.out' % (NEXMD,DIR))
-                os.remove('%s/%04d/pop.out' % (NEXMD,DIR))
-                os.remove('%s/%04d/uservec.out' % (NEXMD,DIR))
-                print '%s%04d' % (NEXMD,DIR), '%0*.2f' % (len(str((TSMAX))) + 2, (TSTEPS - 1)*DT)
-                if TSTEPS == TSMAX:
-                    ETRAJ += 1
-                TTRAJ += 1
-        ## SUMMARY OF RESULTS ##
-        if TTRAJ == 0:
-            print 'No trajectories completed with %0*.2f.' % (len(str(TSMAX)), TCOLL)
+                states = np.genfromtxt('%s/%04d/pop.out' % (NEXMD,dir))
+                ## Collect dipole along a single trajectory ##
+                for ndipole in np.arange(ndipoles):
+                    dipoles = data[array[ndipole] + 1:array[ndipole + 1]:1]
+                    vdipole = np.float_(dipoles[np.int(states[ndipole, 1])].split()[2:5:1]) ## extracts dipole vector
+                    mdipole = np.float(dipoles[np.int(states[ndipole, 1])].split()[5]) ## extracts dipole magnitude
+                    cosine = np.arccos(np.dot(vdipole, uservec[ndipole,1:4:1])/(np.linalg.norm(vdipole)*np.linalg.norm(uservec[ndipole,1:4:1]))) if dotq == 1 else 0 ## inverse cosine of the dot product
+                    print >> output,  '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, dt*odata*cdata*ndipole), '%d' % (states[ndipole, 1]), '%03.6f' % (mdipole), '%.6f' % (np.degrees(cosine))
+                ## Delete extraneous data ##
+                os.remove('%s/%04d/permdipole.out' % (NEXMD,dir))
+                os.remove('%s/%04d/pop.out' % (NEXMD,dir))
+                os.remove('%s/%04d/uservec.out' % (NEXMD,dir))
+                print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                if tsteps == tsmax:
+                    etraj += 1
+                ttraj += 1
+        ## Summary of results ##
+        if ttraj == 0:
+            print 'No trajectories completed with %0*.2f.' % (len(str(tsmax)), tcoll)
         else:
-            print 'Total Trajectories:', '%04d' % (TTRAJ)
-            print 'Excellent Trajectories:', '%04d' % (ETRAJ)
-        if ERRFLAG == 1:
+            print 'Total trajectories:', '%04d' % (ttraj)
+            print 'Excellent trajectories:', '%04d' % (etraj)
+        if errflag == 1:
             print 'One or more trajectories have experienced an error, check permdipole_raw_ensemble.err.'
         else:
-            os.remove('%s/permdipole_raw_ensemble.err' % (CWD))
+            os.remove('%s/permdipole_raw_ensemble.err' % (cwd))

@@ -28,7 +28,7 @@ import sys
 import shutil
 import glob
 
-def SPCALC():
+def spcalc():
 
     print 'Preparing input files for single-point calculations.'
 

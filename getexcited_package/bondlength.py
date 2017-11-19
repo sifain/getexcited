@@ -44,7 +44,7 @@ import math
 
 cwd = os.getcwd()
 
-def BONDLENGTH():
+def bondlength():
 
     print 'Calculating a bond length as a function of time.'
 
@@ -54,15 +54,15 @@ def BONDLENGTH():
         print 'Answer must be 1 or 0.'
         sys.exit()
     if dynq == 0: ## ensemble
-        nexmdir = raw_input('Ensemble directory [e.g. nexmd]: ')
-        if not os.path.exists(nexmdir):
-            print 'Path %s does not exist.' % (nexmdir)
+        NEXMDir = raw_input('Ensemble directory [e.g. NEXMD]: ')
+        if not os.path.exists(NEXMDir):
+            print 'Path %s does not exist.' % (NEXMDir)
             sys.exit()
-        ## Check if nexmd folders exist ##
-        nexmds = glob.glob('%s/nexmd*/' % (nexmdir))
-        nexmds.sort()
-        if len(nexmds) == 0:
-            print 'There are no nexmd folders in %s.' % (nexmdir)
+        ## Check if NEXMD folders exist ##
+        NEXMDs = glob.glob('%s/NEXMD*/' % (NEXMDir))
+        NEXMDs.sort()
+        if len(NEXMDs) == 0:
+            print 'There are no NEXMD folders in %s.' % (NEXMDir)
             sys.exit()
         ## determine mean or all ##
         typeq = input('Output mean bla in time or output bla at all time-steps and trajectories?\nAnswer mean [0] or all [1]: ')
@@ -71,23 +71,23 @@ def BONDLENGTH():
             sys.exit()
     if dynq == 1: ## single trajectory
         typeq = 0
-        nexmdir = raw_input('Single trajectory directory: ')
-        if not os.path.exists(nexmdir):
-            print 'Path %s does not exist.' % (nexmdir)
+        NEXMDir = raw_input('Single trajectory directory: ')
+        if not os.path.exists(NEXMDir):
+            print 'Path %s does not exist.' % (NEXMDir)
             sys.exit()
 
     ## Information from header ##
     if dynq == 0: ## ensemble
-        if not os.path.exists('%s/header' % (nexmdir)):
-            print 'Path %s/header does not exist.' % (nexmdir)
+        if not os.path.exists('%s/header' % (NEXMDir)):
+            print 'Path %s/header does not exist.' % (NEXMDir)
             sys.exit()
-        header = open('%s/header' % (nexmdir),'r')
+        header = open('%s/header' % (NEXMDir),'r')
         header = header.readlines()
     if dynq == 1: ## single trajectory
-        if not os.path.exists('%s/input.ceon' % (nexmdir)):
-            print 'Path %s/input.ceon does not exist.' % (nexmdir)
+        if not os.path.exists('%s/input.ceon' % (NEXMDir)):
+            print 'Path %s/input.ceon does not exist.' % (NEXMDir)
             sys.exit()
-        header = open('%s/input.ceon' % (nexmdir),'r')
+        header = open('%s/input.ceon' % (NEXMDir),'r')
         header = header.readlines()
     for line in header:
         if 'time_init' in line:
@@ -169,18 +169,16 @@ def BONDLENGTH():
         output = open('%s/bl_single.out' % (cwd),'w')
         etraj = 0
         ## Determine completed number of time-steps ##
-        if not os.path.exists('%s/energy-ev.out' % (nexmdir)):
-            print 'Path %s/energy-ev.out does not exist.' % (nexmdir)
+        if not os.path.exists('%s/energy-ev.out' % (NEXMDir)):
+            print 'Path %s/energy-ev.out does not exist.' % (NEXMDir)
             sys.exit()
-        data = open('%s/energy-ev.out' % (nexmdir),'r')
-        data = data.readlines()
-        tsteps = len(data) - 1
+        tsteps = np.genfromtxt('%s/energy-ev.out' % (NEXMDir), usecols=[0], skip_header=1).size
         ## Generate array with indices of the coordinate blocks along a trajectory ##
         if tsteps >= tscol:
-            if not os.path.exists('%s/coords.xyz' % (nexmdir)):
-                print 'path %s/coords.xyz does not exist.' % (nexmdir)
+            if not os.path.exists('%s/coords.xyz' % (NEXMDir)):
+                print 'Path %s/coords.xyz does not exist.' % (NEXMDir)
                 sys.exit()
-            data = open('%s/coords.xyz' % (nexmdir),'r')
+            data = open('%s/coords.xyz' % (NEXMDir),'r')
             data = data.readlines()
             lenc = len(data)
             ncoords = 0
@@ -207,10 +205,10 @@ def BONDLENGTH():
                     array = np.append(array,cindex)
                 cindex += 1
             if tflag1 == 1:
-                print 'Initial time in %s/coords.xyz does not match time_init in %s/input.ceon.' % (nexmdir,nexmdir)
+                print 'Initial time in %s/coords.xyz does not match time_init in %s/input.ceon.' % (NEXMDir,NEXMDir)
                 sys.exit()
             if tflag2 == 1:
-                print 'There is an inconsistency in time-step in %s/coords.xyz.' % (nexmdir)
+                print 'There is an inconsistency in time-step in %s/coords.xyz.' % (NEXMDir)
                 sys.exit()
             ## Append lines for last coordinate set ##
             if tflag3 == 1:
@@ -220,10 +218,10 @@ def BONDLENGTH():
             array = np.int_(array)
             ## Checks to ensure bond length calculation ##
             if ncoords == 0:
-                print 'No coordinates were found in %s/coords.xyz' % (nexmdir)
+                print 'No coordinates were found in %s/coords.xyz' % (NEXMDir)
                 sys.exit()
             if ncoords == 1:
-                print 'Only initial coordinates, at %.2f fs, were found in %s/coords.xyz.' % (tinit,nexmdir)
+                print 'Only initial coordinates, at %.2f fs, were found in %s/coords.xyz.' % (tinit,NEXMDir)
                 sys.exit()
             ## Calculate bond length along a single trajectory ##
             sbondlen = np.zeros((ncoords,nbonds))
@@ -236,12 +234,12 @@ def BONDLENGTH():
                     a = np.subtract(vec1, vec0)
                     sbondlen[ncoord,index] = np.linalg.norm(a)
                     index += 1
-            print '%s' % (nexmdir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+            print '%s' % (NEXMDir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
             ctraj = 1
             if tsteps == tsmax:
                 etraj = 1
         else:
-            print '%s' % (nexmdir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+            print '%s' % (NEXMDir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
         ttraj = 1
         ## Summary of results ##
         if ctraj == 0:
@@ -260,17 +258,17 @@ def BONDLENGTH():
     if dynq == 0 and typeq == 0: ## mean from ensemble
         print 'Collecting mean bond length from ensemble.  Please wait ...'
         ## Determine total number of trajectories in ensemble ##
-        with open('%s/totdirlist' % (nexmdir),'w') as data:
-            for nexmd in nexmds:
-                if not os.path.exists('%s/dirlist1' % (nexmd)):
-                    print 'Path %nexmdirlist1 does not exist.' % (nexmd)
+        with open('%s/totdirlist' % (NEXMDir),'w') as data:
+            for NEXMD in NEXMDs:
+                if not os.path.exists('%s/dirlist1' % (NEXMD)):
+                    print 'Path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
-                input = fileinput.input('%s/dirlist1' % (nexmd))
+                input = fileinput.input('%s/dirlist1' % (NEXMD))
                 data.writelines(input)
-        dirlist1 = np.int_(np.genfromtxt('%s/totdirlist' % (nexmdir)))
+        dirlist1 = np.int_(np.genfromtxt('%s/totdirlist' % (NEXMDir)))
         if isinstance(dirlist1,int) == true:
             dirlist1 = np.array([dirlist1])
-        os.remove('%s/totdirlist' % (nexmdir))
+        os.remove('%s/totdirlist' % (NEXMDir))
         ## Generate output and error files ##
         output = open('%s/bl_mean_ensemble.out' % (cwd),'w')
         error = open('%s/bl_mean_ensemble.err' % (cwd),'w')
@@ -281,31 +279,29 @@ def BONDLENGTH():
         ctraj = 0
         etraj = 0
         errflag = 0
-        for nexmd in nexmds:
-            if not os.path.exists('%s/dirlist1' % (nexmd)):
-                print 'Path %dirlist1 does not exist.' % (nexmd)
+        for NEXMD in NEXMDs:
+            if not os.path.exists('%s/dirlist1' % (NEXMD)):
+                print 'Path %dirlist1 does not exist.' % (NEXMD)
                 sys.exit()
-            dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (nexmd)))
+            dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
             if isinstance(dirlist1, int) == true:
                 dirlist1 = np.array([dirlist1])
             for dir in dirlist1:
                 ## Determine completed number of time-steps ##
-                if not os.path.exists('%s/%04d/energy-ev.out' % (nexmd,dir)):
-                    print >> error, '%s%04d/energy-ev.out' % (nexmd,dir), 'does not exist'
+                if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
+                    print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
                     errflag = 1
                     ttraj += 1
                     continue
-                data = open('%s/%04d/energy-ev.out' % (nexmd,dir),'r')
-                data = data.readlines()
-                tsteps = len(data) - 1
+                tsteps = np.genfromtxt('%s/%04d/energy-ev.out' % (NEXMD,dir), usecols=[0], skip_header=1).size
                 ## Generate array with indices of the coordinate blocks along trajectory ##
                 if tsteps >= tscol:
-                    if not os.path.exists('%s/%04d/coords.xyz' % (nexmd,dir)):
-                        print >> error, '%s%04d/coords.xyz' % (nexmd,dir), 'does not exist'
+                    if not os.path.exists('%s/%04d/coords.xyz' % (NEXMD,dir)):
+                        print >> error, 'Path %s%04d/coords.xyz does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
-                    data = open('%s/%04d/coords.xyz' % (nexmd,dir),'r')
+                    data = open('%s/%04d/coords.xyz' % (NEXMD,dir),'r')
                     data = data.readlines()
                     lenc = len(data)
                     ncoords = 0
@@ -333,12 +329,12 @@ def BONDLENGTH():
                             array = np.append(array,cindex)
                         cindex += 1
                     if tflag1 == 1:
-                        print >> error, 'Initial time in %s%04d/coords.xyz does not match time_init in %s/header.' % (nexmd,dir,nexmdir)
+                        print >> error, 'Initial time in %s%04d/coords.xyz does not match time_init in %s/header.' % (NEXMD,dir,NEXMDir)
                         errflag = 1
                         ttraj += 1
                         continue
                     if tflag2 == 1:
-                        print >> error, 'There is an inconsistency in time-step in %s%04d/coords.xyz.' % (nexmd,dir)
+                        print >> error, 'There is an inconsistency in time-step in %s%04d/coords.xyz.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
@@ -350,12 +346,12 @@ def BONDLENGTH():
                     array = np.int_(array)
                     ## Checks to ensure bond length calculation ##
                     if ncoords == 0:
-                        print >> error, 'No coordinates were found in %s%04d/coords.xyz' % (nexmd,dir)
+                        print >> error, 'No coordinates were found in %s%04d/coords.xyz' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
                     if ncoords == 1:
-                        print >> error, 'Only initial coordinates, at %.2f fs, were found in %s%04d/coords.xyz.' % (tinit,nexmd,dir)
+                        print >> error, 'Only initial coordinates, at %.2f fs, were found in %s%04d/coords.xyz.' % (tinit,NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
@@ -372,13 +368,13 @@ def BONDLENGTH():
                             ebondlen[ncoord,ctraj,index] = sbondlen[ncoord,index]
                             index += 1
                     fbondlen += sbondlen
-                    print '%s%04d' % (nexmd,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
                     ctraj += 1
                     if tsteps == tsmax:
                         etraj += 1
                 else:
-                    print '%s%04d' % (nexmd,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
-                    print >> error, '%s%04d' % (nexmd,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
                     errflag = 1
                 ttraj += 1
         ## Summary of results ##
@@ -411,30 +407,28 @@ def BONDLENGTH():
         ttraj = 0
         etraj = 0
         errflag = 0
-        for nexmd in nexmds:
-            if not os.path.exists('%s/dirlist1' % (nexmd)):
-                print 'Path %dirlist1 does not exist.' % (nexmd)
+        for NEXMD in NEXMDs:
+            if not os.path.exists('%s/dirlist1' % (NEXMD)):
+                print 'Path %dirlist1 does not exist.' % (NEXMD)
                 sys.exit()
-            dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (nexmd)))
+            dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
             if isinstance(dirlist1, int) == true:
                 dirlist1 = np.array([dirlist1])
             for dir in dirlist1:
-                ## Determine number of time-steps completed ##
-                if not os.path.exists('%s/%04d/energy-ev.out' % (nexmd,dir)):
-                    print >> error, '%s%04d/energy-ev.out' % (nexmd,dir), 'does not exist'
+                ## Determine completed number of time-steps ##
+                if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
+                    print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
                     errflag = 1
                     ttraj += 1
                     continue
-                data = open('%s/%04d/energy-ev.out' % (nexmd,dir),'r')
-                data = data.readlines()
-                tsteps = len(data) - 1
+                tsteps = np.genfromtxt('%s/%04d/energy-ev.out' % (NEXMD,dir), usecols=[0], skip_header=1).size
                 ## Generate array with indices of the coordinate blocks along trajectory ##
-                if not os.path.exists('%s/%04d/coords.xyz' % (nexmd,dir)):
-                    print >> error, '%s%04d/coords.xyz' % (nexmd,dir), 'does not exist'
+                if not os.path.exists('%s/%04d/coords.xyz' % (NEXMD,dir)):
+                    print >> error, 'Path %s%04d/coords.xyz does not exist.' % (NEXMD,dir)
                     errflag = 1
                     ttraj += 1
                     continue
-                data = open('%s/%04d/coords.xyz' % (nexmd,dir),'r')
+                data = open('%s/%04d/coords.xyz' % (NEXMD,dir),'r')
                 data = data.readlines()
                 lenc = len(data)
                 ncoords = 0
@@ -462,12 +456,12 @@ def BONDLENGTH():
                         array = np.append(array,cindex)
                     cindex += 1
                 if tflag1 == 1:
-                    print >> error, 'Initial time in %s%04d/coords.xyz does not match time_init in %s/header.' % (nexmd,dir,nexmdir)
+                    print >> error, 'Initial time in %s%04d/coords.xyz does not match time_init in %s/header.' % (NEXMD,dir,NEXMDir)
                     errflag = 1
                     ttraj += 1
                     continue
                 if tflag2 == 1:
-                    print >> error, 'There is an inconsistency in time-step in %s%04d/coords.xyz.' % (nexmd,dir)
+                    print >> error, 'There is an inconsistency in time-step in %s%04d/coords.xyz.' % (NEXMD,dir)
                     errflag = 1
                     ttraj += 1
                     continue
@@ -479,12 +473,12 @@ def BONDLENGTH():
                 array = np.int_(array)
                 ## Checks to ensure bond length calculation ##
                 if ncoords == 0:
-                    print >> error, 'No coordinates were found in %s%04d/coords.xyz' % (nexmd,dir)
+                    print >> error, 'No coordinates were found in %s%04d/coords.xyz' % (NEXMD,dir)
                     errflag = 1
                     ttraj += 1
                     continue
                 if ncoords == 1:
-                    print >> error, 'Only initial coordinates, at %.2f fs, were found in %s%04d/coords.xyz.' % (tinit,nexmd,dir)
+                    print >> error, 'Only initial coordinates, at %.2f fs, were found in %s%04d/coords.xyz.' % (tinit,NEXMD,dir)
                     errflag = 1
                     ttraj += 1
                     continue
@@ -499,13 +493,13 @@ def BONDLENGTH():
                         a = np.subtract(vec1, vec0)
                         sbondlen[index] = np.linalg.norm(a)
                         index += 1
-                    print >> output, '%s%04d' % (nexmd,dir), '%0*.2f' % (len(str((tsmax))) + 2,dt*odata*cdata*ncoord), ' '.join('%08.3f' % (bond) for bond in sbondlen)
-                print '%s%04d' % (nexmd,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    print >> output, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2,dt*odata*cdata*ncoord), ' '.join('%08.3f' % (bond) for bond in sbondlen)
+                print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
                 if tsteps == tsmax:
                     etraj += 1
                 else:
-                    print '%s%04d' % (nexmd,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
-                    print >> error, '%s%04d' % (nexmd,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
                     errflag = 1
                 ttraj += 1
         ## Summary of results ##

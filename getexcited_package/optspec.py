@@ -36,7 +36,7 @@ import glob
 
 cwd = os.getcwd()
 
-def OPTSPEC(pathtoceo):
+def optspec(pathtoceo):
 
     print 'Generating optical spectrum.'
 

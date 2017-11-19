@@ -36,7 +36,7 @@ import fileinput
 
 cwd = os.getcwd()
 
-def NEXMD():
+def nexmd():
     
     print 'Preparing input files for NEXMD.'
     

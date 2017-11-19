@@ -33,7 +33,7 @@ import glob
 
 cwd = os.getcwd()
 
-def POPULATION():
+def population():
 
     print 'Collecting populations.'
 

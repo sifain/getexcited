@@ -47,7 +47,7 @@ def extract(file):
     num = re.findall('\d+$', file)
     return (np.int(num[0]) if num else 0, file)
 
-def RESTART(pathtodel):
+def restart(pathtodel):
 
     print 'Preparing restart input files for NEXMD.'
 

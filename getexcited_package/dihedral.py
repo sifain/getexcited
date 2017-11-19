@@ -51,7 +51,7 @@ import math
 
 cwd = os.getcwd()
 
-def DIHEDRAL():
+def dihedral():
 
     print 'Calculating a dihedral angle as a function of time.'
 
@@ -175,15 +175,13 @@ def DIHEDRAL():
         etraj = 0
         ## Determine completed number of time-steps ##
         if not os.path.exists('%s/energy-ev.out' % (NEXMDir)):
-            print 'path %s/energy-ev.out does not exist.' % (NEXMDir)
+            print 'Path %s/energy-ev.out does not exist.' % (NEXMDir)
             sys.exit()
-        data = open('%s/energy-ev.out' % (NEXMDir),'r')
-        data = data.readlines()
-        tsteps = len(data) - 1
+        tsteps = np.genfromtxt('%s/energy-ev.out' % (NEXMDir), usecols=[0], skip_header=1).size
         ## Generate array with indices of the coordinate blocks along trajectory ##
         if tsteps >= tscol:
             if not os.path.exists('%s/coords.xyz' % (NEXMDir)):
-                print 'path %s/coords.xyz does not exist.' % (NEXMDir)
+                print 'Path %s/coords.xyz does not exist.' % (NEXMDir)
                 sys.exit()
             data = open('%s/coords.xyz' % (NEXMDir),'r')
             data = data.readlines()
@@ -306,17 +304,15 @@ def DIHEDRAL():
             for dir in dirlist1:
                 ## Determine completed number of time-steps ##
                 if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
-                    print >> error, '%s%04d/energy-ev.out' % (NEXMD,dir), 'does not exist'
+                    print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
                     errflag = 1
                     ttraj += 1
                     continue
-                data = open('%s/%04d/energy-ev.out' % (NEXMD,dir),'r')
-                data = data.readlines()
-                tsteps = len(data) - 1
+                tsteps = np.genfromtxt('%s/%04d/energy-ev.out' % (NEXMD,dir), usecols=[0], skip_header=1).size
                 ## Generate array with indices of the coordinate blocks along trajectory ##
                 if tsteps >= tscol:
                     if not os.path.exists('%s/%04d/coords.xyz' % (NEXMD,dir)):
-                        print >> error, '%s%04d/coords.xyz' % (NEXMD,dir), 'does not exist'
+                        print >> error, 'Path %s%04d/coords.xyz does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
@@ -444,18 +440,16 @@ def DIHEDRAL():
             if isinstance(dirlist1, int) == true:
                 dirlist1 = np.array([dirlist1])
             for dir in dirlist1:
-                ## Determine number of time-steps completed ##
+                ## Determine completed number of time-steps ##
                 if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
-                    print >> error, '%s%04d/energy-ev.out' % (NEXMD,dir), 'does not exist'
+                    print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
                     errflag = 1
                     ttraj += 1
                     continue
-                data = open('%s/%04d/energy-ev.out' % (NEXMD,dir),'r')
-                data = data.readlines()
-                tsteps = len(data) - 1
+                tsteps = np.genfromtxt('%s/%04d/energy-ev.out' % (NEXMD,dir), usecols=[0], skip_header=1).size
                 ## Generate array with indices of the coordinate blocks along trajectory ##
                 if not os.path.exists('%s/%04d/coords.xyz' % (NEXMD,dir)):
-                    print >> error, '%s%04d/coords.xyz' % (NEXMD,dir), 'does not exist'
+                    print >> error, 'Path %s%04d/coords.xyz does not exist.' % (NEXMD,dir)
                     errflag = 1
                     ttraj += 1
                     continue

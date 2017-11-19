@@ -38,7 +38,7 @@ import fileinput
 
 cwd = os.getcwd()
 
-def NEWSIM():
+def newsim():
 
     print 'Preparing input files for a new simulation with geometries taken from another simulation.'
 

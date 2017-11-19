@@ -47,7 +47,7 @@ import glob
 
 cwd = os.getcwd()
 
-def TDIAGONAL():
+def tdiagonal():
 
     print 'Calculating occupation of excitation as a function of time according to transition densities.'
 
@@ -61,13 +61,13 @@ def TDIAGONAL():
         if not os.path.exists(NEXMDir):
             print 'Path %s does not exist.' % (NEXMDir)
             sys.exit()
-        ## check if NEXMD folders exist ##
+        ## Check if NEXMD folders exist ##
         NEXMDs = glob.glob('%s/NEXMD*/' % (NEXMDir))
         NEXMDs.sort()
         if len(NEXMDs) == 0:
             print 'There are no NEXMD folders in %s.' % (NEXMDir)
             sys.exit()
-        ## determine mean or all ##
+        ## Determine mean or all ##
         typeq = input('Output mean occupation in time, at all time-steps and trajectories, or up to some user-defined time?\nAnswer mean [0], all [1], or user-defined [2]: ')
         if typeq not in [0,1,2]:
             print 'Answer must be 0, 1, or 2.'
@@ -217,17 +217,17 @@ def TDIAGONAL():
             etraj = 0
             ## Determine completed number of time-steps ##
             if not os.path.exists('%s/energy-ev.out' % (NEXMDir)):
-                print '%s/energy-ev.out' % (NEXMDir), 'does not exist'
+                print 'Path %s/energy-ev.out does not exist.' % (NEXMDir)
                 sys.exit()
             tsteps = np.genfromtxt('%s/energy-ev.out' % (NEXMDir), usecols=[0], skip_header=1).size
             ## Determine if transition density file exists ##
             if not os.path.exists('%s/transition-densities.out' % (NEXMDir)):
-                print 'Path %s/transition-densities.out' % (NEXMDir), 'does not exist'
+                print 'Path %s/transition-densities.out does not exist.' % (NEXMDir)
                 sys.exit()
             ## Check times ##
             times_td = np.around(np.genfromtxt('%s/transition-densities.out' % (NEXMDir),usecols=[0]), decimals = 3)
             if np.array_equal(times_td, times) == false:
-                print >> 'There is an inconsistency in time-step in %s/transition-densities.out at %.3f' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                print >> 'There is an inconsistency in time-step in %s/transition-densities.out at %.3f fs.' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
                 sys.exit()
             ## Collect data ##
             tds = np.genfromtxt('%s/transition-densities.out' % (NEXMDir),usecols=np.arange(1, norbits + 1))
@@ -293,17 +293,17 @@ def TDIAGONAL():
             etraj = 0
             ## Determine completed number of time-steps ##
             if not os.path.exists('%s/energy-ev.out' % (NEXMDir)):
-                print '%s/energy-ev.out' % (NEXMDir), 'does not exist'
+                print 'Path %s/energy-ev.out does not exist.' % (NEXMDir)
                 sys.exit()
             tsteps = np.genfromtxt('%s/energy-ev.out' % (NEXMDir), usecols=[0], skip_header=1).size
             ## Determine if transition density file exists ##
             if not os.path.exists('%s/transition-densities.out' % (NEXMDir)):
-                print 'Path %s/transition-densities.out' % (NEXMDir), 'does not exist'
+                print 'Path %s/transition-densities.out does not exist.' % (NEXMDir)
                 sys.exit()
             ## Check times ##
             times_td = np.around(np.genfromtxt('%s/transition-densities.out' % (NEXMDir),usecols=[0]), decimals = 3)
             if np.array_equal(times_td, times) == false:
-                print >> error, 'There is an inconsistency in time-step in %s/transition-densities.out at %.3f' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                print >> error, 'There is an inconsistency in time-step in %s/transition-densities.out at %.3f fs.' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
                 sys.exit()
             ## Compare completed time-steps to collection time-steps and collect data ##
             if tsteps >= tscol:
@@ -372,12 +372,12 @@ def TDIAGONAL():
             etraj = 0
             ## Determine completed number of time-steps ##
             if not os.path.exists('%s/energy-ev.out' % (NEXMDir)):
-                print '%s/energy-ev.out' % (NEXMDir), 'does not exist'
+                print 'Path %s/energy-ev.out does not exist.' % (NEXMDir)
                 sys.exit()
             tsteps = np.genfromtxt('%s/energy-ev.out' % (NEXMDir), usecols=[0], skip_header=1).size
             ## Determine if coefficient files exist and open it ##
             if not os.path.exists('%s/coeff-n.out' % (NEXMDir)):
-                print 'path %s/coeff-n.out' % (NEXMDir), 'does not exist'
+                print 'Path %s/coeff-n.out does not exist.' % (NEXMDir)
                 sys.exit()
             hops = np.int_(np.genfromtxt('%s/coeff-n.out' % (NEXMDir),usecols=[0]))
             if np.where(linenums > hops.size)[0].size:
@@ -386,12 +386,12 @@ def TDIAGONAL():
                 hops = hops[linenums]
             ## Determine if transition density file exists ##
             if not os.path.exists('%s/transition-densities.out' % (NEXMDir)):
-                print 'path %s/transition-densities.out' % (NEXMDir), 'does not exist'
+                print 'Path %s/transition-densities.out does not exist.' % (NEXMDir)
                 sys.exit()
             ## Check times ##
             times_td = np.around(np.genfromtxt('%s/transition-densities.out' % (NEXMDir),usecols=[0]), decimals = 3)
             if np.array_equal(times_td, times) == false:
-                print >> 'there is an inconsistency in time-step in %s/transition-densities.out at %.3f' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                print >> 'There is an inconsistency in time-step in %s/transition-densities.out at %.3f fs.' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
                 sys.exit()
             ## Collect data ##
             tds = np.genfromtxt('%s/transition-densities.out' % (NEXMDir),usecols=np.arange(1, norbits + 1))
@@ -458,12 +458,12 @@ def TDIAGONAL():
             etraj = 0
             ## Determine completed number of time-steps ##
             if not os.path.exists('%s/energy-ev.out' % (NEXMDir)):
-                print '%s/energy-ev.out' % (NEXMDir), 'does not exist'
+                print 'Path %s/energy-ev.out does not exist.' % (NEXMDir)
                 sys.exit()
             tsteps = np.genfromtxt('%s/energy-ev.out' % (NEXMDir), usecols=[0], skip_header=1).size
             ## Determine if coefficient files exist and open it ##
             if not os.path.exists('%s/coeff-n.out' % (NEXMDir)):
-                print 'Path %s/coeff-n.out' % (NEXMDir), 'does not exist'
+                print 'Path %s/coeff-n.out does not exist.' % (NEXMDir)
                 sys.exit()
             hops = np.int_(np.genfromtxt('%s/coeff-n.out' % (NEXMDir),usecols=[0]))
             if np.where(linenums > hops.size)[0].size:
@@ -472,12 +472,12 @@ def TDIAGONAL():
                 hops = hops[linenums]
             ## Determine if transition density file exists ##
             if not os.path.exists('%s/transition-densities.out' % (NEXMDir)):
-                print 'Path %s/transition-densities.out' % (NEXMDir), 'does not exist'
+                print 'Path %s/transition-densities.out does not exist.' % (NEXMDir)
                 sys.exit()
             ## Check times ##
             times_td = np.around(np.genfromtxt('%s/transition-densities.out' % (NEXMDir),usecols=[0]), decimals = 3)
             if np.array_equal(times_td, times) == false:
-                print >> error, 'There is an inconsistency in time-step in %s/transition-densities.out at %.3f' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                print >> error, 'There is an inconsistency in time-step in %s/transition-densities.out at %.3f fs.' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
                 sys.exit()
             ## Compare completed time-steps to collection time-steps and collect data ##
             if tsteps >= tscol:
@@ -550,7 +550,7 @@ def TDIAGONAL():
             errflag = 0
             for NEXMD in NEXMDs:
                 if not os.path.exists('%s/dirlist1' % (NEXMD)):
-                    print 'path %sdirlist1 does not exist.' % (NEXMD)
+                    print 'Path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
                 dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
                 if isinstance(dirlist1,int) == true:
@@ -558,21 +558,21 @@ def TDIAGONAL():
                 for dir in dirlist1:
                     ## Determine completed number of time-steps ##
                     if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
-                        print >> error, '%s%04d/energy-ev.out' % (NEXMD,dir), 'does not exist'
+                        print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
                     tsteps = np.genfromtxt('%s/%04d/energy-ev.out' % (NEXMD,dir), usecols=[0], skip_header=1).size
                     ## Determine if transition density file exists ##
                     if not os.path.exists('%s/%04d/transition-densities.out' % (NEXMD,dir)):
-                        print >> error, '%s%04d/transition-densities.out' % (NEXMD,dir), 'does not exist'
+                        print >> error, 'Path %s%04d/transition-densities.out does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
                     ## Check times ##
                     times_td = np.around(np.genfromtxt('%s/%04d/transition-densities.out' % (NEXMD,dir),usecols=[0]), decimals = 3)
                     if np.array_equal(times_td, times) == false:
-                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
                         errflag = 1
                         ttraj += 1
                         continue
@@ -655,21 +655,21 @@ def TDIAGONAL():
                 for dir in dirlist1:
                     ## Determine completed number of time-steps ##
                     if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
-                        print >> error, '%s%04d/energy-ev.out' % (NEXMD,dir), 'does not exist'
+                        print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
                     tsteps = np.genfromtxt('%s/%04d/energy-ev.out' % (NEXMD,dir), usecols=[0], skip_header=1).size
                     ## Determine if transition density file exists ##
                     if not os.path.exists('%s/%04d/transition-densities.out' % (NEXMD,dir)):
-                        print >> error, '%s%04d/transition-densities.out' % (NEXMD,dir), 'does not exist'
+                        print >> error, 'Path %s%04d/transition-densities.out does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
                     ## Check times ##
                     times_td = np.around(np.genfromtxt('%s/%04d/transition-densities.out' % (NEXMD,dir),usecols=[0]), decimals = 3)
                     if np.array_equal(times_td, times) == false:
-                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
                         errflag = 1
                         ttraj += 1
                         continue
@@ -758,14 +758,14 @@ def TDIAGONAL():
                 for dir in dirlist1:
                     ## Determine completed number of time-steps ##
                     if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
-                        print >> error, '%s%04d/energy-ev.out' % (NEXMD,dir), 'does not exist'
+                        print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
                     tsteps = np.genfromtxt('%s/%04d/energy-ev.out' % (NEXMD,dir), usecols=[0], skip_header=1).size
                     ## Determine if transition density files exist ##
                     if not os.path.exists('%s/%04d/transition-densities.out' % (NEXMD,dir)):
-                        print >> error, '%s%04d/transition-densities.out' % (NEXMD,dir)
+                        print >> error, 'Path %s%04d/transition-densities.out does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
@@ -773,7 +773,7 @@ def TDIAGONAL():
                     if tsteps >= tscol:
                         times_td = np.around(np.genfromtxt('%s/%04d/transition-densities.out' % (NEXMD,dir),usecols=[0]), decimals = 3)
                         if np.array_equal(times_td, times) == false:
-                            print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                            print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
                             errflag = 1
                             ttraj += 1
                             continue
@@ -855,14 +855,14 @@ def TDIAGONAL():
                 for dir in dirlist1:
                     ## Determine completed number of time-steps ##
                     if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
-                        print >> error, '%s%04d/energy-ev.out' % (NEXMD,dir), 'does not exist'
+                        print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
                     tsteps = np.genfromtxt('%s/%04d/energy-ev.out' % (NEXMD,dir), usecols=[0], skip_header=1).size
                     ## Determine if coefficient files exist and open them ##
                     if not os.path.exists('%s/%04d/coeff-n.out' % (NEXMD,dir)):
-                        print >> error, '%s%04d/coeff-n.out' % (NEXMD,dir), 'does not exist'
+                        print >> error, 'Path %s%04d/coeff-n.out does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
@@ -873,14 +873,14 @@ def TDIAGONAL():
                         hops = hops[linenums]
                     ## Determine if transition density file exists ##
                     if not os.path.exists('%s/%04d/transition-densities.out' % (NEXMD,dir)):
-                        print >> error, '%s%04d/transition-densities.out' % (NEXMD,dir), 'does not exist'
+                        print >> error, 'Path %s%04d/transition-densities.out does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
                     ## Check times ##
                     times_td = np.around(np.genfromtxt('%s/%04d/transition-densities.out' % (NEXMD,dir),usecols=[0]), decimals = 3)
                     if np.array_equal(times_td, times) == false:
-                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
                         errflag = 1
                         ttraj += 1
                         continue
@@ -964,14 +964,14 @@ def TDIAGONAL():
                 for dir in dirlist1:
                     ## Determine completed number of time-steps ##
                     if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
-                        print >> error, '%s%04d/energy-ev.out' % (NEXMD,dir), 'does not exist'
+                        print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
                     tsteps = np.genfromtxt('%s/%04d/energy-ev.out' % (NEXMD,dir), usecols=[0], skip_header=1).size
                     ## Determine if coefficient files exist and open them ##
                     if not os.path.exists('%s/%04d/coeff-n.out' % (NEXMD,dir)):
-                        print >> error, '%s%04d/coeff-n.out' % (NEXMD,dir), 'does not exist'
+                        print >> error, 'Path %s%04d/coeff-n.out does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
@@ -982,14 +982,14 @@ def TDIAGONAL():
                         hops = hops[linenums]
                     ## Determine if transition density file exists ##
                     if not os.path.exists('%s/%04d/transition-densities.out' % (NEXMD,dir)):
-                        print >> error, '%s%04d/transition-densities.out' % (NEXMD,dir), 'does not exist'
+                        print >> error, 'Path %s%04d/transition-densities.out does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
                     ## Check times ##
                     times_td = np.around(np.genfromtxt('%s/%04d/transition-densities.out' % (NEXMD,dir),usecols=[0]), decimals = 3)
                     if np.array_equal(times_td, times) == false:
-                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
                         errflag = 1
                         ttraj += 1
                         continue
@@ -1079,14 +1079,14 @@ def TDIAGONAL():
                 for dir in dirlist1:
                     ## Determine completed number of time-steps ##
                     if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
-                        print >> error, '%s%04d/energy-ev.out' % (NEXMD,dir), 'does not exist'
+                        print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
                     tsteps = np.genfromtxt('%s/%04d/energy-ev.out' % (NEXMD,dir), usecols=[0], skip_header=1).size
                     ## Determine if transition density files exist ##
                     if not os.path.exists('%s/%04d/transition-densities.out' % (NEXMD,dir)):
-                        print >> error, '%s%04d/transition-densities.out' % (NEXMD,dir)
+                        print >> error, 'Path %s%04d/transition-densities.out does not exist.' % (NEXMD,dir)
                         errflag = 1
                         ttraj += 1
                         continue
@@ -1094,7 +1094,7 @@ def TDIAGONAL():
                     if tsteps >= tscol:
                         times_td = np.around(np.genfromtxt('%s/%04d/transition-densities.out' % (NEXMD,dir),usecols=[0]), decimals = 3)
                         if np.array_equal(times_td, times) == false:
-                            print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                            print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
                             errflag = 1
                             ttraj += 1
                             continue

@@ -4,13 +4,13 @@
  _________________________________________________________
 |                                                         |
 | The path below must be in string format, meaning        |
-| PATHTOPATH = '<PATH>', where <PATH> is in single        |
+| pathtopath = '<path>', where <path> is in single        |
 | quotations.                                             |
 |_________________________________________________________|
 
 '''
 
-PATHTOPACK = 'INSERT PATH TO getexcited_package HERE, DO NOT INCLUDE "getexcited_package" IN PATH'
+pathtopack = 'Insert path to getexcited_package here, do not include "getexcited_package" in path'
 
 '''
          _______________________________________
@@ -72,87 +72,87 @@ PATHTOPACK = 'INSERT PATH TO getexcited_package HERE, DO NOT INCLUDE "getexcited
 
 import sys
 import os
-if not os.path.exists(PATHTOPACK):
-    print 'You must provide the path to getexcited_package in getexcited.py (PATHTOPACK).'
+if not os.path.exists(pathtopack):
+    print 'You must provide the path to getexcited_package in getexcited.py (pathtopack).'
     sys.exit()
 sys.dont_write_bytecode = True
-sys.path.append('%s' % (PATHTOPACK))
-from getexcited_package.spcalc import SPCALC
-from getexcited_package.optspec import OPTSPEC
-from getexcited_package.nexmd import NEXMD
-from getexcited_package.population import POPULATION
-from getexcited_package.pesnact import PESNACT
-from getexcited_package.restart import RESTART
-from getexcited_package.newsim import NEWSIM
-from getexcited_package.cleandir import CLEANDIR
-from getexcited_package.dihedral import DIHEDRAL
-from getexcited_package.bondlength import BONDLENGTH
-from getexcited_package.bla import BLA
-from getexcited_package.timing import TIMING
-from getexcited_package.permdipole import PERMDIPOLE
-from getexcited_package.tdiagonal import TDIAGONAL
+sys.path.append('%s' % (pathtopack))
+from getexcited_package.spcalc import spcalc
+from getexcited_package.optspec import optspec
+from getexcited_package.nexmd import nexmd
+from getexcited_package.population import population
+from getexcited_package.pesnact import pesnact
+from getexcited_package.restart import restart
+from getexcited_package.newsim import newsim
+from getexcited_package.cleandir import cleandir
+from getexcited_package.dihedral import dihedral
+from getexcited_package.bondlength import bondlength
+from getexcited_package.bla import bla
+from getexcited_package.timing import timing
+from getexcited_package.permdipole import permdipole
+from getexcited_package.tdiagonal import tdiagonal
 
-FUNQ = input('\nSelect a task from the following list:\n\n[1] Prepare input files for single-point calculations\n[2] Generate an optical spectrum from single-point calculations\n[3] Prepare input files for NEXMD\n[4] Prepare input files for adiabatic dynamics with geometries from NEXMD\n[5] Collect populations from NEXMD\n[6] Collect PESs and NACTs from NEXMD\n[7] Prepare restart input files for NEXMD\n[8] Clean out the directories of NEXMD trajectories that are incomplete\n[9] Access options for geometry analysis\n[10] Access options for dipole analysis\n[11] Access options for transition density analysis\n[12] Access options for pump-push-probe spectroscopy (*** UNDER DEVELOPMENT, DO NOT USE ***)\n[13] Access code testing tools\n\nEnter the number corresponding to the desired task: ')
-if FUNQ not in [1,2,3,4,5,6,7,8,9,10,11,12,13]:
-    print 'Answer must be 1 through 13.'
+funq = input('\nSelect a task from the following list:\n\n[1] Prepare input files for single-point calculations\n[2] Generate an optical spectrum from single-point calculations\n[3] Prepare input files for NEXMD\n[4] Prepare input files for adiabatic dynamics with geometries from NEXMD\n[5] Collect populations from NEXMD\n[6] Collect pess and nacts from NEXMD\n[7] Prepare restart input files for NEXMD\n[8] Clean out the directories of NEXMD trajectories that are incomplete\n[9] Access options for geometry analysis\n[10] Access options for dipole analysis\n[11] Access options for transition density analysis\n[12] Access options for pump-push-probe spectroscopy (*** UNDER DEVELOPMENT, DO NOT USE ***)\n[13] Access code testing tools\n\nEnter the number corresponding to the desired task: ')
+if funq not in [1,2,3,4,5,6,7,8,9,10,11,12,13]:
+    print 'answer must be 1 through 13.'
     sys.exit()
-if FUNQ == 1:
-    SPCALC()
-if FUNQ == 2:
-    OPTSPEC(PATHTOPACK)
-if FUNQ == 3:
-    NEXMD()
-if FUNQ == 4:
-    NEWSIM()
-if FUNQ == 5:
-    POPULATION()
-if FUNQ == 6:
-    PESNACT()
-if FUNQ == 7:
-    RESTART(PATHTOPACK)
-if FUNQ == 8:
-    CLEANDIR()
-if FUNQ == 9:
-    ADVQ = input('\nSelect a task from the following list:\n\n[1] Calculate a dihedral angle\n[2] Calculate a bond length\n[3] Calculate a bond length alternation\n\nEnter the number corresponding to the desired task: ')
-    if ADVQ not in [1,2,3]:
+if funq == 1:
+    spcalc()
+if funq == 2:
+    optspec(pathtopack)
+if funq == 3:
+    nexmd()
+if funq == 4:
+    newsim()
+if funq == 5:
+    population()
+if funq == 6:
+    pesnact()
+if funq == 7:
+    restart(pathtopack)
+if funq == 8:
+    cleandir()
+if funq == 9:
+    advq = input('\nSelect a task from the following list:\n\n[1] Calculate dihedral angle\n[2] Calculate bond lengths\n[3] Calculate bond length alternation\n\nEnter the number corresponding to the desired task: ')
+    if advq not in [1,2,3]:
         print 'Answer must be 1 through 3.'
         sys.exit()
-    if ADVQ == 1:
-        DIHEDRAL()
-    if ADVQ == 2:
-        BONDLENGTH()
-    if ADVQ == 3:
-        BLA()
-if FUNQ == 10:
-    ADVQ = input('\nSelect a task from the following list:\n\n[1] Collect excited-state permanent dipole moment\n\nEnter the number corresponding to the desired task: ')
-    if ADVQ != 1:
+    if advq == 1:
+        dihedral()
+    if advq == 2:
+        bondlength()
+    if advq == 3:
+        bla()
+if funq == 10:
+    advq = input('\nSelect a task from the following list:\n\n[1] Collect excited-state permanent dipole moment\n\nEnter the number corresponding to the desired task: ')
+    if advq != 1:
         print 'Answer must be 1.'
         sys.exit()
-    if ADVQ == 1:
-        PERMDIPOLE(PATHTOPACK)
-if FUNQ == 11:
-    ADVQ = input('\nSelect a task from the following list:\n\n[1] Analyze occupancy according to diagonal elements of the transition density matrix\n\nEnter the number corresponding to the desired task: ')
-    if ADVQ not in [1]:
+    if advq == 1:
+        permdipole(pathtopack)
+if funq == 11:
+    advq = input('\nSelect a task from the following list:\n\n[1] Analyze induced charge according to diagonal elements of the transition density matrix\n\nEnter the number corresponding to the desired task: ')
+    if advq not in [1]:
         print 'Answer must be 1.'
         sys.exit()
-    if ADVQ == 1:
-        TDIAGONAL()
-if FUNQ == 12:
+    if advq == 1:
+        tdiagonal()
+if funq == 12:
     sys.exit()
-    ADVQ = input('\nSelect a task from the following list:\n\n[1] Prepare input files for single-point calculations after pump-push delay time\n[2] Generate optical spectrum from single-point calculations after pump-push delay time\n[3] Prepare input files for NEXMD after push pulse\n\nEnter the number corresponding to the desired task: ')
-    if ADVQ not in [1,2,3]:
+    advq = input('\nSelect a task from the following list:\n\n[1] Prepare input files for single-point calculations after pump-push delay time\n[2] Generate optical spectrum from single-point calculations after pump-push delay time\n[3] Prepare input files for NEXMD after push pulse\n\nEnter the number corresponding to the desired task: ')
+    if advq not in [1,2,3]:
         print 'Answer must be 1 through 3.'
         sys.exit()
-    if ADVQ == 1:
-        SPCALC_PUSH()
-    if ADVQ == 2:
-        OPTSPEC_PUSH()
-    if ADVQ == 3:
-        NEXMD_PUSH()
-if FUNQ == 13:
-    ADVQ = input('Select a task from the following list:\n\n[1] Collect timing data from trajectories\n\nEnter the number corresponding to the desired task: ')
-    if ADVQ != 1:
+    if advq == 1:
+        spcalc_push()
+    if advq == 2:
+        optspec_push()
+    if advq == 3:
+        nexmd_push()
+if funq == 13:
+    advq = input('Select a task from the following list:\n\n[1] Collect timing data from trajectories\n\nEnter the number corresponding to the desired task: ')
+    if advq != 1:
         print 'Answer must be 1.'
         sys.exit()
-    if ADVQ == 1:
-        TIMING(PATHTOPACK)
+    if advq == 1:
+        timing(pathtopack)

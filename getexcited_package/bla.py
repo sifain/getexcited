@@ -166,7 +166,7 @@ def bla():
     ## Calculate bla along a single trajectory ##
     if dynq == 1: ## single trajectory
         print 'Collecting bla along a single trajectory.  please wait ...'
-        ## generate output file ##
+        ## Generate output file ##
         output = open('%s/bla_single.out' % (cwd),'w')
         etraj = 0
         ## Determine completed number of time-steps ##

@@ -51,13 +51,29 @@ def restart(pathtodel):
 
     print 'Preparing restart input files for NEXMD.'
 
-    ## Directory names ##
-    NEXMDir = raw_input('NEXMD directory: ')
-    if not os.path.exists(NEXMDir):
-        print 'Path %s does not exist.' % (NEXMDir)
+    ## Type of calculation and directory check ##
+    dynq = input('Restart a single trajectory or an ensemble of trajectories?\nAnswer one [1] or ensemble [0]: ')
+    if dynq not in [1,0]:
+        print 'Answer must be 1 or 0.'
         sys.exit()
+    if dynq == 0: ## ensemble
+        NEXMDir = raw_input('Ensemble directory [e.g. NEXMD]: ')
+        if not os.path.exists(NEXMDir):
+            print 'Path %s does not exist.' % (NEXMDir)
+            sys.exit()
+        ## Check if NEXMD folders exist ##
+        NEXMDs = glob.glob('%s/NEXMD*/' % (NEXMDir))
+        NEXMDs.sort()
+        if len(NEXMDs) == 0:
+            print 'There are no NEXMD folders in %s.' % (NEXMDir)
+            sys.exit()
+    if dynq == 1: ## single trajectory
+        NEXMDir = raw_input('Single trajectory directory: ')
+        if not os.path.exists(NEXMDir):
+            print 'Path %s does not exist.' % (NEXMDir)
+            sys.exit()
 
-    ## Choose classical time-steps, get number of quantum steps and verbosity ##
+    ## Information from header ##
     if not os.path.exists('%s/header' % (NEXMDir)):
         print 'Path %s/header does not exist.' % (NEXMDir)
         sys.exit()
@@ -87,7 +103,7 @@ def restart(pathtodel):
                 print 'No data has been printed to files because out_data_steps = 0 in header.'
                 sys.exit()
         num += 1
-    print 'Currently, trajectories are set to run for %d classical steps with a time-step of %.2f fs.\nthis is a total of %.2f fs.' % (tsmax,dt,tsmax*dt)
+    print 'Currently, trajectories are set to run for %d classical steps with a time-step of %.2f fs.\nThis is a total of %.2f fs.' % (tsmax,dt,tsmax*dt)
     tsmaxq = input('Keep this trajectory length? Answer yes [1] or no [0]: ')
     if tsmaxq not in [1,0]:
         print 'Answer must be 1 or 0.'
@@ -111,20 +127,18 @@ def restart(pathtodel):
         os.rename('%s/nheader' % (NEXMDir), '%s/header' % (NEXMDir))
     
     ## Choose random seeds ##
-    NEXMDs = glob.glob('%s/NEXMD*/' % (NEXMDir))
-    NEXMDs.sort()
-    if len(NEXMDs) == 0:
-        print 'There are no NEXMD folders in %s.' % (NEXMDir)
-        sys.exit()
-    ntraj = 0
-    for NEXMD in NEXMDs:
-        if not os.path.exists('%s/dirlist1' % (NEXMD)):
-            print 'Path %sdirlist1 does not exist.' % (NEXMD)
-            sys.exit()
-        data = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-        if isinstance(data,int) == true:
-            data = np.array([data])
-        ntraj += len(data)
+    if dynq == 0: ## ensemble
+        ntraj = 0
+        for NEXMD in NEXMDs:
+            if not os.path.exists('%s/dirlist1' % (NEXMD)):
+                print 'Path %sdirlist1 does not exist.' % (NEXMD)
+                sys.exit()
+            data = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
+            if isinstance(data,int) == true:
+                data = np.array([data])
+            ntraj += len(data)
+    if dynq == 1: ## single trajectory
+        ntraj = 1
     randq = input('New random seeds? Answer yes [1] or no [0]: ')
     if randq not in [1,0]:
         print 'Answer must be 1 or 0.'
@@ -152,131 +166,242 @@ def restart(pathtodel):
                 sys.exit()
 
     ## Prepare NEXMD restart input files ##
-    print 'Searching for incomplete trajectories and preparing input files.'
-    header = open('%s/header' % (NEXMDir),'r')
-    header = header.readlines()
-    rseedslist = open('%s/rseedslist%d' % (NEXMDir,maxdir + 1),'w')
-    error = open('%s/restart.err' % (cwd),'w')
-    rtimes = np.array([])
-    rstflag = 0
-    traj = 0
-    for NEXMD in NEXMDs:
-        dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-        if isinstance(dirlist1,int) == true:
-            dirlist1 = np.array([dirlist1])
-        dirlist = open('%s/dirlist' % (NEXMD),'w')
-        for dir in dirlist1:
-            if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
-                print >> error, '%s%04d/energy-ev.out' % (NEXMD,dir), 'does not exist'
-                print >> rseedslist, '%d' % (-123456789)
-                rstflag = 1
-                traj += 1
-                continue
-            data = open('%s/%04d/energy-ev.out' % (NEXMD,dir),'r')
-            data = data.readlines()
-            tsteps = len(data) - 2
-            if tsteps != tsmax:
-                if not os.path.exists('%s/%04d/restart.out' % (NEXMD,dir)):
-                    print >> error, '%s/%04d/restart.out' % (NEXMD,dir), 'does not exist'
+    if dynq == 0:
+        print 'Searching for incomplete trajectories and preparing input files.'
+        #header = open('%s/header' % (NEXMDir),'r')
+        #header = header.readlines()
+        rseedslist = open('%s/rseedslist%d' % (NEXMDir,maxdir + 1),'w')
+        error = open('%s/restart.err' % (cwd),'w')
+        rtimes = np.array([])
+        rstflag = 0
+        traj = 0
+        for NEXMD in NEXMDs:
+            dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
+            if isinstance(dirlist1,int) == true:
+                dirlist1 = np.array([dirlist1])
+            dirlist = open('%s/dirlist' % (NEXMD),'w')
+            for dir in dirlist1:
+                if not os.path.exists('%s/%04d/energy-ev.out' % (NEXMD,dir)):
+                    print >> error, 'Path %s%04d/energy-ev.out does not exist.' % (NEXMD,dir)
                     print >> rseedslist, '%d' % (-123456789)
                     rstflag = 1
                     traj += 1
                     continue
-                data = open('%s/%04d/restart.out' % (NEXMD,dir),'r')
+                data = open('%s/%04d/energy-ev.out' % (NEXMD,dir),'r')
                 data = data.readlines()
-                index = 0
-                array = np.array([])
-                for line in data:
-                    if 'time' in line:
-                        time = np.around(np.float(line.split()[-1]), decimals = 3)
-                    if 'state' in line:
-                        state = np.int(line.split()[-1])
-                    if 'seed' in line:
-                        rseed = np.int(line.split()[-1])
-                    if '$coord' in line:
-                        array = np.append(array,index)
-                    if '$endcoord' in line:
-                        array = np.append(array,index)
-                    if '$veloc' in line:
-                        array = np.append(array,index)
-                    if '$endveloc' in line:
-                        array = np.append(array,index)
-                    if '$coeff' in line:
-                        array = np.append(array,index)
-                    if '$endcoeff' in line:
-                        array = np.append(array,index)
-                    index += 1
-                array = np.int_(array)
-                if len(array) != 6:
-                    print >> error, '%s%04d/restart.out' % (NEXMD,dir), 'is incomplete'
-                    print >> rseedslist, '%d' % (-123456789)
-                    rstflag = 1
-                    traj += 1
-                    continue
-                coords = data[array[0]:array[1]+1:1]
-                velocs = data[array[2]:array[3]+1:1]
-                coeffs = data[array[4]:array[5]+1:1]
-                ## start renormalize coefficients ##
-                ncoeffs = np.zeros(((len(coeffs) - 2), 2))
-                index = 0
-                for line in coeffs[1:len(coeffs) - 1:1]:
-                    ncoeffs[index] = np.float_(line.split())
-                    index += 1
-                ncoeffs[:,0] = ncoeffs[:,0]/np.sum(ncoeffs[:,0])
-                ## end renormalize coefficients ##
-                data = glob.glob('%s/view*' % (NEXMDir))
-                data = [ x[:-10] for x in data ]
-                if len(data) != 0:
-                    max = np.int(extract(max(data,key = extract))[0])
-                else:
-                    max = 0
-                input = open('%s/%04d/input.ceon' % (NEXMD,dir),'w')
-                for line in header:
-                    if 'rnd_seed' in line:
-                        input.write('   rnd_seed=%d, ! seed for the random number generator\n' % (rseed if randq == 1 else rseeds[traj]))
+                tsteps = len(data) - 2
+                if tsteps != tsmax:
+                    if not os.path.exists('%s/%04d/restart.out' % (NEXMD,dir)):
+                        print >> error, 'Path %s/%04d/restart.out does not exist.' % (NEXMD,dir)
+                        print >> rseedslist, '%d' % (-123456789)
+                        rstflag = 1
+                        traj += 1
+                        continue
+                    data = open('%s/%04d/restart.out' % (NEXMD,dir),'r')
+                    data = data.readlines()
+                    index = 0
+                    array = np.array([])
+                    for line in data:
+                        if 'time' in line:
+                            time = np.around(np.float(line.split()[-1]), decimals = 3)
+                        if 'state' in line:
+                            state = np.int(line.split()[-1])
+                        if 'seed' in line:
+                            rseed = np.int(line.split()[-1])
+                        if '$coord' in line:
+                            array = np.append(array,index)
+                        if '$endcoord' in line:
+                            array = np.append(array,index)
+                        if '$veloc' in line:
+                            array = np.append(array,index)
+                        if '$endveloc' in line:
+                            array = np.append(array,index)
+                        if '$coeff' in line:
+                            array = np.append(array,index)
+                        if '$endcoeff' in line:
+                            array = np.append(array,index)
+                        index += 1
+                    array = np.int_(array)
+                    if len(array) != 6:
+                        print >> error, 'Path %s%04d/restart.out is incomplete.' % (NEXMD,dir)
+                        print >> rseedslist, '%d' % (-123456789)
+                        rstflag = 1
+                        traj += 1
+                        continue
+                    coords = data[array[0]:array[1]+1:1]
+                    velocs = data[array[2]:array[3]+1:1]
+                    coeffs = data[array[4]:array[5]+1:1]
+                    ## Start renormalize coefficients ##
+                    ncoeffs = np.zeros(((len(coeffs) - 2), 2))
+                    index = 0
+                    for line in coeffs[1:len(coeffs) - 1:1]:
+                        ncoeffs[index] = np.float_(line.split())
+                        index += 1
+                    if np.sum(ncoeffs[:,0]) != 0:
+                        ncoeffs[:,0] = ncoeffs[:,0]/np.sum(ncoeffs[:,0])
+                    ## Find the maximum view file ##
+                    data = glob.glob('%s/%04d/view*' % (NEXMD,dir))
+                    data = [ x[:-10] for x in data ]
+                    if len(data) != 0:
+                        max = np.int(extract(max(data,key = extract))[0])
                     else:
-                        if 'exc_state_init_flag' in line:
-                            input.write('   exc_state_init=%d, ! initial excited state (0 - ground state) [0]\n' % (state))
+                        max = 0
+                    ## Make new input file ##
+                    input = open('%s/%04d/input.ceon' % (NEXMD,dir),'w')
+                    for line in header:
+                        if 'rnd_seed' in line:
+                            input.write('   rnd_seed=%d, ! seed for the random number generator\n' % (rseed if randq == 1 else rseeds[traj]))
                         else:
-                            if 'time_init' in line:
-                                input.write('   time_init=%.1f, ! initial time, fs [0.00]\n' % (time))
+                            if 'exc_state_init_flag' in line:
+                                input.write('   exc_state_init=%d, ! initial excited state (0 - ground state) [0]\n' % (state))
                             else:
-                                if 'n_class_steps' in line:
-                                    input.write('   n_class_steps=%d, ! number of classical steps [1]\n' % (np.int(tsmax-time/dt)))
+                                if 'time_init' in line:
+                                    input.write('   time_init=%.1f, ! initial time, fs [0.00]\n' % (time))
                                 else:
-                                    if 'out_count_init' in line:
-                                        input.write('   out_count_init=%d, ! initial count for output files [0]\n' % (max))
+                                    if 'n_class_steps' in line:
+                                        input.write('   n_class_steps=%d, ! number of classical steps [1]\n' % (np.int(tsmax-time/dt)))
                                     else:
-                                        if 'nucl_coord_veloc' in line:
-                                            for line in coords:
-                                                input.write(line)
-                                            input.write('\n')
-                                            for line in velocs:
-                                                input.write(line)
+                                        if 'out_count_init' in line:
+                                            input.write('   out_count_init=%d, ! initial count for output files [0]\n' % (max))
                                         else:
-                                            if 'quant_amp_phase' in line:
-                                                input.write('$coeff\n')
-                                                for line in ncoeffs:
-                                                    input.write('  %.10f  %.10f\n' % (line[0],line[1]))
-                                                input.write('$endcoeff\n')
+                                            if 'nucl_coord_veloc' in line:
+                                                for line in coords:
+                                                    input.write(line)
+                                                input.write('\n')
+                                                for line in velocs:
+                                                    input.write(line)
                                             else:
-                                                input.write(line)
-                rtimes = np.append(rtimes,time)
-                print >> dirlist, '%04d' % (dir)
-                print '%s%04d' % (NEXMD,dir)
-                print >> rseedslist, '%d' % (rseed if randq == 1 else rseeds[traj])
-            else:
-                print >> rseedslist, '%d' % (-123456789)
-            traj += 1
-        dirlist.close()
-    if filecmp.cmp('%s/rseedslist%d' % (NEXMDir,maxdir), '%s/rseedslist%d' % (NEXMDir,maxdir + 1)):
-        os.remove('%s/rseedslist%d' % (NEXMDir,maxdir + 1))
-    if rstflag == 1:
-        print 'One or more trajectories cannot be restarted, check restart.err.'
-    else:
-        os.remove('%s/restart.err' % (cwd))
+                                                if 'quant_amp_phase' in line:
+                                                    input.write('$coeff\n')
+                                                    for line in ncoeffs:
+                                                        input.write('  %.10f  %.10f\n' % (line[0],line[1]))
+                                                    input.write('$endcoeff\n')
+                                                else:
+                                                    input.write(line)
+                    rtimes = np.append(rtimes,time)
+                    print >> dirlist, '%04d' % (dir)
+                    print '%s%04d' % (NEXMD,dir)
+                    print >> rseedslist, '%d' % (rseed if randq == 1 else rseeds[traj])
+                else:
+                    print >> rseedslist, '%d' % (-123456789)
+                traj += 1
+            dirlist.close()
+        if filecmp.cmp('%s/rseedslist%d' % (NEXMDir,maxdir), '%s/rseedslist%d' % (NEXMDir,maxdir + 1)):
+            os.remove('%s/rseedslist%d' % (NEXMDir,maxdir + 1))
+        if rstflag == 1:
+            print 'One or more trajectories cannot be restarted, check restart.err.'
+        else:
+            os.remove('%s/restart.err' % (cwd))
 
-    ## Delete extraneous data in output files ##
+    if dynq == 1: ## single trajectory
+        print 'Searching for incomplete trajectory and preparing input file.'
+        #header = open('%s/header' % (NEXMDir),'r')
+        #header = header.readlines()
+        rseedslist = open('%s/rseedslist%d' % (NEXMDir,maxdir + 1),'w')
+        rtimes = np.array([])
+        rstflag = 0
+        traj = 0
+        if not os.path.exists('%s/energy-ev.out' % (NEXMDir)):
+            print 'Path %s/energy-ev.out does not exist.' % (NEXMDir)
+            os.remove('%s/rseedslist%d' % (NEXMDir, maxdir + 1))
+            sys.exit()
+        data = open('%s/energy-ev.out' % (NEXMDir),'r')
+        data = data.readlines()
+        tsteps = len(data) - 2
+        if tsteps != tsmax:
+            if not os.path.exists('%s/restart.out' % (NEXMDir)):
+                print >> error, 'Path %s/restart.out does not exist.' % (NEXMDir)
+                os.remove('%s/rseedslist%d' % (NEXMDir, maxdir + 1))
+                sys.exit()
+            data = open('%s/restart.out' % (NEXMDir),'r')
+            data = data.readlines()
+            index = 0
+            array = np.array([])
+            for line in data:
+                if 'time' in line:
+                    time = np.around(np.float(line.split()[-1]), decimals = 3)
+                if 'state' in line:
+                    state = np.int(line.split()[-1])
+                if 'seed' in line:
+                    rseed = np.int(line.split()[-1])
+                if '$coord' in line:
+                    array = np.append(array,index)
+                if '$endcoord' in line:
+                    array = np.append(array,index)
+                if '$veloc' in line:
+                    array = np.append(array,index)
+                if '$endveloc' in line:
+                    array = np.append(array,index)
+                if '$coeff' in line:
+                    array = np.append(array,index)
+                if '$endcoeff' in line:
+                    array = np.append(array,index)
+                index += 1
+            array = np.int_(array)
+            if len(array) != 6:
+                print 'Path %s/restart.out is incomplete.' % (NEXMDir)
+                os.remove('%s/rseedslist%d' % (NEXMDir, maxdir + 1))
+            coords = data[array[0]:array[1]+1:1]
+            velocs = data[array[2]:array[3]+1:1]
+            coeffs = data[array[4]:array[5]+1:1]
+            ## Start renormalize coefficients ##
+            ncoeffs = np.zeros(((len(coeffs) - 2), 2))
+            index = 0
+            for line in coeffs[1:len(coeffs) - 1:1]:
+                ncoeffs[index] = np.float_(line.split())
+                index += 1
+            if np.sum(ncoeffs[:,0]) != 0:
+                ncoeffs[:,0] = ncoeffs[:,0]/np.sum(ncoeffs[:,0])
+            ## Find the maximum view file ##
+            data = glob.glob('%s/view*' % (NEXMDir))
+            data = [ x[:-10] for x in data ]
+            if len(data) != 0:
+                max = np.int(extract(max(data,key = extract))[0])
+            else:
+                max = 0
+            ## Make new input file ##
+            input = open('%s/input.ceon' % (NEXMDir),'w')
+            for line in header:
+                if 'rnd_seed' in line:
+                    input.write('   rnd_seed=%d, ! seed for the random number generator\n' % (rseed if randq == 1 else rseeds[traj]))
+                else:
+                    if 'exc_state_init_flag' in line:
+                        input.write('   exc_state_init=%d, ! initial excited state (0 - ground state) [0]\n' % (state))
+                    else:
+                        if 'time_init' in line:
+                            input.write('   time_init=%.1f, ! initial time, fs [0.00]\n' % (time))
+                        else:
+                            if 'n_class_steps' in line:
+                                input.write('   n_class_steps=%d, ! number of classical steps [1]\n' % (np.int(tsmax-time/dt)))
+                            else:
+                                if 'out_count_init' in line:
+                                    input.write('   out_count_init=%d, ! initial count for output files [0]\n' % (max))
+                                else:
+                                    if 'nucl_coord_veloc' in line:
+                                        for line in coords:
+                                            input.write(line)
+                                        input.write('\n')
+                                        for line in velocs:
+                                            input.write(line)
+                                    else:
+                                        if 'quant_amp_phase' in line:
+                                            input.write('&coeff\n')
+                                            for line in ncoeffs:
+                                                input.write('  %.10f  %.10f\n' % (line[0],line[1]))
+                                            input.write('&endcoeff\n')
+                                        else:
+                                            input.write(line)
+            rtimes = np.append(rtimes,time)
+            print '%s' % (NEXMDir)
+            print >> rseedslist, '%d' % (rseed if randq == 1 else rseeds[traj])
+        else:
+            print 'Trajectory has completed.'
+            sys.exit()
+        traj += 1
+        if filecmp.cmp('%s/rseedslist%d' % (NEXMDir,maxdir), '%s/rseedslist%d' % (NEXMDir,maxdir + 1)):
+            os.remove('%s/rseedslist%d' % (NEXMDir,maxdir + 1))
+
+    ## Determine whether or not to delete extraneous data in output files ##
     if rstflag == 1:
         contq = input('Continue to delete extraneous data in output files? Answer yes [1] or no [0]: ')
         if contq not in [1,0]:
@@ -291,77 +416,140 @@ def restart(pathtodel):
     else:
         files = np.array(['energy-ev.out', 'temperature.out', 'pes.out','transition-densities.out'])
         ofiles = np.array([])
-    error = open('%s/delextra.err' % (cwd),'w')
-    rstflag = 0
-    traj = 0
-    for NEXMD in NEXMDs:
-        if os.stat('%s/%s/dirlist' % (cwd,NEXMD)).st_size == 0:
-            continue
-        else:
-            dirlist = np.int_(np.genfromtxt('%s/%s/dirlist' % (cwd,NEXMD)))
-        if isinstance(dirlist,int) == true:
-            dirlist = np.array([dirlist])
-        for dir in dirlist:
-            if not os.path.exists('%s/%s/%04d' % (cwd,NEXMD,dir)):
-                print >> error, '%s/%s%04d' % (cwd,NEXMD,dir), 'does not exist'
-                rstflag = 1
-                traj += 1
+
+    ## Delete extraneous data ##
+    if dynq == 0: ## ensemble
+        error = open('%s/delextra.err' % (cwd),'w')
+        rstflag = 0
+        traj = 0
+        for NEXMD in NEXMDs:
+            if os.stat('%s/%s/dirlist' % (cwd,NEXMD)).st_size == 0:
                 continue
-            os.chdir('%s/%s/%04d' % (cwd,NEXMD,dir))
-            for index in np.arange(len(files)):
-                if not os.path.exists('%s/%s/%04d/%s' % (cwd,NEXMD,dir,files[index])):
-                    print >> error, '%s/%s%04d/%s' % (cwd,NEXMD,dir,files[index]), 'does not exist'
+            else:
+                dirlist = np.int_(np.genfromtxt('%s/%s/dirlist' % (cwd,NEXMD)))
+            if isinstance(dirlist,int) == true:
+                    dirlist = np.array([dirlist])
+            for dir in dirlist:
+                if not os.path.exists('%s/%s/%04d' % (cwd,NEXMD,dir)):
+                    print >> error, 'Path %s/%s%04d does not exist.' % (cwd,NEXMD,dir)
                     rstflag = 1
+                    traj += 1
                     continue
-                ## Derivation of the following algorithm is provided at the end of this script ##
-                data = subprocess.check_output(['tail','-1','%s' % (files[index])])
-                ltime = np.around(np.float(np.fromstring(data,dtype=float,sep=' ')[1 if index == 0 and boflag == 0 else 0]), decimals = 3)
-                if rtimes[traj] > ltime + odata*dt:
-                    print >> error, 'last time-step in', '%s/%s%04d/%s' % (cwd,NEXMD,dir,'restart.out'), 'exceeds last time-step in', '%s/%s%04d/%s' % (cwd,NEXMD,dir,files[index])
-                    rstflag = 1
-                    continue
-                ncsteps = 0
-                while rtimes[traj] + ncsteps*(odata*dt) <= ltime:
-                    ncsteps += 1
-                if verb == 3 and index in [2,4]:
-                    lctime = rtimes[traj] + (ncsteps - 1)*(odata*dt)
-                    nqsteps = 0
-                    while lctime*nqstep + nqsteps*dt <= ltime*nqstep:
-                        nqsteps += 1
-                    if ltime == lctime:
-                        nlines = (ncsteps - 1)*(odata*(nqstep - 1) + 1) + (nqsteps - 1) + 1
+                os.chdir('%s/%s/%04d' % (cwd,NEXMD,dir))
+                for index in np.arange(len(files)):
+                    if not os.path.exists('%s/%s/%04d/%s' % (cwd,NEXMD,dir,files[index])):
+                        print >> error, 'Path %s/%s%04d/%s does not exist.' % (cwd,NEXMD,dir,files[index])
+                        rstflag = 1
+                        continue
+                    ## Derivation of the following algorithm is provided at the end of this script ##
+                    data = subprocess.check_output(['tail','-1','%s' % (files[index])])
+                    ltime = np.around(np.float(np.fromstring(data,dtype=float,sep=' ')[1 if index == 0 and boflag == 0 else 0]), decimals = 3)
+                    if rtimes[traj] > ltime + odata*dt:
+                        print >> error, 'last time-step in', '%s/%s%04d/%s' % (cwd,NEXMD,dir,'restart.out'), 'exceeds last time-step in', '%s/%s%04d/%s' % (cwd,NEXMD,dir,files[index])
+                        rstflag = 1
+                        continue
+                    ncsteps = 0
+                    while rtimes[traj] + ncsteps*(odata*dt) <= ltime:
+                        ncsteps += 1
+                    if verb == 3 and index in [2,4]:
+                        lctime = rtimes[traj] + (ncsteps - 1)*(odata*dt)
+                        nqsteps = 0
+                        while lctime*nqstep + nqsteps*dt <= ltime*nqstep:
+                            nqsteps += 1
+                        if ltime == lctime:
+                            nlines = (ncsteps - 1)*(odata*(nqstep - 1) + 1) + (nqsteps - 1) + 1
+                        else:
+                            ncsteps = 0
+                            while rtimes[traj] + ncsteps*dt <= ltime:
+                                ncsteps += 1
+                            nlines = (ncsteps - 1)*(odata*(nqstep - 1) + 1) + (nqsteps - 1) - (ncsteps - 1) + 1
                     else:
-                        ncsteps = 0
-                        while rtimes[traj] + ncsteps*dt <= ltime:
-                            ncsteps += 1
-                        nlines = (ncsteps - 1)*(odata*(nqstep - 1) + 1) + (nqsteps - 1) - (ncsteps - 1) + 1
+                        nlines = (ncsteps - 1) + 1
+                    if boflag == 0:
+                        subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel,(nlines - 1 if index in [2,3,5] else nlines),files[index])))
+                    else:
+                        subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel,(nlines - 1 if index == 1 else nlines),files[index])))
+                    os.rename('%s.restart' % (files[index]), '%s' % (files[index]))
+                for index in np.arange(len(ofiles)):
+                    if not os.path.exists('%s/%s/%04d/%s' % (cwd,NEXMD,dir,ofiles[index])):
+                        print >> error, 'Path %s/%s%04d/%s does not exist.' % (cwd,NEXMD,dir,ofiles[index])
+                        rstflag = 1
+                        continue
+                    ltime = 1000000
+                    nlines = 0
+                    while ltime >= rtimes[traj]:
+                        data = subprocess.check_output(['tail','%d' % (-(nlines + 1)),'%s' % (ofiles[index])])
+                        ltime = np.float(np.fromstring(data,dtype=float,sep=' ')[0])
+                        nlines += 1
+                    subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel, nlines - 1, ofiles[index])))
+                    os.rename('%s.restart' % (ofiles[index]), '%s' % (ofiles[index]))
+                print '%s%04d' % (NEXMD,dir)
+                traj += 1
+        if rstflag == 1:
+            print 'One or more trajectories cannot be restarted properly, check delextra.err.'
+        else:
+            os.remove('%s/delextra.err' % (cwd))
+        print 'A total of %d trajectories have been prepared for restart.' % (traj)
+
+    ## Delete extraneous data ##
+    if dynq == 1: ## single trajectory
+        error = open('%s/delextra.err' % (cwd),'w')
+        rstflag = 0
+        traj = 0
+        for index in np.arange(len(files)):
+            if not os.path.exists('%s/%s/%04d/%s' % (cwd,NEXMDir,files[index])):
+                print >> error, '%s/%s/%s does not exist.' % (cwd,NEXMDir,files[index])
+                rstflag = 1
+                continue
+            ## Derivation of the following algorithm is provided at the end of this script ##
+            data = subprocess.check_output(['tail','-1','%s' % (files[index])])
+            ltime = np.around(np.float(np.fromstring(data,dtype=float,sep=' ')[1 if index == 0 and boflag == 0 else 0]), decimals = 3)
+            if rtimes[traj] > ltime + odata*dt:
+                print >> error, 'last time-step in', '%s/%s/%s' % (cwd,NEXMDir,'restart.out'), 'exceeds last time-step in', '%s/%s/%s' % (cwd,NEXMDir,files[index])
+                rstflag = 1
+                continue
+            ncsteps = 0
+            while rtimes[traj] + ncsteps*(odata*dt) <= ltime:
+                ncsteps += 1
+            if verb == 3 and index in [2,4]:
+                lctime = rtimes[traj] + (ncsteps - 1)*(odata*dt)
+                nqsteps = 0
+                while lctime*nqstep + nqsteps*dt <= ltime*nqstep:
+                    nqsteps += 1
+                if ltime == lctime:
+                    nlines = (ncsteps - 1)*(odata*(nqstep - 1) + 1) + (nqsteps - 1) + 1
                 else:
-                    nlines = (ncsteps - 1) + 1
-                if boflag == 0:
-                    subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel,(nlines - 1 if index in [2,3,5] else nlines),files[index])))
-                else:
-                    subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel,(nlines - 1 if index == 1 else nlines),files[index])))
-                os.rename('%s.restart' % (files[index]), '%s' % (files[index]))
-            for index in np.arange(len(ofiles)):
-                if not os.path.exists('%s/%s/%04d/%s' % (cwd,NEXMD,dir,ofiles[index])):
-                    print >> error, '%s/%s%04d/%s' % (cwd,NEXMD,dir,ofiles[index]), 'does not exist'
-                    rstflag = 1
-                    continue
-                ltime = 1000000
-                nlines = 0
-                while ltime >= rtimes[traj]:
-                    data = subprocess.check_output(['tail','%d' % (-(nlines + 1)),'%s' % (ofiles[index])])
-                    ltime = np.float(np.fromstring(data,dtype=float,sep=' ')[0])
-                    nlines += 1
-                subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel, nlines - 1, ofiles[index])))
-                os.rename('%s.restart' % (ofiles[index]), '%s' % (ofiles[index]))
-            print '%s%04d' % (NEXMD,dir)
-            traj += 1
-    if rstflag == 1:
-        print 'One or more trajectories cannot be restarted properly, check delextra.err.'
-    else:
-        os.remove('%s/delextra.err' % (cwd))
-    print 'A total of %d trajectories have been prepared for restart.' % (traj)
+                    ncsteps = 0
+                    while rtimes[traj] + ncsteps*dt <= ltime:
+                        ncsteps += 1
+                    nlines = (ncsteps - 1)*(odata*(nqstep - 1) + 1) + (nqsteps - 1) - (ncsteps - 1) + 1
+            else:
+                nlines = (ncsteps - 1) + 1
+            if boflag == 0:
+                subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel,(nlines - 1 if index in [2,3,5] else nlines),files[index])))
+            else:
+                subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel,(nlines - 1 if index == 1 else nlines),files[index])))
+            os.rename('%s.restart' % (files[index]), '%s' % (files[index]))
+        for index in np.arange(len(ofiles)):
+            if not os.path.exists('%s/%s/%s' % (cwd,NEXMDir,ofiles[index])):
+                print >> error, '%s/%s/%s' % (cwd,NEXMDir,ofiles[index]), 'does not exist'
+                rstflag = 1
+                continue
+            ltime = 1000000
+            nlines = 0
+            while ltime >= rtimes[traj]:
+                data = subprocess.check_output(['tail','%d' % (-(nlines + 1)),'%s' % (ofiles[index])])
+                ltime = np.float(np.fromstring(data,dtype=float,sep=' ')[0])
+                nlines += 1
+            subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel, nlines - 1, ofiles[index])))
+            os.rename('%s.restart' % (ofiles[index]), '%s' % (ofiles[index]))
+        print '%s%04d' % (NEXMD,dir)
+        traj += 1
+        if rstflag == 1:
+            print 'Trajectory cannot be restarted properly, check delextra.err.'
+        else:
+            os.remove('%s/delextra.err' % (cwd))
+        print 'A total of %d trajectory has been prepared for restart.' % (traj)
 
 '''
     

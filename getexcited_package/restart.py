@@ -81,7 +81,7 @@ def restart(pathtodel):
     header = header.readlines()
     num = 0
     tline = len(header)
-    verb = none
+    verb = None
     for line in header:
         if 'bo_dynamics_flag' in line:
             boflag = np.int(line.split()[0][len('bo_dynamics_flag='):-1])
@@ -95,7 +95,7 @@ def restart(pathtodel):
                 nqstep = 1
         if '&moldyn' in line:
             tline = num
-        if 'verbosity' in line and num > tline and verb is none:
+        if 'verbosity' in line and num > tline and verb is None:
             verb = np.int(line.split()[0][len('verbosity='):-1])
         if 'out_data_steps' in line:
             odata = np.int(line.split()[0][len('out_data_steps='):-1])
@@ -156,9 +156,9 @@ def restart(pathtodel):
         rseeds = np.int_(np.genfromtxt('%s' % (rseeds)))
         if isinstance(rseeds,int) == true:
             rseeds = np.array([rseeds])
-        len = len(rseeds)
-        if len < ntraj:
-            print 'Length of random-seeds list must be equal to or greater than the number of trajectories.\nUser inputted a random-seeds list of length %d, while the number of trajectories is %d.' % (len,ntraj)
+        lenrseeds = len(rseeds) # was len
+        if lenrseeds < ntraj:
+            print 'Length of random-seeds list must be equal to or greater than the number of trajectories.\nUser inputted a random-seeds list of length %d, while the number of trajectories is %d.' % (lenrseeds,ntraj)
             sys.exit()
         for rseed in rseeds:
             if rseed < 0:
@@ -204,21 +204,21 @@ def restart(pathtodel):
                     for line in data:
                         if 'time' in line:
                             time = np.around(np.float(line.split()[-1]), decimals = 3)
-                        if 'state' in line:
+                        if 'State' in line:
                             state = np.int(line.split()[-1])
-                        if 'seed' in line:
+                        if 'Seed' in line:
                             rseed = np.int(line.split()[-1])
-                        if '$coord' in line:
+                        if '$COORD' in line:
                             array = np.append(array,index)
-                        if '$endcoord' in line:
+                        if '$ENDCOORD' in line:
                             array = np.append(array,index)
-                        if '$veloc' in line:
+                        if '$VELOC' in line:
                             array = np.append(array,index)
-                        if '$endveloc' in line:
+                        if '$ENDVELOC' in line:
                             array = np.append(array,index)
-                        if '$coeff' in line:
+                        if '$COEFF' in line:
                             array = np.append(array,index)
-                        if '$endcoeff' in line:
+                        if '$ENDCOEFF' in line:
                             array = np.append(array,index)
                         index += 1
                     array = np.int_(array)
@@ -243,41 +243,41 @@ def restart(pathtodel):
                     data = glob.glob('%s/%04d/view*' % (NEXMD,dir))
                     data = [ x[:-10] for x in data ]
                     if len(data) != 0:
-                        max = np.int(extract(max(data,key = extract))[0])
+                        maxview = np.int(extract(max(data,key = extract))[0])
                     else:
-                        max = 0
+                        maxview = 0
                     ## Make new input file ##
-                    input = open('%s/%04d/input.ceon' % (NEXMD,dir),'w')
+                    inputfile = open('%s/%04d/input.ceon' % (NEXMD,dir),'w')
                     for line in header:
                         if 'rnd_seed' in line:
-                            input.write('   rnd_seed=%d, ! seed for the random number generator\n' % (rseed if randq == 1 else rseeds[traj]))
+                            inputfile.write('   rnd_seed=%d, ! seed for the random number generator\n' % (rseed if randq == 1 else rseeds[traj]))
                         else:
                             if 'exc_state_init_flag' in line:
-                                input.write('   exc_state_init=%d, ! initial excited state (0 - ground state) [0]\n' % (state))
+                                inputfile.write('   exc_state_init=%d, ! initial excited state (0 - ground state) [0]\n' % (state))
                             else:
                                 if 'time_init' in line:
-                                    input.write('   time_init=%.1f, ! initial time, fs [0.00]\n' % (time))
+                                    inputfile.write('   time_init=%.1f, ! initial time, fs [0.00]\n' % (time))
                                 else:
                                     if 'n_class_steps' in line:
-                                        input.write('   n_class_steps=%d, ! number of classical steps [1]\n' % (np.int(tsmax-time/dt)))
+                                        inputfile.write('   n_class_steps=%d, ! number of classical steps [1]\n' % (np.int(tsmax-time/dt)))
                                     else:
                                         if 'out_count_init' in line:
-                                            input.write('   out_count_init=%d, ! initial count for output files [0]\n' % (max))
+                                            inputfile.write('   out_count_init=%d, ! initial count for output files [0]\n' % (maxview))
                                         else:
                                             if 'nucl_coord_veloc' in line:
                                                 for line in coords:
-                                                    input.write(line)
-                                                input.write('\n')
+                                                    inputfile.write(line)
+                                                inputfile.write('\n')
                                                 for line in velocs:
-                                                    input.write(line)
+                                                    inputfile.write(line)
                                             else:
                                                 if 'quant_amp_phase' in line:
-                                                    input.write('$coeff\n')
+                                                    inputfile.write('$coeff\n')
                                                     for line in ncoeffs:
-                                                        input.write('  %.10f  %.10f\n' % (line[0],line[1]))
-                                                    input.write('$endcoeff\n')
+                                                        inputfile.write('  %.10f  %.10f\n' % (line[0],line[1]))
+                                                    inputfile.write('$endcoeff\n')
                                                 else:
-                                                    input.write(line)
+                                                    inputfile.write(line)
                     rtimes = np.append(rtimes,time)
                     print >> dirlist, '%04d' % (dir)
                     print '%s%04d' % (NEXMD,dir)
@@ -320,21 +320,21 @@ def restart(pathtodel):
             for line in data:
                 if 'time' in line:
                     time = np.around(np.float(line.split()[-1]), decimals = 3)
-                if 'state' in line:
+                if 'State' in line:
                     state = np.int(line.split()[-1])
-                if 'seed' in line:
+                if 'Seed' in line:
                     rseed = np.int(line.split()[-1])
-                if '$coord' in line:
+                if '$COORD' in line:
                     array = np.append(array,index)
-                if '$endcoord' in line:
+                if '$ENDCOORD' in line:
                     array = np.append(array,index)
-                if '$veloc' in line:
+                if '$VELOC' in line:
                     array = np.append(array,index)
-                if '$endveloc' in line:
+                if '$ENDVELOC' in line:
                     array = np.append(array,index)
-                if '$coeff' in line:
+                if '$COEFF' in line:
                     array = np.append(array,index)
-                if '$endcoeff' in line:
+                if '$ENDCOEFF' in line:
                     array = np.append(array,index)
                 index += 1
             array = np.int_(array)
@@ -356,41 +356,41 @@ def restart(pathtodel):
             data = glob.glob('%s/view*' % (NEXMDir))
             data = [ x[:-10] for x in data ]
             if len(data) != 0:
-                max = np.int(extract(max(data,key = extract))[0])
+                maxview = np.int(extract(max(data,key = extract))[0])
             else:
-                max = 0
+                maxview = 0
             ## Make new input file ##
-            input = open('%s/input.ceon' % (NEXMDir),'w')
+            inputfile = open('%s/input.ceon' % (NEXMDir),'w')
             for line in header:
                 if 'rnd_seed' in line:
-                    input.write('   rnd_seed=%d, ! seed for the random number generator\n' % (rseed if randq == 1 else rseeds[traj]))
+                    inputfile.write('   rnd_seed=%d, ! seed for the random number generator\n' % (rseed if randq == 1 else rseeds[traj]))
                 else:
                     if 'exc_state_init_flag' in line:
-                        input.write('   exc_state_init=%d, ! initial excited state (0 - ground state) [0]\n' % (state))
+                        inputfile.write('   exc_state_init=%d, ! initial excited state (0 - ground state) [0]\n' % (state))
                     else:
                         if 'time_init' in line:
-                            input.write('   time_init=%.1f, ! initial time, fs [0.00]\n' % (time))
+                            inputfile.write('   time_init=%.1f, ! initial time, fs [0.00]\n' % (time))
                         else:
                             if 'n_class_steps' in line:
-                                input.write('   n_class_steps=%d, ! number of classical steps [1]\n' % (np.int(tsmax-time/dt)))
+                                inputfile.write('   n_class_steps=%d, ! number of classical steps [1]\n' % (np.int(tsmax-time/dt)))
                             else:
                                 if 'out_count_init' in line:
-                                    input.write('   out_count_init=%d, ! initial count for output files [0]\n' % (max))
+                                    inputfile.write('   out_count_init=%d, ! initial count for output files [0]\n' % (maxview))
                                 else:
                                     if 'nucl_coord_veloc' in line:
                                         for line in coords:
-                                            input.write(line)
-                                        input.write('\n')
+                                            inputfile.write(line)
+                                        inputfile.write('\n')
                                         for line in velocs:
-                                            input.write(line)
+                                            inputfile.write(line)
                                     else:
                                         if 'quant_amp_phase' in line:
-                                            input.write('&coeff\n')
+                                            inputfile.write('&coeff\n')
                                             for line in ncoeffs:
-                                                input.write('  %.10f  %.10f\n' % (line[0],line[1]))
-                                            input.write('&endcoeff\n')
+                                                inputfile.write('  %.10f  %.10f\n' % (line[0],line[1]))
+                                            inputfile.write('&endcoeff\n')
                                         else:
-                                            input.write(line)
+                                            inputfile.write(line)
             rtimes = np.append(rtimes,time)
             print '%s' % (NEXMDir)
             print >> rseedslist, '%d' % (rseed if randq == 1 else rseeds[traj])
@@ -402,13 +402,12 @@ def restart(pathtodel):
             os.remove('%s/rseedslist%d' % (NEXMDir,maxdir + 1))
 
     ## Determine whether or not to delete extraneous data in output files ##
-    if rstflag == 1:
-        contq = input('Continue to delete extraneous data in output files? Answer yes [1] or no [0]: ')
-        if contq not in [1,0]:
-            print 'Answer must be 1 or 0.'
-            sys.exit()
-        if contq == 0:
-            sys.exit()
+    contq = input('Continue to delete extraneous data in output files? Answer yes [1] or no [0]: ')
+    if contq not in [1,0]:
+        print 'Answer must be 1 or 0.'
+        sys.exit()
+    if contq == 0:
+        sys.exit()
     print 'Deleting extraneous data in output files. please wait ...'
     if boflag == 0:
         files = np.array(['coeff-n.out', 'energy-ev.out', 'nact.out', 'order.out', 'pes.out', 'temperature.out', 'transition-densities.out'])
@@ -496,8 +495,9 @@ def restart(pathtodel):
         error = open('%s/delextra.err' % (cwd),'w')
         rstflag = 0
         traj = 0
+        os.chdir('%s/%s' % (cwd,NEXMDir))
         for index in np.arange(len(files)):
-            if not os.path.exists('%s/%s/%04d/%s' % (cwd,NEXMDir,files[index])):
+            if not os.path.exists('%s/%s/%s' % (cwd,NEXMDir,files[index])):
                 print >> error, '%s/%s/%s does not exist.' % (cwd,NEXMDir,files[index])
                 rstflag = 1
                 continue
@@ -543,7 +543,7 @@ def restart(pathtodel):
                 nlines += 1
             subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel, nlines - 1, ofiles[index])))
             os.rename('%s.restart' % (ofiles[index]), '%s' % (ofiles[index]))
-        print '%s%04d' % (NEXMD,dir)
+        print '%s' % (NEXMDir)
         traj += 1
         if rstflag == 1:
             print 'Trajectory cannot be restarted properly, check delextra.err.'

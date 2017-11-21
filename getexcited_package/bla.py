@@ -112,7 +112,7 @@ def bla():
             tcoll = input('Calculate bla up to what time in femtoseconds?\nNote that averaged results will only include trajectories that are complete up to this time: ')
         if dynq == 1: ## single trajectory
             tcoll = input('Calculate bla up to what time in femtoseconds? ')
-        if isinstance(tcoll, int) == false and isinstance(tcoll, float) == false:
+        if isinstance(tcoll, int) == False and isinstance(tcoll, float) == False:
             print 'time must be integer or float.'
             sys.exit()
         if tcoll < 0:
@@ -141,7 +141,7 @@ def bla():
 
     ## Four unique atoms defining the three bond lengths ##
     lines = input('Input the line numbers labeling the coordinates of the four atoms.\nInput an array of the form [ .., .., .., .. ]: ')
-    if isinstance(lines, list) == false:
+    if isinstance(lines, list) == False:
         print 'Input must be an array of the form [atom 1, atom2, atom3, atom4], where atom# = line number of atom#.'
         sys.exit()
     if len(lines) != 4:
@@ -149,7 +149,7 @@ def bla():
         sys.exit()
     index = 0
     for i in lines:
-        if isinstance(i, int) == false:
+        if isinstance(i, int) == False:
             print 'Element number %d of input array must be integer.\nUser inputted [%s, %s, %s, %s], which is not allowed.' % (index + 1, lines[0], lines[1], lines[2], lines[3])
             sys.exit()
         if i < 0:
@@ -259,7 +259,7 @@ def bla():
 
     ## Calculate mean bla from ensemble of trajectories ##
     if dynq == 0 and typeq == 0: ## mean from ensemble
-        print 'collecting mean bla from ensemble.  please wait ...'
+        print 'Collecting mean bla from ensemble.  Please wait ...'
         ## Determine total number of trajectories in ensemble ##
         with open('%s/totdirlist' % (NEXMDir),'w') as data:
             for NEXMD in NEXMDs:
@@ -269,7 +269,7 @@ def bla():
                 inputdata = fileinput.input('%s/dirlist1' % (NEXMD))
                 data.writelines(inputdata)
         dirlist1 = np.int_(np.genfromtxt('%s/totdirlist' % (NEXMDir)))
-        if isinstance(dirlist1,int) == true:
+        if isinstance(dirlist1,int) == True:
             dirlist1 = np.array([dirlist1])
         os.remove('%s/totdirlist' % (NEXMDir))
         ## Generate output and error files ##
@@ -277,7 +277,7 @@ def bla():
         error = open('%s/bla_mean_ensemble.err' % (cwd),'w')
         ## Generate bla array for final results ##
         fbla = np.zeros(len(times))
-        ebla = np.zeros(len(times), len(dirlist1))
+        ebla = np.zeros((len(times), len(dirlist1)))
         ttraj = 0
         ctraj = 0
         etraj = 0
@@ -287,7 +287,7 @@ def bla():
                 print 'Path %sdirlist1 does not exist.' % (NEXMD)
                 sys.exit()
             dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-            if isinstance(dirlist1, int) == true:
+            if isinstance(dirlist1, int) == True:
                 dirlist1 = np.array([dirlist1])
             for dir in dirlist1:
                 ## Determine completed number of time-steps ##
@@ -417,7 +417,7 @@ def bla():
                 print 'Path %sdirlist1 does not exist.' % (NEXMD)
                 sys.exit()
             dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-            if isinstance(dirlist1, int) == true:
+            if isinstance(dirlist1, int) == True:
                 dirlist1 = np.array([dirlist1])
             for dir in dirlist1:
                 ## Determine completed number of time-steps ##

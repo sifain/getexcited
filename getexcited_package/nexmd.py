@@ -167,15 +167,15 @@ def nexmd():
                 if not os.path.exists('%s/dirlist1' % (NEXMD)):
                     print 'Path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
-                input = fileinput.input('%s/dirlist1' % (NEXMD))
-                data.writelines(input)
+                inputdata = fileinput.input('%s/dirlist1' % (NEXMD))
+                data.writelines(inputdata)
         dirlist1 = np.int_(np.genfromtxt('%s/totdirlist' % (outdir)))
-        if isinstance(dirlist1,int) == true:
+        if isinstance(dirlist1,int) == True:
             dirlist1 = np.array([dirlist1])
         os.remove('%s/totdirlist' % (outdir))
         ntraj = len(dirlist1)
         ntrajq = input('How many trajectories for NEXMD? enter a number no greater than %d: ' % (ntraj))
-        if isinstance(ntrajq, int) == false:
+        if isinstance(ntrajq, int) == False:
             print 'Number of trajectories must be integer.'
             sys.exit()
         if ntrajq == 0:
@@ -212,7 +212,7 @@ def nexmd():
             sys.exit()
         index = 0
         for i in coords:
-            if isinstance(i, int) == false:
+            if isinstance(i, int) == False:
                 print 'Element number %d of input array must be integer.\nUser inputted [%s, %s, %s], which is not allowed.' % (index + 1,coords[0],coords[1],coords[2])
                 sys.exit()
             if index in [0,1]:
@@ -249,7 +249,7 @@ def nexmd():
 
     ## Split geometries ##
     split = input('Number of trajectories per NEXMD folder: ')
-    if isinstance(split, int) == false:
+    if isinstance(split, int) == False:
         print 'Number of trajectories per NEXMD folder must be integer.'
         sys.exit()
     if split <= 0:
@@ -275,8 +275,8 @@ def nexmd():
         sys.exit()
     anum = open('%s/restart.out' % (gsdir),'r')
     anum = anum.readlines()
-    top = none
-    bottom = none
+    top = None
+    bottom = None
     index = 0
     for line in anum:
         if '$coord' in line:
@@ -285,7 +285,7 @@ def nexmd():
             bottom = index
             break
         index += 1
-    if isinstance(top, int) == true and isinstance(bottom, int) == true:
+    if isinstance(top, int) == True and isinstance(bottom, int) == True:
         anum = [ line.split()[0] for line in anum[top+1:bottom:1] ]
     else:
         print 'There is a problem with %s/restart.out.' % (gsdir)
@@ -304,11 +304,11 @@ def nexmd():
             print 'Path %s does not exist.' % (rseeds)
             sys.exit()
         rseeds = np.int_(np.genfromtxt('%s' % (rseeds)))
-        if isinstance(rseeds,int) == true:
+        if isinstance(rseeds,int) == True:
             rseeds = np.array([rseeds])
-        len = len(rseeds)
-        if len < ntraj:
-            print 'Length of random-seeds list must be equal to or greater than the number of trajectories.\nUser inputted a random-seeds list of length %d, while the number of trajectories requested is %d.' % (len,ntraj)
+        lenrseeds = len(rseeds)
+        if lenrseeds < ntraj:
+            print 'Length of random-seeds list must be equal to or greater than the number of trajectories.\nUser inputted a random-seeds list of length %d, while the number of trajectories requested is %d.' % (lenrseeds,ntraj)
             sys.exit()
     for rseed in rseeds:
         if rseed < 0:
@@ -326,14 +326,14 @@ def nexmd():
             print 'Answer must be 0 or 1.'
             sys.exit()
         excen = input('Laser excitation energy in eV: ')
-        if isinstance(excen, int) == false and isinstance(excen, float) == false:
+        if isinstance(excen, int) == False and isinstance(excen, float) == False:
             print 'Excitation energy must be integer or float.'
             sys.exit()
         if stype == 0:
             specb = input('Spectral broadening (i.e. Gaussian standard deviation) in eV [e.g. 0.15]: ')
         else:
             specb = input('Spectral broadening (i.e. Lorentzian fwhm) in eV [e.g. 0.36]: ')
-        if isinstance(specb, int) == false and isinstance(specb, float) == false:
+        if isinstance(specb, int) == False and isinstance(specb, float) == False:
             print 'Spectral broadening must be integer or float.'
             sys.exit()
         traj = 0
@@ -358,8 +358,8 @@ def nexmd():
                     iceoflag = 0
                     traj += 1
                     continue
-                len = len(data)
-                qpop = np.zeros(len)
+                lendata = len(data)
+                qpop = np.zeros(lendata)
                 oindex = 0
                 if stype == 0:
                     for state, energy, osx, osy, osz, oscstren in data:
@@ -371,38 +371,38 @@ def nexmd():
                         oindex += 1
                 qpop = qpop/np.sum(qpop)
                 state = np.searchsorted(np.cumsum(qpop),np.random.uniform()) + 1
-                qpop = np.zeros(len)
+                qpop = np.zeros(lendata)
                 qpop[state-1] = 1.0
                 coords = datac[arrayc[dir]+1:arrayc[dir+1]-1:1]
                 velocs = datav[arrayv[dir]+2:arrayv[dir+1]-1:1]
-                input = open('%s/NEXMD%d/%04d/input.ceon' % (outdir,NEXMD,dir),'w')
+                inputfile = open('%s/NEXMD%d/%04d/input.ceon' % (outdir,NEXMD,dir),'w')
                 for line in header:
                     if 'rnd_seed' in line:
-                        input.write('   rnd_seed=%d, ! seed for the random number generator\n' % (rseeds[traj]))
+                        inputfile.write('   rnd_seed=%d, ! seed for the random number generator\n' % (rseeds[traj]))
                     else:
                         if 'exc_state_init_flag' in line:
-                            input.write('   exc_state_init=%d, ! initial excited state (0 - ground state) [0]\n' % (state))
+                            inputfile.write('   exc_state_init=%d, ! initial excited state (0 - ground state) [0]\n' % (state))
                         else:
                             if 'nucl_coord_veloc' in line:
-                                input.write('&coord\n')
+                                inputfile.write('&coord\n')
                                 aindex = 0
                                 for line in coords:
                                     val = line.split()
-                                    input.write('{:>6}  {:>12}  {:>12}  {:>12}'.format(anum[aindex],val[1],val[2],val[3]))
-                                    input.write('\n')
+                                    inputfile.write('{:>6}  {:>12}  {:>12}  {:>12}'.format(anum[aindex],val[1],val[2],val[3]))
+                                    inputfile.write('\n')
                                     aindex += 1
-                                input.write('&endcoord\n\n&veloc\n')
+                                inputfile.write('&endcoord\n\n&veloc\n')
                                 for line in velocs:
-                                    input.write(line)
-                                input.write('&endveloc\n')
+                                    inputfile.write(line)
+                                inputfile.write('&endveloc\n')
                             else:
                                 if 'quant_amp_phase' in line:
-                                    input.write('&coeff\n')
+                                    inputfile.write('&coeff\n')
                                     for line in qpop:
-                                        input.write('  %.3f  %.3f\n' % (line,0.0))
-                                    input.write('&endcoeff\n')
+                                        inputfile.write('  %.3f  %.3f\n' % (line,0.0))
+                                    inputfile.write('&endcoeff\n')
                                 else:
-                                    input.write(line)
+                                    inputfile.write(line)
                 print >> dirlist, '%04d' % (dir)
                 print '%s/NEXMD%d/%04d' % (outdir,NEXMD,dir)
                 traj += 1
@@ -429,35 +429,35 @@ def nexmd():
                 os.makedirs('%s/NEXMD%d/%04d' % (outdir,NEXMD,dir))
                 coords = datac[arrayc[dir]+1:arrayc[dir+1]-1:1]
                 velocs = datav[arrayv[dir]+2:arrayv[dir+1]-1:1]
-                input = open('%s/NEXMD%d/%04d/input.ceon' % (outdir,NEXMD,dir),'w')
+                inputfile = open('%s/NEXMD%d/%04d/input.ceon' % (outdir,NEXMD,dir),'w')
                 for line in header:
                     if 'rnd_seed' in line:
-                        input.write('   rnd_seed=%d, ! seed for the random number generator\n' % (rseeds[traj])) ## for new code
-                        #input.write('%d ! seed for the random number generator\n' % (rseeds[traj])) ## for old code
+                        inputfile.write('   rnd_seed=%d, ! seed for the random number generator\n' % (rseeds[traj])) ## for new code
+                        #inputfile.write('%d ! seed for the random number generator\n' % (rseeds[traj])) ## for old code
                     else:
                         if 'nucl_coord_veloc' in line:
-                            input.write('&coord\n')  ## for new code
-                            #input.write('$coord\n')  ## for old code
+                            inputfile.write('&coord\n')  ## for new code
+                            #inputfile.write('$coord\n')  ## for old code
                             aindex = 0
                             for line in coords:
                                 val = line.split()
-                                input.write('{:>6}  {:>12}  {:>12}  {:>12}'.format(anum[aindex],val[1],val[2],val[3]))
-                                input.write('\n')
+                                inputfile.write('{:>6}  {:>12}  {:>12}  {:>12}'.format(anum[aindex],val[1],val[2],val[3]))
+                                inputfile.write('\n')
                                 aindex += 1
-                            input.write('&endcoord\n\n&veloc\n')  ## for new code
-                            #input.write('$endcoord\n\n$veloc\n') ## for old code
+                            inputfile.write('&endcoord\n\n&veloc\n')  ## for new code
+                            #inputfile.write('$endcoord\n\n$veloc\n') ## for old code
                             for line in velocs:
-                                input.write(line)
-                            input.write('&endveloc\n')
-                            #input.write('$endveloc\n')
+                                inputfile.write(line)
+                            inputfile.write('&endveloc\n')
+                            #inputfile.write('$endveloc\n')
                         else:
                             if 'quant_amp_phase' in line:
-                                input.write('&coeff\n')
+                                inputfile.write('&coeff\n')
                                 for line in qpop:
-                                    input.write('  %.3f  %.3f\n' % (line,0.0))
-                                input.write('&endcoeff\n')
+                                    inputfile.write('  %.3f  %.3f\n' % (line,0.0))
+                                inputfile.write('&endcoeff\n')
                             else:
-                                input.write(line)
+                                inputfile.write(line)
                 print >> dirlist, '%04d' % (dir)
                 print '%s/NEXMD%d/%04d' % (outdir,NEXMD,dir)
                 traj += 1

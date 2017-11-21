@@ -125,7 +125,7 @@ def spcalc():
         sys.exit()
     index = 0
     for i in coords:
-        if isinstance(i, int) == false:
+        if isinstance(i, int) == False:
             print 'Element number %d of input array must be integer.\nUser inputted [%s, %s, %s], which is not allowed.' % (index + 1,coords[0],coords[1],coords[2])
             sys.exit()
         if index in [0,1]:
@@ -162,7 +162,7 @@ def spcalc():
 
     ## Split geometries ##
     split = input('Number of single-point calculations per NEXMD folder [e.g. 100]: ')
-    if isinstance(split, int) == false:
+    if isinstance(split, int) == False:
         print 'Number of single-point calculations per NEXMD folder must be integer.'
         sys.exit()
     if split < 0:
@@ -181,8 +181,8 @@ def spcalc():
         sys.exit()
     anum = open('%s/restart.out' % (gsdir),'r')
     anum = anum.readlines()
-    top = none
-    bottom = none
+    top = None
+    bottom = None
     index = 0
     for line in anum:
         if '$coord' in line:
@@ -191,7 +191,7 @@ def spcalc():
             bottom = index
             break
         index += 1
-    if isinstance(top, int) == true and isinstance(bottom, int) == true:
+    if isinstance(top, int) == True and isinstance(bottom, int) == True:
         anum = [ line.split()[0] for line in anum[top+1:bottom:1] ]
     else:
         print 'There is a problem with %s/restart.out.' % (gsdir)
@@ -206,22 +206,22 @@ def spcalc():
             coords = datac[arrayc[dir]+1:arrayc[dir+1]-1:1]
             velocs = datav[arrayv[dir]+2:arrayv[dir+1]-1:1]
             os.makedirs('%s/NEXMD%d/%04d' % (outdir,NEXMD,dir))
-            input = open('%s/NEXMD%d/%04d/input.ceon' % (outdir,NEXMD,dir),'w')
+            inputfile = open('%s/NEXMD%d/%04d/input.ceon' % (outdir,NEXMD,dir),'w')
             for line in header:
                 if 'nucl_coord_veloc' in line:
-                    input.write('&coord\n')
+                    inputfile.write('&coord\n')
                     aindex = 0
                     for line in coords:
                         val = line.split()
-                        input.write('{:>6}  {:>12}  {:>12}  {:>12}'.format(anum[aindex],val[1],val[2],val[3]))
-                        input.write('\n')
+                        inputfile.write('{:>6}  {:>12}  {:>12}  {:>12}'.format(anum[aindex],val[1],val[2],val[3]))
+                        inputfile.write('\n')
                         aindex += 1
-                    input.write('&endcoord\n\n&veloc\n')
+                    inputfile.write('&endcoord\n\n&veloc\n')
                     for line in velocs:
-                        input.write(line)
-                    input.write('&endveloc\n')
+                        inputfile.write(line)
+                    inputfile.write('&endveloc\n')
                 else:
-                    input.write(line)
+                    inputfile.write(line)
             print >> dirlist, '%04d' % (dir)
             print '%s/NEXMD%d/%04d' % (outdir,NEXMD,dir)
         dirlist.close()

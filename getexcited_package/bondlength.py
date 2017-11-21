@@ -109,7 +109,7 @@ def bondlength():
             tcoll = input('Calculate bond length up to what time in femtoseconds?\nNote that averaged results will only include trajectories that are complete up to this time: ')
         if dynq == 1: ## single trajectory
             tcoll = input('Calculate bond length up to what time in femtoseconds? ')
-        if isinstance(tcoll, int) == false and isinstance(tcoll, float) == false:
+        if isinstance(tcoll, int) == False and isinstance(tcoll, float) == False:
             print 'Time must be integer or float.'
             sys.exit()
         if tcoll < 0:
@@ -139,7 +139,7 @@ def bondlength():
     ## Two unique atoms defined by user ##
     lines = input('Input the line numbers labeling the coordinates of the two atoms.\nInput an array of the form [[atom1, atom2], [atom3, atom4], .. ]: ')
     for line in lines:
-        if isinstance(line, list) == false:
+        if isinstance(line, list) == False:
             print 'Subarray must be of the form [atom1, atom2], where atom# = line number of atom#.'
             sys.exit()
         if len(line) != 2:
@@ -147,7 +147,7 @@ def bondlength():
             sys.exit()
         index = 0
         for i in line:
-            if isinstance(i, int) == false:
+            if isinstance(i, int) == False:
                 print 'Element number %d of subarray must be integer.\nuser inputted [%s, %s], which is not allowed.' % (index + 1, line[0], line[1])
                 sys.exit()
             if i < 0:
@@ -263,10 +263,10 @@ def bondlength():
                 if not os.path.exists('%s/dirlist1' % (NEXMD)):
                     print 'Path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
-                input = fileinput.input('%s/dirlist1' % (NEXMD))
-                data.writelines(input)
+                inputdata = fileinput.input('%s/dirlist1' % (NEXMD))
+                data.writelines(inputdata)
         dirlist1 = np.int_(np.genfromtxt('%s/totdirlist' % (NEXMDir)))
-        if isinstance(dirlist1,int) == true:
+        if isinstance(dirlist1,int) == True:
             dirlist1 = np.array([dirlist1])
         os.remove('%s/totdirlist' % (NEXMDir))
         ## Generate output and error files ##
@@ -284,7 +284,7 @@ def bondlength():
                 print 'Path %dirlist1 does not exist.' % (NEXMD)
                 sys.exit()
             dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-            if isinstance(dirlist1, int) == true:
+            if isinstance(dirlist1, int) == True:
                 dirlist1 = np.array([dirlist1])
             for dir in dirlist1:
                 ## Determine completed number of time-steps ##
@@ -412,7 +412,7 @@ def bondlength():
                 print 'Path %dirlist1 does not exist.' % (NEXMD)
                 sys.exit()
             dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-            if isinstance(dirlist1, int) == true:
+            if isinstance(dirlist1, int) == True:
                 dirlist1 = np.array([dirlist1])
             for dir in dirlist1:
                 ## Determine completed number of time-steps ##

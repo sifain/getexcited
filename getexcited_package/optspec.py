@@ -71,7 +71,7 @@ def optspec(pathtoceo):
             print 'Path %s/%sdirlist1 does not exist.' % (cwd,NEXMD)
             sys.exit()
         dirlist1 = np.int_(np.genfromtxt('%s/%s/dirlist1' % (cwd,NEXMD)))
-        if isinstance(dirlist1,int) == true:
+        if isinstance(dirlist1,int) == True:
             dirlist1 = np.array([dirlist1])
         for dir in dirlist1:
             if not os.path.exists('%s/%s/%04d' % (cwd,NEXMD,dir)):
@@ -107,7 +107,7 @@ def optspec(pathtoceo):
         specb = input('Spectral broadening (i.e. Gaussian standard deviation) in eV [e.g. 0.15]: ')
     else:
         specb = input('Spectral broadening (i.e. Lorentzian fwhm) in eV [e.g. 0.36]: ')
-    if isinstance(specb, int) == false and isinstance(specb, float) == false:
+    if isinstance(specb, int) == False and isinstance(specb, float) == False:
         print 'Spectral broadening must be integer or float.'
         sys.exit()
     if specb < 0:
@@ -120,7 +120,7 @@ def optspec(pathtoceo):
     if stype == 0:
         for NEXMD in NEXMDs:
             dirlist1 = np.int_(np.genfromtxt('%s/%s/dirlist1' % (cwd,NEXMD)))
-            if isinstance(dirlist1,int) == true:
+            if isinstance(dirlist1,int) == True:
                 dirlist1 = np.array([dirlist1])
             for dir in dirlist1:
                 data = np.genfromtxt('%s/%s/%04d/ceo.out' % (cwd,NEXMD,dir))
@@ -131,7 +131,7 @@ def optspec(pathtoceo):
     else:
         for NEXMD in NEXMDs:
             dirlist1 = np.int_(np.genfromtxt('%s/%s/dirlist1' % (cwd,NEXMD)))
-            if isinstance(dirlist1,int) == true:
+            if isinstance(dirlist1,int) == True:
                 dirlist1 = np.array([dirlist1])
             for dir in dirlist1:
                 data = np.genfromtxt('%s/%s/%04d/ceo.out' % (cwd,NEXMD,dir))

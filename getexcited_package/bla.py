@@ -266,8 +266,8 @@ def bla():
                 if not os.path.exists('%s/dirlist1' % (NEXMD)):
                     print 'Path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
-                input = fileinput.input('%s/dirlist1' % (NEXMD))
-                data.writelines(input)
+                inputdata = fileinput.input('%s/dirlist1' % (NEXMD))
+                data.writelines(inputdata)
         dirlist1 = np.int_(np.genfromtxt('%s/totdirlist' % (NEXMDir)))
         if isinstance(dirlist1,int) == true:
             dirlist1 = np.array([dirlist1])

@@ -60,7 +60,7 @@ def population():
         if 'out_data_steps' in line:
             odata = np.int(line.split()[0][len('out_data_steps='):-1])
     tcoll = input('Collect populations up to what time in femtoseconds: ')
-    if isinstance(tcoll, int) == false and isinstance(tcoll, float) == false:
+    if isinstance(tcoll, int) == False and isinstance(tcoll, float) == False:
         print 'time must be integer or float.'
         sys.exit()
     if tcoll < 0:
@@ -93,7 +93,7 @@ def population():
             print 'path %sdirlist1 does not exist.' % (NEXMD)
             sys.exit()
         dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-        if isinstance(dirlist1,int) == true:
+        if isinstance(dirlist1,int) == True:
             dirlist1 = np.array([dirlist1])
         for dir in dirlist1:
             if not os.path.exists('%s/%04d/coeff-n.out' % (NEXMD,dir)):

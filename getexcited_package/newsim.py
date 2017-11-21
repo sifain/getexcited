@@ -118,8 +118,8 @@ def newsim():
         sys.exit()
     anum = open('%s/restart.out' % (gsdir),'r')
     anum = anum.readlines()
-    top = none
-    bottom = none
+    top = None
+    bottom = None
     index = 0
     for line in anum:
         if '$coord' in line:
@@ -128,7 +128,7 @@ def newsim():
             bottom = index
             break
         index += 1
-    if isinstance(top, int) == true and isinstance(bottom, int) == true:
+    if isinstance(top, int) == True and isinstance(bottom, int) == True:
         anum = [ line.split()[0] for line in anum[top+1:bottom:1] ]
     else:
         print 'There is a problem with %s/restart.out.' % (gsdir)
@@ -145,10 +145,10 @@ def newsim():
             if not os.path.exists('%s/dirlist1' % (NEXMD)):
                 print 'Path %sdirlist1 does not exist.' % (NEXMD)
                 sys.exit()
-            input = fileinput.input('%s/dirlist1' % (NEXMD))
-            data.writelines(input)
+            inputdata = fileinput.input('%s/dirlist1' % (NEXMD))
+            data.writelines(inputdata)
     dirlist1 = np.int_(np.genfromtxt('%s/totdirlist' % (newdir)))
-    if isinstance(dirlist1,int) == true:
+    if isinstance(dirlist1,int) == True:
         dirlist1 = np.array([dirlist1])
     os.remove('%s/totdirlist' % (newdir))
     ntraj = len(dirlist1)
@@ -164,11 +164,11 @@ def newsim():
             print 'Path %s does not exist.' % (rseeds)
             sys.exit()
         rseeds = np.int_(np.genfromtxt('%s' % (rseeds)))
-        if isinstance(rseeds,int) == true:
+        if isinstance(rseeds,int) == True:
             rseeds = np.array([rseeds])
-        len = len(rseeds)
-        if len < ntraj:
-            print 'Length of random-seeds list must be equal to or greater than the number of trajectories.\nUser inputted a random-seeds list of length %d, while the number of trajectories requested is %d.' % (len,ntraj)
+        lenrseeds = len(rseeds)
+        if lenrseeds < ntraj:
+            print 'Length of random-seeds list must be equal to or greater than the number of trajectories.\nUser inputted a random-seeds list of length %d, while the number of trajectories requested is %d.' % (lenrseeds,ntraj)
             sys.exit()
     for rseed in rseeds:
         if rseed < 0:
@@ -178,7 +178,7 @@ def newsim():
 
     ## Choose time at which geometries should be taken from the old simulation ##
     startq = input('At what time, in femtoseconds, should geometries be taken from %s? ' % (olddir))
-    if isinstance(startq, int) == false and isinstance(startq, float) == false:
+    if isinstance(startq, int) == False and isinstance(startq, float) == False:
         print 'Time must be integer or float'
         sys.exit()
     if startq < 0:
@@ -207,7 +207,7 @@ def newsim():
         sys.exit()
     for NEXMD in NEXMDs:
         dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-        if isinstance(dirlist1,int) == true:
+        if isinstance(dirlist1,int) == True:
             dirlist1 = np.array([dirlist1])
         for dir in dirlist1:
             if not os.path.exists('%s/%04d/coords.xyz' % (NEXMD,dir)):
@@ -306,7 +306,7 @@ def newsim():
     for NEXMD in np.arange(1, len(NEXMDs) + 1):
         os.makedirs('%s/NEXMD%d' % (newdir,NEXMD))
         dirlist1 = np.int_(np.genfromtxt('%s/NEXMD%d/dirlist1' % (olddir,NEXMD)))
-        if isinstance(dirlist1,int) == true:
+        if isinstance(dirlist1,int) == True:
             dirlist1 = np.array([dirlist1])
         dirlist = open('%s/NEXMD%d/dirlist' % (newdir,NEXMD),'w')
         for dir in dirlist1:
@@ -322,25 +322,25 @@ def newsim():
             datav = datav.readlines()
             coords = datac[tarrayc[traj][0] + 1:tarrayc[traj][1] - 1:1]
             velocs = datav[tarrayv[traj][0] + 2:tarrayv[traj][1] - 1:1]
-            input = open('%s/NEXMD%d/%04d/input.ceon' % (newdir,NEXMD,dir),'w')
+            inputfile = open('%s/NEXMD%d/%04d/input.ceon' % (newdir,NEXMD,dir),'w')
             for line in header:
                 if 'rnd_seed' in line:
-                    input.write('   rnd_seed=%d, ! seed for the random number generator\n' % (rseeds[traj]))
+                    inputfile.write('   rnd_seed=%d, ! seed for the random number generator\n' % (rseeds[traj]))
                 else:
                     if 'nucl_coord_veloc' in line:
-                        input.write('&coord\n')
+                        inputfile.write('&coord\n')
                         aindex = 0
                         for line in coords:
                             val = line.split()
-                            input.write('{:>6}  {:>12}  {:>12}  {:>12}'.format(anum[aindex],val[1],val[2],val[3]))
-                            input.write('\n')
+                            inputfile.write('{:>6}  {:>12}  {:>12}  {:>12}'.format(anum[aindex],val[1],val[2],val[3]))
+                            inputfile.write('\n')
                             aindex += 1
-                        input.write('&endcoord\n\n&veloc\n')
+                        inputfile.write('&endcoord\n\n&veloc\n')
                         for line in velocs:
-                            input.write(line)
-                        input.write('&endveloc')
+                            inputfile.write(line)
+                        inputfile.write('&endveloc')
                     else:
-                        input.write(line)
+                        inputfile.write(line)
             print >> dirlist, '%04d' % (dir)
             print '%s/NEXMD%d/%04d' % (newdir,NEXMD,dir)
             traj += 1

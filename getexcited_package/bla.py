@@ -399,7 +399,7 @@ def bla():
             for ncoord in np.arange(ncoords):
                 print >> output, '%0*.2f' % (len(str((tsmax))) + 2,dt*odata*cdata*ncoord), '%08.3f' % (fbla[ncoord]), '%07.3f' % (ebla[ncoord])
         if errflag == 1:
-            print 'One or more trajectories have experienced an error, check bla_mean_ensemble.err.' % (len(str(tsmax)),tcoll)
+            print 'One or more trajectories have experienced an error, check bla_mean_ensemble.err.'
         else:
             os.remove('%s/bla_mean_ensemble.err' % (cwd))
 

@@ -141,7 +141,7 @@ def tdiagonal():
             sys.exit()
         header = open('%s/input.ceon' % (NEXMDir))
         header = header.readlines()
-    stateinit = none
+    stateinit = None
     for line in header:
         if 'bo_dynamics_flag' in line:
             boflag = np.int(line.split()[0][len('bo_dynamics_flag='):-1])
@@ -155,7 +155,7 @@ def tdiagonal():
             tsmax = np.int(line.split()[0][len('n_class_steps='):-1]) + 1
         if 'out_data_steps' in line:
             odata = np.int(line.split()[0][len('out_data_steps='):-1])
-    if boflag == 1 and stateinit == none:
+    if boflag == 1 and stateinit == None:
         print 'Dynamics are set to Born-Oppenheimer, but the initial state is not set.\nPlease check bo_dynamics_flag and exc_state_init in header.'
         sys.exit()
 
@@ -165,7 +165,7 @@ def tdiagonal():
             tcoll = input('Calculate occupation up to what time in femtoseconds?\nNote that averaged results will only include trajectories that are complete up to this time: ')
         if dynq == 1: ## single trajectory
             tcoll = input('Calculate occupation up to what time in femtoseconds? ')
-        if isinstance(tcoll, int) == false and isinstance(tcoll, float) == false:
+        if isinstance(tcoll, int) == False and isinstance(tcoll, float) == False:
             print 'Time must be integer or float.'
             sys.exit()
         if tcoll < 0:
@@ -182,7 +182,7 @@ def tdiagonal():
         tcoll = (tsmax - 1)*dt
     if typeq == 2: ## all up to user-defined time
         tcoll = input('Calculate occupation up to what time in femtoseconds? ')
-        if isinstance(tcoll, int) == false and isinstance(tcoll, float) == false:
+        if isinstance(tcoll, int) == False and isinstance(tcoll, float) == False:
             print 'Time must be integer or float.'
             sys.exit()
         if tcoll < 0:
@@ -226,8 +226,8 @@ def tdiagonal():
                 sys.exit()
             ## Check times ##
             times_td = np.around(np.genfromtxt('%s/transition-densities.out' % (NEXMDir),usecols=[0]), decimals = 3)
-            if np.array_equal(times_td, times) == false:
-                print >> 'There is an inconsistency in time-step in %s/transition-densities.out at %.3f fs.' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+            if np.array_equal(times_td, times) == False:
+                print >> 'There is an inconsistency in time-step in %s/transition-densities.out at %.3f fs.' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==True)[0]])
                 sys.exit()
             ## Collect data ##
             tds = np.genfromtxt('%s/transition-densities.out' % (NEXMDir),usecols=np.arange(1, norbits + 1))
@@ -241,7 +241,7 @@ def tdiagonal():
                     tindex += 1
                 aindex += 1
             single_occ = np.abs(single_occ)
-            single_occ = single_occ/single_occ.sum(axis = 1, keepdims = true)
+            single_occ = single_occ/single_occ.sum(axis = 1, keepdims = True)
             exciton_com = 1.0/np.sum(np.square(single_occ), axis = 1)
             ## Generate fragment array ##
             frag_occ = np.zeros((tscol, nfrag))
@@ -302,8 +302,8 @@ def tdiagonal():
                 sys.exit()
             ## Check times ##
             times_td = np.around(np.genfromtxt('%s/transition-densities.out' % (NEXMDir),usecols=[0]), decimals = 3)
-            if np.array_equal(times_td, times) == false:
-                print >> error, 'There is an inconsistency in time-step in %s/transition-densities.out at %.3f fs.' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+            if np.array_equal(times_td, times) == False:
+                print >> error, 'There is an inconsistency in time-step in %s/transition-densities.out at %.3f fs.' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==True)[0]])
                 sys.exit()
             ## Compare completed time-steps to collection time-steps and collect data ##
             if tsteps >= tscol:
@@ -318,7 +318,7 @@ def tdiagonal():
                         tindex += 1
                     aindex += 1
                 single_occ = np.abs(single_occ)
-                single_occ = single_occ/single_occ.sum(axis = 1, keepdims = true)
+                single_occ = single_occ/single_occ.sum(axis = 1, keepdims = True)
                 exciton_com = 1.0/np.sum(np.square(single_occ), axis = 1)
                 ## Generate fragment array ##
                 frag_occ = np.zeros((tscol, nfrag))
@@ -390,8 +390,8 @@ def tdiagonal():
                 sys.exit()
             ## Check times ##
             times_td = np.around(np.genfromtxt('%s/transition-densities.out' % (NEXMDir),usecols=[0]), decimals = 3)
-            if np.array_equal(times_td, times) == false:
-                print >> 'There is an inconsistency in time-step in %s/transition-densities.out at %.3f fs.' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+            if np.array_equal(times_td, times) == False:
+                print >> 'There is an inconsistency in time-step in %s/transition-densities.out at %.3f fs.' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==True)[0]])
                 sys.exit()
             ## Collect data ##
             tds = np.genfromtxt('%s/transition-densities.out' % (NEXMDir),usecols=np.arange(1, norbits + 1))
@@ -405,7 +405,7 @@ def tdiagonal():
                     tindex += 1
                 aindex += 1
             single_occ = np.abs(single_occ)
-            single_occ = single_occ/single_occ.sum(axis = 1, keepdims = true)
+            single_occ = single_occ/single_occ.sum(axis = 1, keepdims = True)
             exciton_com = 1.0/np.sum(np.square(single_occ), axis = 1)
             ## Generate fragment array ##
             frag_occ = np.zeros((tscol, nfrag))
@@ -476,8 +476,8 @@ def tdiagonal():
                 sys.exit()
             ## Check times ##
             times_td = np.around(np.genfromtxt('%s/transition-densities.out' % (NEXMDir),usecols=[0]), decimals = 3)
-            if np.array_equal(times_td, times) == false:
-                print >> error, 'There is an inconsistency in time-step in %s/transition-densities.out at %.3f fs.' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+            if np.array_equal(times_td, times) == False:
+                print >> error, 'There is an inconsistency in time-step in %s/transition-densities.out at %.3f fs.' % (NEXMDir,times_td[np.where(np.not_equal(times_td,times)==True)[0]])
                 sys.exit()
             ## Compare completed time-steps to collection time-steps and collect data ##
             if tsteps >= tscol:
@@ -492,7 +492,7 @@ def tdiagonal():
                         tindex += 1
                     aindex += 1
                 single_occ = np.abs(single_occ)
-                single_occ = single_occ/single_occ.sum(axis = 1, keepdims = true)
+                single_occ = single_occ/single_occ.sum(axis = 1, keepdims = True)
                 exciton_com = 1.0/np.sum(np.square(single_occ), axis = 1)
                 ## Generate fragment array ##
                 frag_occ = np.zeros((tscol, nfrag))
@@ -553,7 +553,7 @@ def tdiagonal():
                     print 'Path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
                 dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(dirlist1,int) == true:
+                if isinstance(dirlist1,int) == True:
                     dirlist1 = np.array([dirlist1])
                 for dir in dirlist1:
                     ## Determine completed number of time-steps ##
@@ -571,8 +571,8 @@ def tdiagonal():
                         continue
                     ## Check times ##
                     times_td = np.around(np.genfromtxt('%s/%04d/transition-densities.out' % (NEXMD,dir),usecols=[0]), decimals = 3)
-                    if np.array_equal(times_td, times) == false:
-                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                    if np.array_equal(times_td, times) == False:
+                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==True)[0]])
                         errflag = 1
                         ttraj += 1
                         continue
@@ -588,7 +588,7 @@ def tdiagonal():
                             tindex += 1
                         aindex += 1
                     single_occ = np.abs(single_occ)
-                    single_occ = single_occ/single_occ.sum(axis = 1, keepdims = true)
+                    single_occ = single_occ/single_occ.sum(axis = 1, keepdims = True)
                     exciton_com = 1.0/np.sum(np.square(single_occ), axis = 1)
                     ## Generate fragment array ##
                     frag_occ = np.zeros((tscol, nfrag))
@@ -650,7 +650,7 @@ def tdiagonal():
                     print 'path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
                 dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(dirlist1, int) == true:
+                if isinstance(dirlist1, int) == True:
                     dirlist1 = np.array([dirlist1])
                 for dir in dirlist1:
                     ## Determine completed number of time-steps ##
@@ -668,8 +668,8 @@ def tdiagonal():
                         continue
                     ## Check times ##
                     times_td = np.around(np.genfromtxt('%s/%04d/transition-densities.out' % (NEXMD,dir),usecols=[0]), decimals = 3)
-                    if np.array_equal(times_td, times) == false:
-                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                    if np.array_equal(times_td, times) == False:
+                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==True)[0]])
                         errflag = 1
                         ttraj += 1
                         continue
@@ -686,7 +686,7 @@ def tdiagonal():
                                 tindex += 1
                             aindex += 1
                         single_occ = np.abs(single_occ)
-                        single_occ = single_occ/single_occ.sum(axis = 1, keepdims = true)
+                        single_occ = single_occ/single_occ.sum(axis = 1, keepdims = True)
                         exciton_com = 1.0/np.sum(np.square(single_occ), axis = 1)
                         ## Generate fragment array ##
                         frag_occ = np.zeros((tscol, nfrag))
@@ -753,7 +753,7 @@ def tdiagonal():
                     print 'Path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
                 dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(dirlist1, int) == true:
+                if isinstance(dirlist1, int) == True:
                     dirlist1 = np.array([dirlist1])
                 for dir in dirlist1:
                     ## Determine completed number of time-steps ##
@@ -772,8 +772,8 @@ def tdiagonal():
                     ## Compare completed time-steps to collection time-steps and collect data ##
                     if tsteps >= tscol:
                         times_td = np.around(np.genfromtxt('%s/%04d/transition-densities.out' % (NEXMD,dir),usecols=[0]), decimals = 3)
-                        if np.array_equal(times_td, times) == false:
-                            print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                        if np.array_equal(times_td, times) == False:
+                            print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==True)[0]])
                             errflag = 1
                             ttraj += 1
                             continue
@@ -788,7 +788,7 @@ def tdiagonal():
                                 tindex += 1
                             aindex += 1
                         single_occ = np.abs(single_occ)
-                        single_occ = single_occ/single_occ.sum(axis = 1, keepdims = true)
+                        single_occ = single_occ/single_occ.sum(axis = 1, keepdims = True)
                         exciton_com = 1.0/np.sum(np.square(single_occ), axis = 1)
                         final_occ += single_occ
                         final_exciton_com += exciton_com
@@ -850,7 +850,7 @@ def tdiagonal():
                     print 'Path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
                 dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(dirlist1,int) == true:
+                if isinstance(dirlist1,int) == True:
                     dirlist1 = np.array([dirlist1])
                 for dir in dirlist1:
                     ## Determine completed number of time-steps ##
@@ -879,8 +879,8 @@ def tdiagonal():
                         continue
                     ## Check times ##
                     times_td = np.around(np.genfromtxt('%s/%04d/transition-densities.out' % (NEXMD,dir),usecols=[0]), decimals = 3)
-                    if np.array_equal(times_td, times) == false:
-                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                    if np.array_equal(times_td, times) == False:
+                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==True)[0]])
                         errflag = 1
                         ttraj += 1
                         continue
@@ -896,7 +896,7 @@ def tdiagonal():
                             tindex += 1
                         aindex += 1
                     single_occ = np.abs(single_occ)
-                    single_occ = single_occ/single_occ.sum(axis = 1, keepdims = true)
+                    single_occ = single_occ/single_occ.sum(axis = 1, keepdims = True)
                     exciton_com = 1.0/np.sum(np.square(single_occ), axis = 1)
                     ## Generate fragment array ##
                     frag_occ = np.zeros((tscol, nfrag))
@@ -959,7 +959,7 @@ def tdiagonal():
                     print 'Path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
                 dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(dirlist1,int) == true:
+                if isinstance(dirlist1,int) == True:
                     dirlist1 = np.array([dirlist1])
                 for dir in dirlist1:
                     ## Determine completed number of time-steps ##
@@ -988,8 +988,8 @@ def tdiagonal():
                         continue
                     ## Check times ##
                     times_td = np.around(np.genfromtxt('%s/%04d/transition-densities.out' % (NEXMD,dir),usecols=[0]), decimals = 3)
-                    if np.array_equal(times_td, times) == false:
-                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                    if np.array_equal(times_td, times) == False:
+                        print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==True)[0]])
                         errflag = 1
                         ttraj += 1
                         continue
@@ -1006,7 +1006,7 @@ def tdiagonal():
                                 tindex += 1
                             aindex += 1
                         single_occ = np.abs(single_occ)
-                        single_occ = single_occ/single_occ.sum(axis = 1, keepdims = true)
+                        single_occ = single_occ/single_occ.sum(axis = 1, keepdims = True)
                         exciton_com = 1.0/np.sum(np.square(single_occ), axis = 1)
                         ## Generate fragment array ##
                         frag_occ = np.zeros((tscol, nfrag))
@@ -1074,7 +1074,7 @@ def tdiagonal():
                     print 'path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
                 dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(dirlist1, int) == true:
+                if isinstance(dirlist1, int) == True:
                     dirlist1 = np.array([dirlist1])
                 for dir in dirlist1:
                     ## Determine completed number of time-steps ##
@@ -1093,8 +1093,8 @@ def tdiagonal():
                     ## Compare completed time-steps to collection time-steps and collect data ##
                     if tsteps >= tscol:
                         times_td = np.around(np.genfromtxt('%s/%04d/transition-densities.out' % (NEXMD,dir),usecols=[0]), decimals = 3)
-                        if np.array_equal(times_td, times) == false:
-                            print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==true)[0]])
+                        if np.array_equal(times_td, times) == False:
+                            print >> error, 'There is an inconsistency in time-step in %s%04d/transition-densities.out at %.3f fs.' % (NEXMD,dir,times_td[np.where(np.not_equal(times_td,times)==True)[0]])
                             errflag = 1
                             ttraj += 1
                             continue
@@ -1109,7 +1109,7 @@ def tdiagonal():
                                 tindex += 1
                             aindex += 1
                         single_occ = np.abs(single_occ)
-                        single_occ = single_occ/single_occ.sum(axis = 1, keepdims = true)
+                        single_occ = single_occ/single_occ.sum(axis = 1, keepdims = True)
                         exciton_com = 1.0/np.sum(np.square(single_occ), axis = 1)
                         final_occ += single_occ
                         final_exciton_com += exciton_com

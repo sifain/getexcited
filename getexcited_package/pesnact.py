@@ -84,8 +84,8 @@ def pesnact():
     header = header.readlines()
     num = 0
     tline = len(header)
-    verb = none
-    stateinit = none
+    verb = None
+    stateinit = None
     for line in header:
         if 'bo_dynamics_flag' in line:
             boflag = np.int(line.split()[0][len('bo_dynamics_flag='):-1])
@@ -105,7 +105,7 @@ def pesnact():
                 nqstep = 1
         if '&moldyn' in line:
             tline = num
-        if 'verbosity' in line and num > tline and verb is none:
+        if 'verbosity' in line and num > tline and verb is None:
             verb = np.int(line.split()[0][len('verbosity='):-1])
         if 'out_data_steps' in line:
             odata = np.int(line.split()[0][len('out_data_steps='):-1])
@@ -113,7 +113,7 @@ def pesnact():
                 print 'No data has been printed to files because out_data_steps = 0 in header.'
                 sys.exit()
         num += 1
-    if boflag == 1 and stateinit == none:
+    if boflag == 1 and stateinit == None:
         print 'Dynamics are set to Born-Oppenheimer, but the initial state is not set.\nPlease check bo_dynamics_flag and exc_state_init in header.'
         sys.exit()
     if boflag == 1 and typeq == 2:
@@ -125,7 +125,7 @@ def pesnact():
         tcoll = (tsmax - 1)*dt
     if typeq == 1 or typeq == 2: ## user-defined time or time-steps at hops only
         tcoll = input('Collect data up to what time in femtoseconds: ')
-        if isinstance(tcoll, int) == false and isinstance(tcoll, float) == false:
+        if isinstance(tcoll, int) == False and isinstance(tcoll, float) == False:
             print 'Time must be integer or float.'
             sys.exit()
         if tcoll < 0:
@@ -200,7 +200,7 @@ def pesnact():
                     print 'Path %dirlist1 does not exist.' % (NEXMD)
                     sys.exit()
                 dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(dirlist1,int) == true:
+                if isinstance(dirlist1,int) == True:
                     dirlist1 = np.array([dirlist1])
                 for dir in dirlist1:
                     ## Determine completed number of time-steps ##
@@ -268,7 +268,7 @@ def pesnact():
                     print 'Path %dirlist1 does not exist.' % (NEXMD)
                     sys.exit()
                 dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(dirlist1,int) == true:
+                if isinstance(dirlist1,int) == True:
                     dirlist1 = np.array([dirlist1])
                 for dir in dirlist1:
                     ## Determine completed number of time-steps ##
@@ -348,7 +348,7 @@ def pesnact():
                     print 'path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
                 dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(dirlist1,int) == true:
+                if isinstance(dirlist1,int) == True:
                     dirlist1 = np.array([dirlist1])
                 for dir in dirlist1:
                     ## Determine completed number of time-steps ##
@@ -490,7 +490,7 @@ def pesnact():
                     print 'Path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
                 dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(dirlist1,int) == true:
+                if isinstance(dirlist1,int) == True:
                     dirlist1 = np.array([dirlist1])
                 for dir in dirlist1:
                     ## Determine number of completed time-steps ##
@@ -634,7 +634,7 @@ def pesnact():
                     print 'Path %sdirlist1 does not exist.' % (NEXMD)
                     sys.exit()
                 dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-                if isinstance(dirlist1,int) == true:
+                if isinstance(dirlist1,int) == True:
                     dirlist1 = np.array([dirlist1])
                 for dir in dirlist1:
                     ## determine number of completed time-steps ##

@@ -2,8 +2,12 @@
 TASKS:
 
 Urgent
+1) add a function that calculates internal angles between bonds
+2) make information from header a class
 
 Less Urgent
 1) how to simulate pump-push-probe spectroscopy, possible convolution? Multiple pump-push delay times?
 2) NEXMD program problem with restart - propagation of quantum degrees of freedom
+3) add a function that calculates torque about a specific atom
+4) add a function that calculates r_cm and v_cm
 

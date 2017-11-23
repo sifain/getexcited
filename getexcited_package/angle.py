@@ -46,10 +46,10 @@ cwd = os.getcwd()
 
 def bondlength():
 
-    print 'Calculating a bond length as a function of time.'
+    print 'Calculating angle between bonds as a function of time.'
 
     ## Type of calculation and directory check ##
-    dynq = input('Calculate bond length along one trajectory or an ensemble of trajectories?\nAnswer one [1] or ensemble [0]: ')
+    dynq = input('Calculate angle between bonds along one trajectory or an ensemble of trajectories?\nAnswer one [1] or ensemble [0]: ')
     if dynq not in [1,0]:
         print 'Answer must be 1 or 0.'
         sys.exit()
@@ -65,7 +65,7 @@ def bondlength():
             print 'There are no NEXMD folders in %s.' % (NEXMDir)
             sys.exit()
         ## Determine mean or all ##
-        typeq = input('Output mean bla in time or output bla at all time-steps and trajectories?\nAnswer mean [0] or all [1]: ')
+        typeq = input('Output mean angle in time or output angle at all time-steps and trajectories?\nAnswer mean [0] or all [1]: ')
         if typeq not in [0,1]:
             print 'Answer must be 0 or 1.'
             sys.exit()
@@ -106,9 +106,9 @@ def bondlength():
     ## Collection time ##
     if typeq == 0: ## mean bond length
         if dynq == 0: ## ensemble
-            tcoll = input('Calculate bond length up to what time in femtoseconds?\nNote that averaged results will only include trajectories that are complete up to this time: ')
+            tcoll = input('Calculate angle up to what time in femtoseconds?\nNote that averaged results will only include trajectories that are complete up to this time: ')
         if dynq == 1: ## single trajectory
-            tcoll = input('Calculate bond length up to what time in femtoseconds? ')
+            tcoll = input('Calculate angle up to what time in femtoseconds? ')
         if isinstance(tcoll, int) == False and isinstance(tcoll, float) == False:
             print 'Time must be integer or float.'
             sys.exit()
@@ -136,37 +136,43 @@ def bondlength():
     ## Collection time ##
     times = np.linspace(tinith, ccoll - dt*odata*cdata, num)
 
-    ## Two unique atoms defined by user ##
-    lines = input('Input the line numbers labeling the coordinates of the two atoms.\nInput an array of the form [[atom1, atom2], [atom3, atom4], .. ]: ')
+    ## Two unique bonds defined by user ##
+    lines = input('Input the line numbers labeling the two bonds.\nEach bond is identified by two atoms.\nInput an array of the form [[[atom1, atom2], [atom3, atom4]], .. ]: ')
     for line in lines:
         if isinstance(line, list) == False:
-            print 'Subarray must be of the form [atom1, atom2], where atom# = line number of atom#.'
+            print 'Angle subarray must be of the form [[atom1, atom2], [atom3, atom4]], where atom# = line number of atom#.'
             sys.exit()
         if len(line) != 2:
-            print 'Subarray must contain two elements labeling the line numbers of two atoms.'
+            print 'Angle subarray must contain two bond subarrays, each labeling the line numbers of two atoms.'
             sys.exit()
-        index = 0
-        for i in line:
-            if isinstance(i, int) == False:
-                print 'Element number %d of subarray must be integer.\nUser inputted [%s, %s], which is not allowed.' % (index + 1, line[0], line[1])
+        for bond in line:
+            if isinstance(line, list) == False:
+                print 'Bond subarray must be of the form [atom1, atom2], where atom# = line number of atom#.'
                 sys.exit()
-            if i < 0:
-                print 'Element number %d of subarray must be a positive integer.\nUser inputted [%s, %s], which is not allowed.' % (index + 1, line[0], line[1])
-                sys.exit()
-            if i > natoms - 1:
-                print 'Element number %d of subarray must be less than the max number of atoms (-1).\nUser inputted [%s, %s], which is not allowed.' % (index + 1, line[0], line[1])
-                sys.exit()
-            index += 1
-        if len(np.unique(line)) != 2:
-            print 'All elements of subarray must be unique.\nuser inputted [%s, %s], which is not allowed.' % (line[0], line[1])
+            if len(bond) != 2:
+                print 'Bond subarray must contain two elements labeling the line numbers of two atoms.'
+            index = 0
+            for atom in bond:
+                if isinstance(atom, int) == False:
+                    print 'Element number %d of bond subarray must be integer.\nuser inputted [%s, %s], which is not allowed.' % (index + 1, bond[0], bond[1])
+                    sys.exit()
+                if atom < 0:
+                    print 'Element number %d of bond subarray must be a positive integer.\nuser inputted [%s, %s], which is not allowed.' % (index + 1, bond[0], bond[1])
+                    sys.exit()
+                if atom > natoms - 1: # -1 for python indexing
+                    print 'Element number %d of bond subarray must be less than the max number of atoms (-1).\nuser inputted [%s, %s], which is not allowed.' % (index + 1, bond[0], bond[1])
+                    sys.exit()
+                index += 1
+            if len(np.unique(bond)) != 2:
+                print 'All elements of bond subarray must be unique.\nUser inputted [%s, %s], which is not allowed.' % (bond[0], bond[1])
             sys.exit()
-    nbonds = len(lines)
+    nangles = len(lines)
 
-    ## Calculate bond length along a single trajectory ##
+    ## Calculate angle along a single trajectory ##
     if dynq == 1: ## single trajectory
-        print 'Collecting bond length along single trajectory.  Please wait ...'
+        print 'Collecting angle along single trajectory.  Please wait ...'
         ## genrate output file ##
-        output = open('%s/bl_single.out' % (cwd),'w')
+        output = open('%s/angle_single.out' % (cwd),'w')
         etraj = 0
         ## Determine completed number of time-steps ##
         if not os.path.exists('%s/energy-ev.out' % (NEXMDir)):
@@ -216,14 +222,14 @@ def bondlength():
             else:
                 array = np.append(array, lenc + 1)
             array = np.int_(array)
-            ## Checks to ensure bond length calculation ##
+            ## Checks to ensure angle calculation ##
             if ncoords == 0:
                 print 'No coordinates were found in %s/coords.xyz' % (NEXMDir)
                 sys.exit()
             if ncoords == 1:
                 print 'Only initial coordinates, at %.2f fs, were found in %s/coords.xyz.' % (tinit,NEXMDir)
                 sys.exit()
-            ## Calculate bond length along a single trajectory ##
+            ## Calculate angle along a single trajectory ##
             sbondlen = np.zeros((ncoords,nbonds))
             for ncoord in np.arange(ncoords):
                 coords = data[array[ncoord]+1:array[ncoord+1]-1:1]

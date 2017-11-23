@@ -94,7 +94,6 @@ def nexmd():
     if tsmax <= 0:
         print 'Must change n_class_steps in %s/header to greater than 0 for dynamics.' % (outdir)
         sys.exit()
-    cstate = 40
     if waves == 1 and wavec == 1 or waves == 1 and wavec == 0:
         print 'All trajectories will begin on state %d.' % (cstate)
     if waves == 0 and wavec == 1:
@@ -279,9 +278,9 @@ def nexmd():
     bottom = None
     index = 0
     for line in anum:
-        if '$coord' in line:
+        if '$COORD' in line:
             top = index
-        if '$endcoord' in line:
+        if '$ENDCOORD' in line:
             bottom = index
             break
         index += 1

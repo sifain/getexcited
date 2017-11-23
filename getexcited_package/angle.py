@@ -2,36 +2,36 @@
 
 '''
 
-This function calculates a user-specified bond length in time.
+This function calculates a user-specified angle in time.
 
-The bond length is calculated between two atoms at every time-step
+The angle is calculated between three atoms at every time-step
 and may be tracked along a single trajectory or an ensemble of
 trajectories during adiabatic or non-adiabatic dynamics.  The
-user must supply the line numbers of two atoms, where the first atom
+user must supply the line numbers of three atoms, where the first atom
 between '&coord' and '&endcoord' in 'input.ceon' is always labeled with
-line number = 0.
+line number = 0.  The second atom specified is the vertex.
 
 Type of calculation:
 
 [1] Single Trajectory
 < collection time (fs)
-> time (fs), bond length (Angstroms)
+> time (fs), angle (degrees)
 
 [2] Ensemble of Trajectories
 
 [2a] Mean
 < collection time (fs)
-> time (fs), bond length (Angstroms), standard deviation (Angstroms)
+> time (fs), angle (degrees), standard deviation (degrees)
 
 [2b] All time-steps
-> trajectory directory, bond length (Angstroms) at all time-steps and
+> trajectory directory, angle (degrees) at all time-steps and
 trajectories
 
 Output Files:
-- bl_[type].out, where [type] = single, mean_ensemble, raw_ensemble
+- angle_[type].out, where [type] = single, mean_ensemble, raw_ensemble
 
 Error Files:
-- bl_[type].err, where [type] = single, mean_ensemble, raw_ensemble
+- angle_[type].err, where [type] = single, mean_ensemble, raw_ensemble
 
 '''
 
@@ -44,7 +44,7 @@ import math
 
 cwd = os.getcwd()
 
-def bondlength():
+def angle():
 
     print 'Calculating angle between bonds as a function of time.'
 
@@ -104,7 +104,7 @@ def bondlength():
             natoms = np.int(line.split()[0][len('natoms='):-1])
 
     ## Collection time ##
-    if typeq == 0: ## mean bond length
+    if typeq == 0: ## mean angle
         if dynq == 0: ## ensemble
             tcoll = input('Calculate angle up to what time in femtoseconds?\nNote that averaged results will only include trajectories that are complete up to this time: ')
         if dynq == 1: ## single trajectory
@@ -136,35 +136,29 @@ def bondlength():
     ## Collection time ##
     times = np.linspace(tinith, ccoll - dt*odata*cdata, num)
 
-    ## Two unique bonds defined by user ##
-    lines = input('Input the line numbers labeling the two bonds.\nEach bond is identified by two atoms.\nInput an array of the form [[[atom1, atom2], [atom3, atom4]], .. ]: ')
+    ## Three unique atoms defined by user ##
+    lines = input('Input the line numbers labeling the three atoms in the form A(atom)-V(vertex atom)-A(atom).\nInput an array of the form [[atom1, atom2, atom3], .. ]: ')
     for line in lines:
         if isinstance(line, list) == False:
-            print 'Angle subarray must be of the form [[atom1, atom2], [atom3, atom4]], where atom# = line number of atom#.'
+            print 'Subarray must be of the form [atom1, atom2, atom3], where atom# = line number of atom#.'
             sys.exit()
-        if len(line) != 2:
-            print 'Angle subarray must contain two bond subarrays, each labeling the line numbers of two atoms.'
+        if len(line) != 3:
+            print 'Subarray must contain three elements labeling the line numbers of three atoms.'
             sys.exit()
-        for bond in line:
-            if isinstance(line, list) == False:
-                print 'Bond subarray must be of the form [atom1, atom2], where atom# = line number of atom#.'
+        index = 0
+        for atom in line:
+            if isinstance(atom, int) == False:
+                print 'Element number %d of subarray must be integer.\nUser inputted [%s, %s], which is not allowed.' % (index + 1, line[0], line[1])
                 sys.exit()
-            if len(bond) != 2:
-                print 'Bond subarray must contain two elements labeling the line numbers of two atoms.'
-            index = 0
-            for atom in bond:
-                if isinstance(atom, int) == False:
-                    print 'Element number %d of bond subarray must be integer.\nuser inputted [%s, %s], which is not allowed.' % (index + 1, bond[0], bond[1])
-                    sys.exit()
-                if atom < 0:
-                    print 'Element number %d of bond subarray must be a positive integer.\nuser inputted [%s, %s], which is not allowed.' % (index + 1, bond[0], bond[1])
-                    sys.exit()
-                if atom > natoms - 1: # -1 for python indexing
-                    print 'Element number %d of bond subarray must be less than the max number of atoms (-1).\nuser inputted [%s, %s], which is not allowed.' % (index + 1, bond[0], bond[1])
-                    sys.exit()
-                index += 1
-            if len(np.unique(bond)) != 2:
-                print 'All elements of bond subarray must be unique.\nUser inputted [%s, %s], which is not allowed.' % (bond[0], bond[1])
+            if atom < 0:
+                print 'Element number %d of subarray must be a positive integer.\nUser inputted [%s, %s], which is not allowed.' % (index + 1, line[0], line[1])
+                sys.exit()
+            if atom > natoms - 1: # -1 for python indexing
+                print 'Element number %d of subarray must be less than the max number of atoms (-1).\nuser inputted [%s, %s], which is not allowed.' % (index + 1, line[0], line[1])
+                sys.exit()
+            index += 1
+        if len(np.unique(line)) != 3:
+            print 'All elements of subarray must be unique.\nUser inputted [%s, %s], which is not allowed.' % (line[0], line[1])
             sys.exit()
     nangles = len(lines)
 
@@ -230,15 +224,18 @@ def bondlength():
                 print 'Only initial coordinates, at %.2f fs, were found in %s/coords.xyz.' % (tinit,NEXMDir)
                 sys.exit()
             ## Calculate angle along a single trajectory ##
-            sbondlen = np.zeros((ncoords,nbonds))
+            sangle = np.zeros((ncoords,nangles))
             for ncoord in np.arange(ncoords):
                 coords = data[array[ncoord]+1:array[ncoord+1]-1:1]
                 index = 0
                 for line in lines:
-                    vec0 = np.float_(coords[line[0]].split()[1:])
-                    vec1 = np.float_(coords[line[1]].split()[1:])
-                    a = np.subtract(vec1, vec0)
-                    sbondlen[ncoord,index] = np.linalg.norm(a)
+                    vec0 = np.float_(coords[line[0,0]].split()[1:])
+                    vec1 = np.float_(coords[line[0,1]].split()[1:])
+                    vec2 = np.float_(coords[line[0,2]].split()[1:])
+                    a = np.subtract(vec0, vec1)
+                    b = np.subtract(vec2, vec1)
+                    cosine = np.arccos(np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b)))
+                    sangle[ncoord,index] = cosine
                     index += 1
             print '%s' % (NEXMDir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
             ctraj = 1
@@ -258,11 +255,11 @@ def bondlength():
             print >> output, 'Completed trajectories: ', '%04d' % (ctraj)
             print >> output, 'Excellent trajectories: ', '%04d' % (etraj)
             for ncoord in np.arange(ncoords):
-                print >> output, '%0*.2f' % (len(str((tsmax))) + 2,dt*odata*cdata*ncoord), ' '.join('%08.3f' % (bond) for bond in sbondlen[ncoord])
+                print >> output, '%0*.2f' % (len(str((tsmax))) + 2,dt*odata*cdata*ncoord), ' '.join('%08.3f' % (np.degrees(angle)) for angle in sangle[ncoord])
 
-    ## Calculate bond length along an ensemble of trajectories ##
+    ## Calculate angle along an ensemble of trajectories ##
     if dynq == 0 and typeq == 0: ## mean from ensemble
-        print 'Collecting mean bond length from ensemble.  Please wait ...'
+        print 'Collecting mean angle from ensemble.  Please wait ...'
         ## Determine total number of trajectories in ensemble ##
         with open('%s/totdirlist' % (NEXMDir),'w') as data:
             for NEXMD in NEXMDs:
@@ -276,11 +273,11 @@ def bondlength():
             dirlist1 = np.array([dirlist1])
         os.remove('%s/totdirlist' % (NEXMDir))
         ## Generate output and error files ##
-        output = open('%s/bl_mean_ensemble.out' % (cwd),'w')
-        error = open('%s/bl_mean_ensemble.err' % (cwd),'w')
-        ## Generate bond length array for final results ##
-        fbondlen = np.zeros((len(times), nbonds))
-        ebondlen = np.zeros((len(times), len(dirlist1), nbonds))
+        output = open('%s/angle_mean_ensemble.out' % (cwd),'w')
+        error = open('%s/angle_mean_ensemble.err' % (cwd),'w')
+        ## Generate angle array for final results ##
+        fangle = np.zeros((len(times), nangles))
+        eangle = np.zeros((len(times), len(dirlist1), nangles))
         ttraj = 0
         ctraj = 0
         etraj = 0
@@ -350,7 +347,7 @@ def bondlength():
                     else:
                         array = np.append(array, lenc + 1)
                     array = np.int_(array)
-                    ## Checks to ensure bond length calculation ##
+                    ## Checks to ensure angle calculation ##
                     if ncoords == 0:
                         print >> error, 'No coordinates were found in %s%04d/coords.xyz' % (NEXMD,dir)
                         errflag = 1
@@ -361,19 +358,22 @@ def bondlength():
                         errflag = 1
                         ttraj += 1
                         continue
-                    ## Calculate bond length along a single trajectory ##
-                    sbondlen = np.zeros((ncoords, nbonds))
+                    ## Calculate angle along a single trajectory ##
+                    sangle = np.zeros((ncoords, nangles))
                     for ncoord in np.arange(ncoords):
                         coords = data[array[ncoord]+1:array[ncoord+1]-1:1]
                         index = 0
                         for line in lines:
                             vec0 = np.float_(coords[line[0]].split()[1:])
                             vec1 = np.float_(coords[line[1]].split()[1:])
-                            a = np.subtract(vec1, vec0)
-                            sbondlen[ncoord,index] = np.linalg.norm(a)
-                            ebondlen[ncoord,ctraj,index] = sbondlen[ncoord,index]
+                            vec2 = np.float_(coords[line[2]].split()[1:])
+                            a = np.subtract(vec0, vec1)
+                            b = np.subtract(vec2, vec1)
+                            cosine = np.arccos(np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b)))
+                            sangle[ncoord,index] = cosine
+                            eangle[ncoord,ctraj,index] = cosine
                             index += 1
-                    fbondlen += sbondlen
+                    fangle += sangle
                     print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
                     ctraj += 1
                     if tsteps == tsmax:
@@ -387,10 +387,10 @@ def bondlength():
         if ctraj == 0:
             print 'No trajectories completed within %0*.2f.' % (len(str(tsmax)),tcoll)
         else:
-            ## Mean and standard deviation for bond length ##
-            ebondlen = np.delete(ebondlen, np.arange(ctraj, ttraj), axis = 1)
-            ebondlen = np.std(ebondlen, axis = 1)
-            fbondlen = fbondlen/ctraj
+            ## Mean and standard deviation for angle ##
+            eangle = np.delete(eangle, np.arange(ctraj, ttraj), axis = 1)
+            eangle = np.std(eangle, axis = 1)
+            fangle = fangle/ctraj
             print 'Total trajectories:', '%04d' % (ttraj)
             print 'Completed trajectories:', '%04d' % (ctraj)
             print 'Excellent trajectories:', '%04d' % (etraj)
@@ -398,18 +398,18 @@ def bondlength():
             print >> output, 'Completed trajectories: ', '%04d' % (ctraj)
             print >> output, 'Excellent trajectories: ', '%04d' % (etraj)
             for ncoord in np.arange(ncoords):
-                print >> output, '%0*.2f' % (len(str((tsmax))) + 2,dt*odata*cdata*ncoord), ' '.join('%08.3f' % (bond) for bond in fbondlen[ncoord]), ' '.join('%07.3f' % (bond) for bond in ebondlen[ncoord])
+                print >> output, '%0*.2f' % (len(str((tsmax))) + 2,dt*odata*cdata*ncoord), ' '.join('%08.3f' % (np.degrees(angle)) for angle in fangle[ncoord]), ' '.join('%07.3f' % (np.degrees(angle)) for angle in eangle[ncoord])
         if errflag == 1:
-            print 'One or more trajectories did not finish within %0*.2f femtoseconds, check bl_mean_ensemble.err.' % (len(str(tsmax)),tcoll)
+            print 'One or more trajectories have experienced an error, check angle_mean_ensemble.err.'
         else:
-            os.remove('%s/bl_mean_ensemble.err' % (cwd))
+            os.remove('%s/angle_mean_ensemble.err' % (cwd))
 
-    ## Calculate bond length from ensemble of trajectories at all time-steps ##
+    ## Calculate angle from ensemble of trajectories at all time-steps ##
     if dynq == 0 and typeq == 1: ## all from ensemble
-        print 'Collecting all bond lengths from ensemble.  Please wait ...'
+        print 'Collecting all angles from ensemble.  Please wait ...'
         ## Generate output and error files ##
-        output = open('%s/bl_raw_ensemble.out' % (cwd),'w')
-        error = open('%s/bl_raw_ensemble.err' % (cwd),'w')
+        output = open('%s/angle_raw_ensemble.out' % (cwd),'w')
+        error = open('%s/angle_raw_ensemble.err' % (cwd),'w')
         ttraj = 0
         etraj = 0
         errflag = 0
@@ -477,7 +477,7 @@ def bondlength():
                 else:
                     array = np.append(array, lenc + 1)
                 array = np.int_(array)
-                ## Checks to ensure bond length calculation ##
+                ## Checks to ensure angle calculation ##
                 if ncoords == 0:
                     print >> error, 'No coordinates were found in %s%04d/coords.xyz' % (NEXMD,dir)
                     errflag = 1
@@ -488,18 +488,21 @@ def bondlength():
                     errflag = 1
                     ttraj += 1
                     continue
-                ## Calculate bond length along a single trajectory ##
+                ## Calculate angle along a single trajectory ##
                 for ncoord in np.arange(ncoords):
                     coords = data[array[ncoord]+1:array[ncoord+1]-1:1]
-                    sbondlen = np.zeros(nbonds)
+                    sangle = np.zeros(nangles)
                     index = 0
                     for line in lines:
                         vec0 = np.float_(coords[line[0]].split()[1:])
                         vec1 = np.float_(coords[line[1]].split()[1:])
-                        a = np.subtract(vec1, vec0)
-                        sbondlen[index] = np.linalg.norm(a)
+                        vec2 = np.float_(coords[line[2]].split()[1:])
+                        a = np.subtract(vec0, vec1)
+                        b = np.subtract(vec2, vec1)
+                        cosine = np.arccos(np.dot(a, b)/(np.linalg.norm(a)*np.linalg.norm(b)))
+                        sangle[index] = cosine
                         index += 1
-                    print >> output, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2,dt*odata*cdata*ncoord), ' '.join('%08.3f' % (bond) for bond in sbondlen)
+                    print >> output, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2,dt*odata*cdata*ncoord), ' '.join('%08.3f' % (np.degrees(angle)) for angle in sangle)
                 print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
                 if tsteps == tsmax:
                     etraj += 1
@@ -515,6 +518,6 @@ def bondlength():
             print 'Total trajectories:', '%04d' % (ttraj)
             print 'Excellent trajectories:', '%04d' % (etraj)
         if errflag == 1:
-            print 'One or more trajectories have experienced an error, check bl_raw_ensemble.err.'
+            print 'One or more trajectories have experienced an error, check angle_raw_ensemble.err.'
         else:
-            os.remove('%s/bl_raw_ensemble.err' % (cwd))
+            os.remove('%s/angle_raw_ensemble.err' % (cwd))

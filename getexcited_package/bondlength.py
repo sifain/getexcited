@@ -146,19 +146,19 @@ def bondlength():
             print 'Subarray must contain two elements labeling the line numbers of two atoms.'
             sys.exit()
         index = 0
-        for i in line:
-            if isinstance(i, int) == False:
+        for atom in line:
+            if isinstance(atom, int) == False:
                 print 'Element number %d of subarray must be integer.\nUser inputted [%s, %s], which is not allowed.' % (index + 1, line[0], line[1])
                 sys.exit()
-            if i < 0:
+            if atom < 0:
                 print 'Element number %d of subarray must be a positive integer.\nUser inputted [%s, %s], which is not allowed.' % (index + 1, line[0], line[1])
                 sys.exit()
-            if i > natoms - 1:
+            if atom > natoms - 1: # -1 for python indexing
                 print 'Element number %d of subarray must be less than the max number of atoms (-1).\nUser inputted [%s, %s], which is not allowed.' % (index + 1, line[0], line[1])
                 sys.exit()
             index += 1
         if len(np.unique(line)) != 2:
-            print 'All elements of subarray must be unique.\nuser inputted [%s, %s], which is not allowed.' % (line[0], line[1])
+            print 'All elements of subarray must be unique.\nUser inputted [%s, %s], which is not allowed.' % (line[0], line[1])
             sys.exit()
     nbonds = len(lines)
 
@@ -394,7 +394,7 @@ def bondlength():
             for ncoord in np.arange(ncoords):
                 print >> output, '%0*.2f' % (len(str((tsmax))) + 2,dt*odata*cdata*ncoord), ' '.join('%08.3f' % (bond) for bond in fbondlen[ncoord]), ' '.join('%07.3f' % (bond) for bond in ebondlen[ncoord])
         if errflag == 1:
-            print 'One or more trajectories did not finish within %0*.2f femtoseconds, check bl_mean_ensemble.err.' % (len(str(tsmax)),tcoll)
+            print 'One or more trajectories have experienced an error, check bl_mean_ensemble.err.'
         else:
             os.remove('%s/bl_mean_ensemble.err' % (cwd))
 

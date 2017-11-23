@@ -85,6 +85,7 @@ from getexcited_package.pesnact import pesnact
 from getexcited_package.restart import restart
 from getexcited_package.newsim import newsim
 from getexcited_package.cleandir import cleandir
+from getexcited_package.angle import angle
 from getexcited_package.dihedral import dihedral
 from getexcited_package.bondlength import bondlength
 from getexcited_package.bla import bla
@@ -113,9 +114,9 @@ if funq == 7:
 if funq == 8:
     cleandir()
 if funq == 9:
-    advq = input('\nSelect a task from the following list:\n\n[1] Calculate dihedral angle\n[2] Calculate bond lengths\n[3] Calculate bond length alternation\n\nEnter the number corresponding to the desired task: ')
-    if advq not in [1,2,3]:
-        print 'Answer must be 1 through 3.'
+    advq = input('\nSelect a task from the following list:\n\n[1] Calculate dihedral angle\n[2] Calculate bond lengths\n[3] Calculate bond length alternation\n[4] Calculate angle between two bonds\n\nEnter the number corresponding to the desired task: ')
+    if advq not in [1,2,3,4]:
+        print 'Answer must be 1 through 4.'
         sys.exit()
     if advq == 1:
         dihedral()
@@ -123,6 +124,8 @@ if funq == 9:
         bondlength()
     if advq == 3:
         bla()
+    if advq == 4:
+        angle()
 if funq == 10:
     advq = input('\nSelect a task from the following list:\n\n[1] Collect excited-state permanent dipole moment\n\nEnter the number corresponding to the desired task: ')
     if advq != 1:

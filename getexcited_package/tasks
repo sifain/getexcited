@@ -2,8 +2,8 @@
 TASKS:
 
 Urgent
-1) add a function that calculates internal angles between bonds
-2) make information from header a class
+1) make information from header a class and import all inputs
+2) make a dictionary for elements to atomic numbers
 
 Less Urgent
 1) how to simulate pump-push-probe spectroscopy, possible convolution? Multiple pump-push delay times?

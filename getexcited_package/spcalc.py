@@ -46,7 +46,7 @@ def spcalc():
     NEXMDs = glob.glob('%s/NEXMD*/' % (outdir))
     NEXMDs.sort()
     if len(NEXMDs) != 0:
-        contq = input('** WARNING ** All NEXMD folders inside %s will be deleted!\nContinue? answer yes [1] or no [0]: ' % (outdir))
+        contq = input('** WARNING ** All NEXMD folders inside %s will be deleted!\nContinue? Answer yes [1] or no [0]: ' % (outdir))
         if contq not in [1,0]:
             print 'Answer must be 1 or 0.'
             sys.exit()

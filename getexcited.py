@@ -103,11 +103,11 @@ if funq == 1:
 if funq == 2:
     optspec(pathtopack,header)
 if funq == 3:
-    nexmd()
+    nexmd(header)
 if funq == 4:
     newsim()
 if funq == 5:
-    population()
+    population(header)
 if funq == 6:
     pesnact()
 if funq == 7:

@@ -65,13 +65,13 @@ def dihedral(header):
         if not os.path.exists(NEXMDir):
             print 'Path %s does not exist.' % (NEXMDir)
             sys.exit()
-        ## check if NEXMD folders exist ##
+        ## Check if NEXMD folders exist ##
         NEXMDs = glob.glob('%s/NEXMD*/' % (NEXMDir))
         NEXMDs.sort()
         if len(NEXMDs) == 0:
             print 'There are no NEXMD folders in %s.' % (NEXMDir)
             sys.exit()
-        ## determine mean or all ##
+        ## Determine mean or all ##
         typeq = input('Ouput mean dihedral in time or output dihedrals at all time-steps and trajectories?\nAnswer mean [0] or all [1]: ')
         if typeq not in [0,1]:
             print 'Answer must be 0 or 1.'

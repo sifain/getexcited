@@ -98,10 +98,10 @@ class header(object):
                 self.bo_dynamics = np.int(line.split()[0][len('bo_dynamics_flag='):-1])
             if 'exc_state_init=' in line:
                 self.exc_state_init = np.int(line.split()[0][len('exc_state_init='):-1])
+            '''
             if 'n_exc_states_propagate=' in line:
                 self.n_exc_states_propagate = np.int(line.split()[0][len('n_exc_states_propagate='):-1])
             ## End general parameters ###
-            '''
             
             ## Start dynamics parameters ##
             if 'time_init=' in line:

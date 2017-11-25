@@ -101,7 +101,7 @@ if funq not in [1,2,3,4,5,6,7,8,9,10,11,12,13]:
 if funq == 1:
     spcalc(header)
 if funq == 2:
-    optspec(pathtopack)
+    optspec(pathtopack,header)
 if funq == 3:
     nexmd()
 if funq == 4:

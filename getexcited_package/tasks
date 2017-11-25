@@ -5,6 +5,7 @@ Urgent
 1) make information from header a class and import all inputs
 2) make a dictionary for elements to atomic numbers
 3) separate function for collection time
+4) more efficient array method for geometrical quantities, may be important for torque, r_cm, and v_cm
 
 Less Urgent
 1) how to simulate pump-push-probe spectroscopy, possible convolution? Multiple pump-push delay times?

@@ -36,7 +36,7 @@ import fileinput
 
 cwd = os.getcwd()
 
-def nexmd():
+def nexmd(header):
     
     print 'Preparing input files for NEXMD.'
     
@@ -68,6 +68,49 @@ def nexmd():
         os.remove(rseeds)
         print 'Deleting', '%s' % (rseeds)
 
+    ## Information from header ##
+    if not os.path.exists('%s/header' % (outdir)):
+        print 'Path %s/header does not exist.' % (outdir)
+        sys.exit()
+    header = header('%s/header' % (outdir))
+
+    ## Check running dynamics ##
+    if header.n_class_steps <= 0:
+        print 'Must change n_class_steps in %s/header to greater than 0 for dynamics.' % (outdir)
+        sys.exit()
+
+    ## Check type of initial excitation ##
+    #waves = 1 # only for old code
+    #wavec = 1 # only for old code
+    ## possible combinations ##
+    ## state set, coefficients set          (waves = 1, wavec = 1) - single state
+    ## state set, coefficients not set      (waves = 1, wavec = 0) - single state
+    ## state not set, coefficients set      (waves = 0, wavec = 1) - ridiculous (exit system)
+    ## state not set, coefficients not set  (waves = 0, wavec = 0) - photoexcited wavepacket
+    try:
+        header.exc_state_init
+        waves = 1
+    except AttributeError:
+        waves = 0
+    try:
+        header.quant_amp_phase
+        wavec = 0
+    except AttributeError:
+        waves = 1
+    if waves == 1 and wavec == 1 or waves == 1 and wavec == 0:
+        print 'All trajectories will begin on state %d.' % (cstate)
+    if waves == 0 and wavec == 1:
+        print 'There is an inconsistency in header.\nInput exc_state_init is not set, while coefficients are set.'
+        sys.exit()
+    if waves == 0 and wavec == 0:
+        print 'Initial excited states will model a photoexcited wavepacket according to the optical spectrum.'
+        spdir = raw_input('Single-point calculations directory: ')
+        if not os.path.exists(spdir):
+            print 'Path %s does not exist.' % (spdir)
+            sys.exit()
+
+    '''
+        Probably garabage, but keep until above is confirmed to work
     ## Check running dynamics and type of initial excitation ##
     if not os.path.exists('%s/header' % (outdir)):
         print 'Path %s/header does not exist.' % (outdir)
@@ -105,7 +148,8 @@ def nexmd():
         if not os.path.exists(spdir):
             print 'Path %s does not exist.' % (spdir)
             sys.exit()
-
+        '''
+    
     ## Find geometries ##
     if not os.path.exists('%s/coords.xyz' % (gsdir)):
         print 'Path %s/coords.xyz does not exist.' % (gsdir)

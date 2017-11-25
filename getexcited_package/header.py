@@ -167,3 +167,6 @@ class header(object):
             ## End output and log parameters ##
             '''
 
+            if 'quant_amp_phase' in line:
+                header.quant_amp_phase = 'The quant_amp_phase flag is in the header.'
+

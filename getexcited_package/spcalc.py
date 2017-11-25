@@ -28,7 +28,7 @@ import sys
 import shutil
 import glob
 
-def spcalc():
+def spcalc(header):
 
     print 'Preparing input files for single-point calculations.'
 
@@ -56,17 +56,14 @@ def spcalc():
         print 'Deleting', '%s' % (NEXMD)
         shutil.rmtree(NEXMD)
 
-    ## Check running single-point ##
+    ## Information from header ##
     if not os.path.exists('%s/header' % (outdir)):
         print 'Path %s/header does not exist.' % (outdir)
         sys.exit()
-    header = open('%s/header' % (outdir),'r')
-    header = header.readlines()
-    for line in header:
-        if 'n_class_steps' in line:
-            tsmax = np.int(line.split()[0][len('n_class_steps='):-1])
-            break
-    if tsmax != 0:
+    header = header('%s/header' % (outdir))
+
+    ## Check single-point calculation ##
+    if header.n_class_steps != 0:
         print 'User must change n_class_steps in %s/header to 0 for single-point calculations.' % (outdir)
         sys.exit()
 

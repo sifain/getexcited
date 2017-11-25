@@ -99,7 +99,7 @@ if funq not in [1,2,3,4,5,6,7,8,9,10,11,12,13]:
     print 'Answer must be 1 through 13.'
     sys.exit()
 if funq == 1:
-    spcalc()
+    spcalc(header)
 if funq == 2:
     optspec(pathtopack)
 if funq == 3:
@@ -122,11 +122,11 @@ if funq == 9:
     if advq == 1:
         dihedral(header)
     if advq == 2:
-        bondlength()
+        bondlength(header)
     if advq == 3:
-        bla()
+        bla(header)
     if advq == 4:
-        angle()
+        angle(header)
 if funq == 10:
     advq = input('\nSelect a task from the following list:\n\n[1] Collect excited-state permanent dipole moment\n\nEnter the number corresponding to the desired task: ')
     if advq != 1:

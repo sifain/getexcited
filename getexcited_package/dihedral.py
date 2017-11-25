@@ -83,41 +83,20 @@ def dihedral(header):
             print 'path %s does not exist.' % (NEXMDir)
             sys.exit()
 
-    ## User-defined length of analysis and initialize arrays ##
+    ## Information from header ##
     if dynq == 0: ## ensemble
         if not os.path.exists('%s/header' % (NEXMDir)):
             print 'Path %s/header does not exist.' % (NEXMDir)
             sys.exit()
         header = header('%s/header' % (NEXMDir))
-        '''
-        header = open('%s/header' % (NEXMDir),'r')
-        header = header.readlines()
     if dynq == 1: ## single trajectory
         if not os.path.exists('%s/input.ceon' % (NEXMDir)):
             print 'Path %s/input.ceon does not exist.' % (NEXMDir)
             sys.exit()
-        header = open('%s/input.ceon' % (NEXMDir),'r')
-        header = header.readlines()
-    for line in header:
-        if 'time_init' in line:
-            tinith = np.float(line.split()[0][len('time_init='):-1])
-        if 'time_step' in line:
-            dt = np.float(line.split()[0][len('time_step='):-1])
-        if 'n_class_steps' in line:
-            tsmax = np.int(line.split()[0][len('n_class_steps='):-1]) + 1
-        if 'out_data_steps' in line:
-            odata = np.int(line.split()[0][len('out_data_steps='):-1])
-        if 'out_coords_steps' in line:
-            cdata = np.int(line.split()[0][len('out_coords_steps='):-1])
-        if 'natoms' in line:
-            natoms = np.int(line.split()[0][len('natoms='):-1])
-'''
-        tinith = header.time_init
-        dt = header.time_step
-        tsmax = header.n_class_steps + 1
-        odata = header.out_data_steps
-        cdata = header.out_coords_steps
-        natoms = header.natoms
+        header = header('%s/input.ceon' % (NEXMDir))
+
+    ## Adding + 1 to include zeroth time-step ##
+    header.n_class_steps = header.n_class_steps + 1
 
     ## Collection time ##
     if typeq == 0: ## mean dihedral
@@ -132,25 +111,25 @@ def dihedral(header):
             print 'Time must be integer or float greater than zero.'
             sys.exit()
         tcoll = np.float(tcoll)
-        if tcoll > (tsmax - 1)*dt:
-            tcoll = (tsmax - 1)*dt
+        if tcoll > (header.n_class_steps - 1)*header.time_step:
+            tcoll = (header.n_class_steps - 1)*header.time_step
     if typeq == 1: ## all dihedrals
-        tcoll = (tsmax - 1)*dt
+        tcoll = (header.n_class_steps - 1)*header.time_step
 
     ## Number of classical time-steps ##
     tscol = 0
-    while tscol*dt*odata <= tcoll:
+    while tscol*header.time_step*header.out_data_steps <= tcoll:
         tscol += 1
 
     ## Number of time-steps for coordinates ##
     ccoll = 0
     num = 0
     while ccoll <= tcoll:
-        ccoll += dt*odata*cdata
+        ccoll += header.time_step*header.out_data_steps*header.out_coords_steps
         num += 1
 
     ## Collection time array ##
-    times = np.linspace(tinith, ccoll - dt*odata*cdata, num)
+    times = np.linspace(header.time_init, ccoll - header.time_step*header.out_data_steps*header.out_coords_steps, num)
 
     ## Four unique atoms defining dihedral angle ##
     lines = input('Input the line numbers labeling the coordinates of the four atoms.\nInput an array of the form [ .., .., .., .. ]: ')
@@ -168,7 +147,7 @@ def dihedral(header):
         if i < 0:
             print 'Element number %d of input array must be a positive integer.\nUser inputted [%s, %s, %s, %s], which is not allowed.' % (index + 1, lines[0], lines[1], lines[2], lines[3])
             sys.exit()
-        if i > natoms - 1:
+        if i > header.natoms - 1: # - 1 for python indexing
             print 'Element number %d of input array must be less than the max number of atoms (-1).\nUser inputted [%s, %s, %s, %s], which is not allowed.' % (index + 1, lines[0], lines[1], lines[2], lines[3])
             sys.exit()
         index += 1
@@ -205,7 +184,7 @@ def dihedral(header):
                 if 'time' in line:
                     if ncoords == 0:
                         tinit = np.float(line.split()[-1])
-                        if tinit != tinith:
+                        if tinit != header.time_init:
                             tflag1 = 1
                             break
                     else:
@@ -258,16 +237,16 @@ def dihedral(header):
                 x = np.dot(un1, un2)
                 y = np.dot(m1, un2)
                 sdihedral[ncoord] = np.degrees(-math.atan2(y,x))
-            print '%s' % (NEXMDir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+            print '%s' % (NEXMDir), '%0*.2f' % (len(str((header.n_class_steps))) + 2, (tsteps - 1)*header.time_step)
             ctraj = 1
-            if tsteps == tsmax:
+            if tsteps == header.n_class_steps:
                 etraj += 1
         else:
-            print '%s' % (NEXMDir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+            print '%s' % (NEXMDir), '%0*.2f' % (len(str((header.n_class_steps))) + 2, (tsteps - 1)*header.time_step)
         ttraj = 1
         ## Summary of results ##
         if ctraj == 0:
-            print 'No trajectories completed within %0*.2f.' % (len(str(tsmax)),tcoll)
+            print 'No trajectories completed within %0*.2f.' % (len(str(header.n_class_steps)),tcoll)
         else:
             print 'Total trajectories:', '%04d' % (ttraj)
             print 'Completed trajectories:', '%04d' % (ctraj)
@@ -276,7 +255,7 @@ def dihedral(header):
             print >> output, 'Tompleted trajectories: ', '%04d' % (ctraj)
             print >> output, 'Excellent trajectories: ', '%04d' % (etraj)
             for ncoord in np.arange(ncoords):
-                print >> output, '%0*.2f' % (len(str((tsmax))) + 2,dt*odata*cdata*ncoord), '%08.3f' % (sdihedral[ncoord])
+                print >> output, '%0*.2f' % (len(str((header.n_class_steps))) + 2,header.time_step*header.out_data_steps*header.out_coords_steps*ncoord), '%08.3f' % (sdihedral[ncoord])
 
     ## Calculate mean dihedral from ensemble of trajectories ##
     if dynq == 0 and typeq == 0: ## mean from ensemble
@@ -338,7 +317,7 @@ def dihedral(header):
                         if 'time' in line:
                             if ncoords == 0:
                                 tinit = np.float(line.split()[-1])
-                                if tinit != tinith:
+                                if tinit != header.time_init:
                                     tflag1 = 1
                                     continue
                             else:
@@ -401,18 +380,18 @@ def dihedral(header):
                         sdihedral[ncoord] = np.degrees(-math.atan2(y,x))
                         edihedral[ncoord,ctraj] = sdihedral[ncoord]
                     fdihedral += sdihedral
-                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((header.n_class_steps))) + 2, (tsteps - 1)*header.time_step)
                     ctraj += 1
-                    if tsteps == tsmax:
+                    if tsteps == header.n_class_steps:
                         etraj += 1
                 else:
-                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
-                    print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((header.n_class_steps))) + 2, (tsteps - 1)*header.time_step)
+                    print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((header.n_class_steps))) + 2, (tsteps - 1)*header.time_step)
                     errflag = 1
                 ttraj += 1
         ## Summary of results ##
         if ctraj == 0:
-            print 'No trajectories completed within %0*.2f.' % (len(str(tsmax)),tcoll)
+            print 'No trajectories completed within %0*.2f.' % (len(str(header.n_class_steps)),tcoll)
         else:
             ## Mean and standard deviation for dihedral ##
             edihedral = np.delete(edihedral, np.arange(ctraj, ttraj), axis = 1)
@@ -426,7 +405,7 @@ def dihedral(header):
             print >> output, 'completed trajectories: ', '%04d' % (ctraj)
             print >> output, 'excellent trajectories: ', '%04d' % (etraj)
             for ncoord in np.arange(ncoords):
-                print >> output, '%0*.2f' % (len(str((tsmax))) + 2,dt*odata*cdata*ncoord), '%08.3f' % (fdihedral[ncoord]), '%07.3f' % (edihedral[ncoord])
+                print >> output, '%0*.2f' % (len(str((header.n_class_steps))) + 2,header.time_step*header.out_data_steps*header.out_coords_steps*ncoord), '%08.3f' % (fdihedral[ncoord]), '%07.3f' % (edihedral[ncoord])
         if errflag == 1:
             print 'One or more trajectories have experienced an error, check dihedral_mean_ensemble.err.'
         else:
@@ -475,7 +454,7 @@ def dihedral(header):
                     if 'time' in line:
                         if ncoords == 0:
                             tinit = np.float(line.split()[-1])
-                            if tinit != tinith:
+                            if tinit != header.time_init:
                                 tflag1 = 1
                                 continue
                         else:
@@ -535,18 +514,18 @@ def dihedral(header):
                     x = np.dot(un1, un2)
                     y = np.dot(m1, un2)
                     dihedral = np.degrees(-math.atan2(y,x))
-                    print >> output, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2,dt*odata*cdata*ncoord), '%08.3f' % (dihedral)
-                print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
-                if tsteps == tsmax:
+                    print >> output, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((header.n_class_steps))) + 2,header.time_step*header.out_data_steps*header.out_coords_steps*ncoord), '%08.3f' % (dihedral)
+                print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((header.n_class_steps))) + 2, (tsteps - 1)*header.time_step)
+                if tsteps == header.n_class_steps:
                     etraj += 1
                 else:
-                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
-                    print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((header.n_class_steps))) + 2, (tsteps - 1)*header.time_step)
+                    print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((header.n_class_steps))) + 2, (tsteps - 1)*header.time_step)
                     errflag = 1
                 ttraj += 1
         ## Summary of results ##
         if ttraj == 0:
-            print 'No trajectories completed within %0*.2f.' % (len(str(tsmax)),tcoll)
+            print 'No trajectories completed within %0*.2f.' % (len(str(header.n_class_steps)),tcoll)
         else:
             print 'Total trajectories:', '%04d' % (ttraj)
             print 'Excellent trajectories:', '%04d' % (etraj)

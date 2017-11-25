@@ -51,7 +51,7 @@ import math
 
 cwd = os.getcwd()
 
-def dihedral():
+def dihedral(header):
 
     print 'Calculating a dihedral angle as a function of time.'
 
@@ -88,6 +88,8 @@ def dihedral():
         if not os.path.exists('%s/header' % (NEXMDir)):
             print 'Path %s/header does not exist.' % (NEXMDir)
             sys.exit()
+        header = header('%s/header' % (NEXMDir))
+        '''
         header = open('%s/header' % (NEXMDir),'r')
         header = header.readlines()
     if dynq == 1: ## single trajectory
@@ -109,6 +111,13 @@ def dihedral():
             cdata = np.int(line.split()[0][len('out_coords_steps='):-1])
         if 'natoms' in line:
             natoms = np.int(line.split()[0][len('natoms='):-1])
+'''
+        tinith = header.time_init
+        dt = header.time_step
+        tsmax = header.n_class_steps + 1
+        odata = header.out_data_steps
+        cdata = header.out_coords_steps
+        natoms = header.natoms
 
     ## Collection time ##
     if typeq == 0: ## mean dihedral

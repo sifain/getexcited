@@ -4,6 +4,7 @@ TASKS:
 Urgent
 1) make information from header a class and import all inputs
 2) make a dictionary for elements to atomic numbers
+3) separate function for collection time
 
 Less Urgent
 1) how to simulate pump-push-probe spectroscopy, possible convolution? Multiple pump-push delay times?

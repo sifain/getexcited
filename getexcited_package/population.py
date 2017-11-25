@@ -37,7 +37,7 @@ def population():
 
     print 'Collecting populations.'
 
-    ## directory names ##
+    ## Directory names ##
     NEXMDir = raw_input('NEXMD directory: ')
     if not os.path.exists(NEXMDir):
         print 'Path %s does not exist.' % (NEXMDir)

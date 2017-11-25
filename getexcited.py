@@ -92,6 +92,7 @@ from getexcited_package.bla import bla
 from getexcited_package.timing import timing
 from getexcited_package.permdipole import permdipole
 from getexcited_package.tdiagonal import tdiagonal
+from getexcited_package.header import header
 
 funq = input('\nSelect a task from the following list:\n\n[1] Prepare input files for single-point calculations\n[2] Generate an optical spectrum from single-point calculations\n[3] Prepare input files for NEXMD\n[4] Prepare input files for adiabatic dynamics with geometries from NEXMD\n[5] Collect populations from NEXMD\n[6] Collect pess and nacts from NEXMD\n[7] Prepare restart input files for NEXMD\n[8] Clean out the directories of NEXMD trajectories that are incomplete\n[9] Access options for geometry analysis\n[10] Access options for dipole analysis\n[11] Access options for transition density analysis\n[12] Access options for pump-push-probe spectroscopy (*** UNDER DEVELOPMENT, DO NOT USE ***)\n[13] Access code testing tools\n\nEnter the number corresponding to the desired task: ')
 if funq not in [1,2,3,4,5,6,7,8,9,10,11,12,13]:
@@ -119,7 +120,7 @@ if funq == 9:
         print 'Answer must be 1 through 4.'
         sys.exit()
     if advq == 1:
-        dihedral()
+        dihedral(header)
     if advq == 2:
         bondlength()
     if advq == 3:

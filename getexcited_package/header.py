@@ -14,9 +14,25 @@ class header(object):
     def __init__(self, path):
         self.path = path
         file = open(path,'r')
-        self.file = file = file.readlines()
-
-        for line in file:
+        #self.file = file = file.readlines()
+        self.file = file.readlines()
+        
+        line_num = 0
+        for line in self.file:
+            ## Determine lines defining the qmmm block ##
+            if '&qmmm' in line:
+                qmmm_block_start = line_num
+            if '&endqmmm' in line:
+                qmmm_block_end  = line_num
+            ## Determine lines defining the moldyn block ##
+            if '&moldyn' in line:
+                moldyn_block_start = line_num
+            if '&endmoldyn' in line
+                moldyn_block_end = line_num
+            line_num += 1
+            
+        line_num = 0
+        for line in self.file:
             '''
             ## Start geometry optimization ##
             if 'maxcyc=' in line and 'dav_maxcyc=' not in line:
@@ -110,9 +126,9 @@ class header(object):
                 self.time_step = np.float(line.split()[0][len('time_step='):-1])
             if 'n_class_steps=' in line:
                 self.n_class_steps = np.int(line.split()[0][len('n_class_steps='):-1])
-            '''
             if 'n_quant_steps=' in line:
                 self.n_quant_steps = np.int(line.split()[0][len('n_quant_steps='):-1])
+            '''
             if 'moldyn_deriv_flag=' in line:
                 self.moldyn_deriv_flag = np.int(line.split()[0][len('moldyn_deriv_flag='):-1])
             if 'num_deriv_step=' in line:
@@ -150,11 +166,8 @@ class header(object):
             ## End thermostat parameters ##
             '''
             ## Start output and log parameters ##
-            '''
-            if 'verbosity=' in line:
-                self.verbosity = np.int(line.split()[0][len('verbosity='):-1])
-                # we have a problem with this verbosity since there are two different verbosities - need to check how I solved this issue
-            '''
+            if 'verbosity=' in line and moldyn_block_start < line_num < moldyn_block_end:
+                self.moldyn_verbosity = np.int(line.split()[0][len('verbosity='):-1])
             if 'out_data_steps=' in line:
                 self.out_data_steps = np.int(line.split()[0][len('out_data_steps='):-1])
             if 'out_coords_steps=' in line:
@@ -166,7 +179,8 @@ class header(object):
                 self.out_count_init = np.int(line.split()[0][len('out_count_init='):-1])
             ## End output and log parameters ##
             '''
-
+            ## Check is coefficients are set ##
             if 'quant_amp_phase' in line:
                 header.quant_amp_phase = 'The quant_amp_phase flag is in the header.'
 
+            line_num += 1

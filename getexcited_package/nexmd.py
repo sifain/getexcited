@@ -89,20 +89,20 @@ def nexmd(header):
     ## state not set, coefficients not set  (waves = 0, wavec = 0) - photoexcited wavepacket
     try:
         header.exc_state_init
-        waves = 1
+        state_set = 1
     except AttributeError:
-        waves = 0
+        state_set = 0
     try:
         header.quant_amp_phase
-        wavec = 0
+        coeff_set = 0
     except AttributeError:
-        waves = 1
-    if waves == 1 and wavec == 1 or waves == 1 and wavec == 0:
+        state_set = 1
+    if state_set == 1 and coeff_set == 1 or state_set == 1 and coeff_set == 0:
         print 'All trajectories will begin on state %d.' % (cstate)
-    if waves == 0 and wavec == 1:
+    if state_set == 0 and coeff_set == 1:
         print 'There is an inconsistency in header.\nInput exc_state_init is not set, while coefficients are set.'
         sys.exit()
-    if waves == 0 and wavec == 0:
+    if state_set == 0 and coeff_set == 0:
         print 'Initial excited states will model a photoexcited wavepacket according to the optical spectrum.'
         spdir = raw_input('Single-point calculations directory: ')
         if not os.path.exists(spdir):
@@ -193,13 +193,13 @@ def nexmd(header):
         arrayv = np.append(arrayv,lenv)
         arrayv = np.int_(arrayv)
     tinc = time/(ncoords - 1)
-    if waves == 1 and wavec == 1 or waves == 1 and wavec == 0:
+    if state_set == 1 and coeff_set == 1 or state_set == 1 and coeff_set == 0:
         print 'A total of %d coordinate files, ranging from %.2f to %.2f fs in increments of %.2f fs, were found.' % (ncoords,tinit,time,tinc)
-    if waves == 0 and wavec == 0:
+    if state_set == 0 and coeff_set == 0:
         print 'A total of %d coordinate files, ranging from %.2f to %.2f fs in increments of %.2f fs, were found.\nNote: only coordinate files used for single-point calculations can be used for NEXMD.' % (ncoords,tinit,time,tinc)
 
     ## Choose geometries for a photoexcited wavepacket ##
-    if waves == 0 and wavec == 0:
+    if state_set == 0 and coeff_set == 0:
         NEXMDs = glob.glob('%s/NEXMD*/' % (spdir))
         NEXMDs.sort()
         if len(NEXMDs) == 0:
@@ -245,7 +245,7 @@ def nexmd(header):
             sys.exit()
 
     ## Choose geometries for a single excited state ##
-    if waves == 1 and wavec == 1 or waves == 1 and wavec == 0:
+    if state_set == 1 and coeff_set == 1 or state_set == 1 and coeff_set == 0:
         coords = input('Enter requested range of the ground-state sampling by coordinate files and the number of trajectories.\nInput an array of the form [start, end, number]: ')
         if not isinstance(coords,list):
             print 'Input must be an array of the form [start, end, number].\nFor example, [1, 1000, 500] requests 500 coordinate files sampled from 1 to 1000.'
@@ -299,13 +299,13 @@ def nexmd(header):
         print 'Number of trajectories per NEXMD folder must be integer greater than zero.'
         sys.exit()
     dirsplit = split*np.arange(1,np.ceil(np.float(ntraj)/split)+1)
-    if waves == 1 and wavec == 1 or waves == 1 and wavec == 0:
+    if state_set == 1 and coeff_set == 1 or state_set == 1 and coeff_set == 0:
         dirsplit[-1] = coords[1] + 1
         if coords[2] < 0:
             dirsplit = np.split(np.sort(random.sample(np.arange(coords[0],coords[1]+1),ntraj)),dirsplit)
         else:
             dirsplit = np.split(np.arange(coords[0],coords[1]+1,interval),dirsplit)
-    if waves == 0 and wavec == 0:
+    if state_set == 0 and coeff_set == 0:
         dirsplit[-1] = dirlist1[-1]
         if ntrajq < 0:
             dirsplit = np.split(np.sort(random.sample(dirlist1,ntraj)),dirsplit)
@@ -360,7 +360,7 @@ def nexmd(header):
     rseeds = np.int_(rseeds)
 
     ## Prepare NEXMD input files with a photoexcited wavepacket ##
-    if waves == 0 and wavec == 0:
+    if state_set == 0 and coeff_set == 0:
         spNEXMDs = glob.glob('%s/NEXMD*/' % (spdir))
         spNEXMDs.sort()
         error = open('%s/ceo.err' % (cwd),'w')
@@ -419,7 +419,7 @@ def nexmd(header):
                 coords = datac[arrayc[dir]+1:arrayc[dir+1]-1:1]
                 velocs = datav[arrayv[dir]+2:arrayv[dir+1]-1:1]
                 inputfile = open('%s/NEXMD%d/%04d/input.ceon' % (outdir,NEXMD,dir),'w')
-                for line in header:
+                for line in header.file:
                     if 'rnd_seed' in line:
                         inputfile.write('   rnd_seed=%d, ! seed for the random number generator\n' % (rseeds[traj]))
                     else:
@@ -460,7 +460,7 @@ def nexmd(header):
             os.remove('%s/ceo.err' % (cwd))
 
     ## Prepare NEXMD input files with a single excited state ##
-    if waves == 1 and wavec == 1 or waves == 1 and wavec == 0:
+    if state_set == 1 and coeff_set == 1 or state_set == 1 and coeff_set == 0:
         qpop = np.zeros(cstate)
         qpop[cstate - 1] = 1.0
         traj = 0
@@ -473,7 +473,7 @@ def nexmd(header):
                 coords = datac[arrayc[dir]+1:arrayc[dir+1]-1:1]
                 velocs = datav[arrayv[dir]+2:arrayv[dir+1]-1:1]
                 inputfile = open('%s/NEXMD%d/%04d/input.ceon' % (outdir,NEXMD,dir),'w')
-                for line in header:
+                for line in header.file:
                     if 'rnd_seed' in line:
                         inputfile.write('   rnd_seed=%d, ! seed for the random number generator\n' % (rseeds[traj])) ## for new code
                         #inputfile.write('%d ! seed for the random number generator\n' % (rseeds[traj])) ## for old code

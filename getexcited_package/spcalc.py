@@ -204,7 +204,7 @@ def spcalc(header):
             velocs = datav[arrayv[dir]+2:arrayv[dir+1]-1:1]
             os.makedirs('%s/NEXMD%d/%04d' % (outdir,NEXMD,dir))
             inputfile = open('%s/NEXMD%d/%04d/input.ceon' % (outdir,NEXMD,dir),'w')
-            for line in header:
+            for line in header.file:
                 if 'nucl_coord_veloc' in line:
                     inputfile.write('&coord\n')
                     aindex = 0

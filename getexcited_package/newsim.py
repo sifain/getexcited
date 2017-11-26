@@ -81,10 +81,10 @@ def newsim(header):
     old_header = header('%s/header' % (oldir))
 
     ## Check output data ##
-    if old_header.out_data_steps = 0:
+    if old_header.out_data_steps == 0:
         print 'No data have been printed to files because out_data_steps = 0 in %s/header.' % (olddir)
         sys.exit()
-    if old_header.out_coords_steps = 0:
+    if old_header.out_coords_steps == 0:
         print 'No coordinates have been printed to coords.xyz because out_coords_steps = 0 in %/header.' % (olddir)
         sys.exit()
 

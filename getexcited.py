@@ -111,7 +111,7 @@ if funq == 5:
 if funq == 6:
     pesnact()
 if funq == 7:
-    restart(pathtopack)
+    restart(pathtopack,header)
 if funq == 8:
     cleandir()
 if funq == 9:
@@ -133,7 +133,7 @@ if funq == 10:
         print 'Answer must be 1.'
         sys.exit()
     if advq == 1:
-        permdipole(pathtopack)
+        permdipole(pathtopack,header)
 if funq == 11:
     advq = input('\nSelect a task from the following list:\n\n[1] Analyze induced charge from diagonal elements of the transition density matrix\n\nEnter the number corresponding to the desired task: ')
     if advq not in [1]:

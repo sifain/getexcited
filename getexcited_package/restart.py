@@ -47,7 +47,7 @@ def extract(file):
     num = re.findall('\d+$', file)
     return (np.int(num[0]) if num else 0, file)
 
-def restart(pathtodel):
+def restart(pathtopack,header):
 
     print 'Preparing restart input files for NEXMD.'
 
@@ -77,44 +77,30 @@ def restart(pathtodel):
     if not os.path.exists('%s/header' % (NEXMDir)):
         print 'Path %s/header does not exist.' % (NEXMDir)
         sys.exit()
-    header = open('%s/header' % (NEXMDir),'r')
-    header = header.readlines()
-    num = 0
-    tline = len(header)
-    verb = None
-    for line in header:
-        if 'bo_dynamics_flag' in line:
-            boflag = np.int(line.split()[0][len('bo_dynamics_flag='):-1])
-        if 'time_step' in line:
-            dt = np.float(line.split()[0][len('time_step='):-1])
-        if 'n_class_steps' in line:
-            tsmax = np.int(line.split()[0][len('n_class_steps='):-1])
-        if 'n_quant_steps' in line:
-            nqstep = np.int(line.split()[0][len('n_quant_steps='):-1])
-            if nqstep == 0:
-                nqstep = 1
-        if '&moldyn' in line:
-            tline = num
-        if 'verbosity' in line and num > tline and verb is None:
-            verb = np.int(line.split()[0][len('verbosity='):-1])
-        if 'out_data_steps' in line:
-            odata = np.int(line.split()[0][len('out_data_steps='):-1])
-            if odata == 0:
-                print 'No data has been printed to files because out_data_steps = 0 in header.'
-                sys.exit()
-        num += 1
-    print 'Currently, trajectories are set to run for %d classical steps with a time-step of %.2f fs.\nThis is a total of %.2f fs.' % (tsmax,dt,tsmax*dt)
+    header = header('%s/header' % (NEXMDir))
+
+    ## Check output data ##
+    if header.out_data_steps == 0:
+        print 'No data have been printed to files because out_data_steps = 0 in %s/header.' % (NEXMDir)
+        sys.exit()
+
+    ## Redefine number of quantum steps per classical step if set to 0 in header ##
+    if header.n_quant_steps == 0:
+        header.n_quant_steps = 1
+
+## Figure out what this part is about
+    print 'Currently, trajectories are set to run for %d classical steps with a time-step of %.2f fs.\nThis is a total of %.2f fs.' % (header.n_class_steps,header.time_step,header.n_class_steps*header.time_step)
     tsmaxq = input('Keep this trajectory length? Answer yes [1] or no [0]: ')
     if tsmaxq not in [1,0]:
         print 'Answer must be 1 or 0.'
         sys.exit()
     if tsmaxq == 0:
         ntsmax = input('Enter new number of classical time-steps: ')
-        if isinstance(ntsmax, int) == false:
+        if isinstance(ntsmax, int) == False:
             print 'Answer must be integer.'
             sys.exit()
-        if ntsmax <= tsmax:
-            print 'Answer must be greater than or equal to the previous number of classical steps used, which was %d.\nTo reduce number of classical steps past %d, simply change n_class_steps in header.' % (tsmax,tsmax)
+        if ntsmax <= header.n_class_steps:
+            print 'Answer must be greater than or equal to the previous number of classical steps used, which was %d.\nTo reduce number of classical steps past %d, simply change n_class_steps in header.' % (header.n_class_steps,header.n_class_steps)
             sys.exit()
         nheader = open('%s/nheader' % (NEXMDir),'w')
         for line in header:
@@ -123,7 +109,7 @@ def restart(pathtodel):
             else:
                 nheader.write(line)
         nheader.close()
-        tsmax = ntsmax
+        header.n_class_steps = ntsmax
         os.rename('%s/nheader' % (NEXMDir), '%s/header' % (NEXMDir))
     
     ## Choose random seeds ##
@@ -134,7 +120,7 @@ def restart(pathtodel):
                 print 'Path %sdirlist1 does not exist.' % (NEXMD)
                 sys.exit()
             data = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-            if isinstance(data,int) == true:
+            if isinstance(data,int) == True:
                 data = np.array([data])
             ntraj += len(data)
     if dynq == 1: ## single trajectory
@@ -154,9 +140,9 @@ def restart(pathtodel):
             print 'Path %s does not exist.' % (rseeds)
             sys.exit()
         rseeds = np.int_(np.genfromtxt('%s' % (rseeds)))
-        if isinstance(rseeds,int) == true:
+        if isinstance(rseeds,int) == True:
             rseeds = np.array([rseeds])
-        lenrseeds = len(rseeds) # was len
+        lenrseeds = len(rseeds)
         if lenrseeds < ntraj:
             print 'Length of random-seeds list must be equal to or greater than the number of trajectories.\nUser inputted a random-seeds list of length %d, while the number of trajectories is %d.' % (lenrseeds,ntraj)
             sys.exit()
@@ -177,7 +163,7 @@ def restart(pathtodel):
         traj = 0
         for NEXMD in NEXMDs:
             dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-            if isinstance(dirlist1,int) == true:
+            if isinstance(dirlist1,int) == True:
                 dirlist1 = np.array([dirlist1])
             dirlist = open('%s/dirlist' % (NEXMD),'w')
             for dir in dirlist1:
@@ -190,7 +176,7 @@ def restart(pathtodel):
                 data = open('%s/%04d/energy-ev.out' % (NEXMD,dir),'r')
                 data = data.readlines()
                 tsteps = len(data) - 2
-                if tsteps != tsmax:
+                if tsteps != header.n_class_steps:
                     if not os.path.exists('%s/%04d/restart.out' % (NEXMD,dir)):
                         print >> error, 'Path %s/%04d/restart.out does not exist.' % (NEXMD,dir)
                         print >> rseedslist, '%d' % (-123456789)
@@ -259,7 +245,7 @@ def restart(pathtodel):
                                     inputfile.write('   time_init=%.1f, ! initial time, fs [0.00]\n' % (time))
                                 else:
                                     if 'n_class_steps' in line:
-                                        inputfile.write('   n_class_steps=%d, ! number of classical steps [1]\n' % (np.int(tsmax-time/dt)))
+                                        inputfile.write('   n_class_steps=%d, ! number of classical steps [1]\n' % (np.int(header.n_class_steps-time/header.time_step)))
                                     else:
                                         if 'out_count_init' in line:
                                             inputfile.write('   out_count_init=%d, ! initial count for output files [0]\n' % (maxview))
@@ -308,7 +294,7 @@ def restart(pathtodel):
         data = open('%s/energy-ev.out' % (NEXMDir),'r')
         data = data.readlines()
         tsteps = len(data) - 2
-        if tsteps != tsmax:
+        if tsteps != header.n_class_steps:
             if not os.path.exists('%s/restart.out' % (NEXMDir)):
                 print >> error, 'Path %s/restart.out does not exist.' % (NEXMDir)
                 os.remove('%s/rseedslist%d' % (NEXMDir, maxdir + 1))
@@ -372,7 +358,7 @@ def restart(pathtodel):
                             inputfile.write('   time_init=%.1f, ! initial time, fs [0.00]\n' % (time))
                         else:
                             if 'n_class_steps' in line:
-                                inputfile.write('   n_class_steps=%d, ! number of classical steps [1]\n' % (np.int(tsmax-time/dt)))
+                                inputfile.write('   n_class_steps=%d, ! number of classical steps [1]\n' % (np.int(header.n_class_steps-time/header.time_step)))
                             else:
                                 if 'out_count_init' in line:
                                     inputfile.write('   out_count_init=%d, ! initial count for output files [0]\n' % (maxview))
@@ -409,7 +395,7 @@ def restart(pathtodel):
     if contq == 0:
         sys.exit()
     print 'Deleting extraneous data in output files. please wait ...'
-    if boflag == 0:
+    if header.bo_dynamics_flag == 0:
         files = np.array(['coeff-n.out', 'energy-ev.out', 'nact.out', 'order.out', 'pes.out', 'temperature.out', 'transition-densities.out'])
         ofiles = np.array(['hops.out', 'hops-trial.out'])
     else:
@@ -426,7 +412,7 @@ def restart(pathtodel):
                 continue
             else:
                 dirlist = np.int_(np.genfromtxt('%s/%s/dirlist' % (cwd,NEXMD)))
-            if isinstance(dirlist,int) == true:
+            if isinstance(dirlist,int) == True:
                     dirlist = np.array([dirlist])
             for dir in dirlist:
                 if not os.path.exists('%s/%s/%04d' % (cwd,NEXMD,dir)):
@@ -442,32 +428,32 @@ def restart(pathtodel):
                         continue
                     ## Derivation of the following algorithm is provided at the end of this script ##
                     data = subprocess.check_output(['tail','-1','%s' % (files[index])])
-                    ltime = np.around(np.float(np.fromstring(data,dtype=float,sep=' ')[1 if index == 0 and boflag == 0 else 0]), decimals = 3)
-                    if rtimes[traj] > ltime + odata*dt:
+                    ltime = np.around(np.float(np.fromstring(data,dtype=float,sep=' ')[1 if index == 0 and header.bo_dynamics_flag == 0 else 0]), decimals = 3)
+                    if rtimes[traj] > ltime + header.out_data_steps*header.time_step:
                         print >> error, 'last time-step in', '%s/%s%04d/%s' % (cwd,NEXMD,dir,'restart.out'), 'exceeds last time-step in', '%s/%s%04d/%s' % (cwd,NEXMD,dir,files[index])
                         rstflag = 1
                         continue
                     ncsteps = 0
-                    while rtimes[traj] + ncsteps*(odata*dt) <= ltime:
+                    while rtimes[traj] + ncsteps*(header.out_data_steps*header.time_step) <= ltime:
                         ncsteps += 1
-                    if verb == 3 and index in [2,4]:
-                        lctime = rtimes[traj] + (ncsteps - 1)*(odata*dt)
+                    if header.moldyn_verbosity == 3 and index in [2,4]:
+                        lctime = rtimes[traj] + (ncsteps - 1)*(header.out_data_steps*header.time_step)
                         nqsteps = 0
-                        while lctime*nqstep + nqsteps*dt <= ltime*nqstep:
+                        while lctime*header.n_quant_steps + nqsteps*header.time_step <= ltime*header.n_quant_steps:
                             nqsteps += 1
                         if ltime == lctime:
-                            nlines = (ncsteps - 1)*(odata*(nqstep - 1) + 1) + (nqsteps - 1) + 1
+                            nlines = (ncsteps - 1)*(header.out_data_steps*(header.n_quant_steps - 1) + 1) + (nqsteps - 1) + 1
                         else:
                             ncsteps = 0
-                            while rtimes[traj] + ncsteps*dt <= ltime:
+                            while rtimes[traj] + ncsteps*header.time_step <= ltime:
                                 ncsteps += 1
-                            nlines = (ncsteps - 1)*(odata*(nqstep - 1) + 1) + (nqsteps - 1) - (ncsteps - 1) + 1
+                            nlines = (ncsteps - 1)*(header.out_data_steps*(header.n_quant_steps - 1) + 1) + (nqsteps - 1) - (ncsteps - 1) + 1
                     else:
                         nlines = (ncsteps - 1) + 1
-                    if boflag == 0:
-                        subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel,(nlines - 1 if index in [2,3,5] else nlines),files[index])))
+                    if header.bo_dynamics_flag == 0:
+                        subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtopack,(nlines - 1 if index in [2,3,5] else nlines),files[index])))
                     else:
-                        subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel,(nlines - 1 if index == 1 else nlines),files[index])))
+                        subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtopack,(nlines - 1 if index == 1 else nlines),files[index])))
                     os.rename('%s.restart' % (files[index]), '%s' % (files[index]))
                 for index in np.arange(len(ofiles)):
                     if not os.path.exists('%s/%s/%04d/%s' % (cwd,NEXMD,dir,ofiles[index])):
@@ -480,7 +466,7 @@ def restart(pathtodel):
                         data = subprocess.check_output(['tail','%d' % (-(nlines + 1)),'%s' % (ofiles[index])])
                         ltime = np.float(np.fromstring(data,dtype=float,sep=' ')[0])
                         nlines += 1
-                    subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel, nlines - 1, ofiles[index])))
+                    subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtopack, nlines - 1, ofiles[index])))
                     os.rename('%s.restart' % (ofiles[index]), '%s' % (ofiles[index]))
                 print '%s%04d' % (NEXMD,dir)
                 traj += 1
@@ -503,32 +489,32 @@ def restart(pathtodel):
                 continue
             ## Derivation of the following algorithm is provided at the end of this script ##
             data = subprocess.check_output(['tail','-1','%s' % (files[index])])
-            ltime = np.around(np.float(np.fromstring(data,dtype=float,sep=' ')[1 if index == 0 and boflag == 0 else 0]), decimals = 3)
-            if rtimes[traj] > ltime + odata*dt:
+            ltime = np.around(np.float(np.fromstring(data,dtype=float,sep=' ')[1 if index == 0 and header.bo_dynamics_flag == 0 else 0]), decimals = 3)
+            if rtimes[traj] > ltime + header.out_data_steps*header.time_step:
                 print >> error, 'last time-step in', '%s/%s/%s' % (cwd,NEXMDir,'restart.out'), 'exceeds last time-step in', '%s/%s/%s' % (cwd,NEXMDir,files[index])
                 rstflag = 1
                 continue
             ncsteps = 0
-            while rtimes[traj] + ncsteps*(odata*dt) <= ltime:
+            while rtimes[traj] + ncsteps*(header.out_data_steps*header.time_step) <= ltime:
                 ncsteps += 1
-            if verb == 3 and index in [2,4]:
-                lctime = rtimes[traj] + (ncsteps - 1)*(odata*dt)
+            if header.moldyn_verbosity == 3 and index in [2,4]:
+                lctime = rtimes[traj] + (ncsteps - 1)*(header.out_data_steps*header.time_step)
                 nqsteps = 0
-                while lctime*nqstep + nqsteps*dt <= ltime*nqstep:
+                while lctime*header.n_quant_steps + nqsteps*header.time_step <= ltime*header.n_quant_steps:
                     nqsteps += 1
                 if ltime == lctime:
-                    nlines = (ncsteps - 1)*(odata*(nqstep - 1) + 1) + (nqsteps - 1) + 1
+                    nlines = (ncsteps - 1)*(header.out_data_steps*(header.n_quant_steps - 1) + 1) + (nqsteps - 1) + 1
                 else:
                     ncsteps = 0
-                    while rtimes[traj] + ncsteps*dt <= ltime:
+                    while rtimes[traj] + ncsteps*header.time_step <= ltime:
                         ncsteps += 1
-                    nlines = (ncsteps - 1)*(odata*(nqstep - 1) + 1) + (nqsteps - 1) - (ncsteps - 1) + 1
+                    nlines = (ncsteps - 1)*(header.out_data_steps*(header.n_quant_steps - 1) + 1) + (nqsteps - 1) - (ncsteps - 1) + 1
             else:
                 nlines = (ncsteps - 1) + 1
-            if boflag == 0:
-                subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel,(nlines - 1 if index in [2,3,5] else nlines),files[index])))
+            if header.bo_dynamics_flag == 0:
+                subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtopack,(nlines - 1 if index in [2,3,5] else nlines),files[index])))
             else:
-                subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel,(nlines - 1 if index == 1 else nlines),files[index])))
+                subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtopack,(nlines - 1 if index == 1 else nlines),files[index])))
             os.rename('%s.restart' % (files[index]), '%s' % (files[index]))
         for index in np.arange(len(ofiles)):
             if not os.path.exists('%s/%s/%s' % (cwd,NEXMDir,ofiles[index])):
@@ -541,7 +527,7 @@ def restart(pathtodel):
                 data = subprocess.check_output(['tail','%d' % (-(nlines + 1)),'%s' % (ofiles[index])])
                 ltime = np.float(np.fromstring(data,dtype=float,sep=' ')[0])
                 nlines += 1
-            subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtodel, nlines - 1, ofiles[index])))
+            subprocess.call(shlex.split('sh %s/getexcited_package/cutdata.sh %d %s' % (pathtopack, nlines - 1, ofiles[index])))
             os.rename('%s.restart' % (ofiles[index]), '%s' % (ofiles[index]))
         print '%s' % (NEXMDir)
         traj += 1
@@ -553,38 +539,38 @@ def restart(pathtodel):
 
 '''
     
-    dt     = time-step
-    verb   = verbosity of molecular dynamics data
-    odata  = data are printed every odata classical time-steps
+    header.time_step     = time-step
+    header.moldyn_verbosity   = verbosity of molecular dynamics data
+    header.out_data_steps  = data are printed every out_data_steps classical time-steps
     ltime  = last printed time-step (may be classical or quantum)
     lctime = last printed classical time-step
     rtime  = restart time-step (always classical)
-    nqstep = number of quantum steps per classical step
+    header.n_quant_steps= number of quantum steps per classical step
     
-    a = (lctime - rtime)/dt                                      = total # of classical steps computed
-    b = (lctime - rtime)/(odata x dt)                            = total # of classical steps printed
-    c = (lctime - rtime)/dt x ((odata - 1)/odata)                = total # of classical steps not printed
-    d = (nqstep - 1) x (lctime - rtime)/dt x ((odata - 1)/odata) = total # of quantum steps from unprinted classical steps
-    e = nqstep x (lctime - rtime)/(odata x dt)                   = total # of classical and quantum steps from printed classical steps
+    a = (lctime - rtime)/header.time_step                                                                                   = total # of classical steps computed
+    b = (lctime - rtime)/(header.out_data_steps x header.time_step)                                                         = total # of classical steps printed
+    c = (lctime - rtime)/header.time_step x ((header.out_data_steps - 1)/header.out_data_steps)                             = total # of classical steps not printed
+    d = (header.n_quant_steps- 1) x (lctime - rtime)/header.time_step x ((header.out_data_steps - 1)/header.out_data_steps) = total # of quantum steps from unprinted classical steps
+    e = header.n_quant_stepsx (lctime - rtime)/(header.out_data_steps x header.time_step)                                   = total # of classical and quantum steps from printed classical steps
     
-    if verb != 3:
+    if header.moldyn_verbosity != 3:
         total # of lines to delete = b
-    if verb == 3 and file not in [nact.out, pes.out]:
+    if header.moldyn_verbosity == 3 and file not in [nact.out, pes.out]:
         total # of lines to delete = b
-    if verb == 3 and file in [nact.out, pes.out]:
+    if header.moldyn_verbosity == 3 and file in [nact.out, pes.out]:
         total # of lines to delete = d + e + resdiual quantum steps after lctime
         if ltime == lctime:
-            residual quantum steps after lctime = nqstep x (ltime - lctime)/dt
-            total # of lines to delete = d + e + nqstep x (ltime - lctime)/dt + 1 ( + 1 to delete the restart time-step )
-            total # of lines to delete = (lctime - rtime)*(odata*(nqstep - 1) + 1)/(odata*dt) + nqstep*(ltime - lctime)/dt + 1
-            total # of lines to delete = (ncsteps - 1)*(odata*(nqstep - 1) + 1) + (nqsteps - 1) + 1
+            residual quantum steps after lctime = header.n_quant_stepsx (ltime - lctime)/header.time_step
+            total # of lines to delete = d + e + header.n_quant_stepsx (ltime - lctime)/header.time_step + 1 ( + 1 to delete the restart time-step )
+            total # of lines to delete = (lctime - rtime)*(header.out_data_steps*(header.n_quant_steps- 1) + 1)/(header.out_data_steps*header.time_step) + header.n_quant_steps*(ltime - lctime)/header.time_step + 1
+            total # of lines to delete = (ncsteps - 1)*(header.out_data_steps*(header.n_quant_steps- 1) + 1) + (nqsteps - 1) + 1
             *** see in code how to calculate ncsteps and nqsteps ***
         if ltime != lctime:
-            residual quantum steps after lctime = nqstep x (ltime - lctime)/dt
+            residual quantum steps after lctime = header.n_quant_stepsx (ltime - lctime)/header.time_step
             number of unprinted classical steps after lctime = ncsteps - 1
-            total # of lines to delete = d + e + nqstep x (ltime - lctime)/dt - (ncsteps - 1) + 1 ( + 1 to delete the restart time-step)
-            total # of lines to delete = (lctime - rtime)*(odata*(nqstep - 1) + 1)/(odata*dt) + nqstep*(ltime - lctime)/dt - (ncsteps - 1) + 1
-            total # of lines to delete = (ncsteps - 1)*(odata*(nqstep - 1) + 1) + (nqsteps - 1) - (ncsteps - 1) + 1
+            total # of lines to delete = d + e + header.n_quant_stepsx (ltime - lctime)/header.time_step - (ncsteps - 1) + 1 ( + 1 to delete the restart time-step)
+            total # of lines to delete = (lctime - rtime)*(header.out_data_steps*(header.n_quant_steps- 1) + 1)/(header.out_data_steps*header.time_step) + header.n_quant_steps*(ltime - lctime)/header.time_step - (ncsteps - 1) + 1
+            total # of lines to delete = (ncsteps - 1)*(header.out_data_steps*(header.n_quant_steps- 1) + 1) + (nqsteps - 1) - (ncsteps - 1) + 1
             *** see in code how to calculate ncsteps and nqsteps ***
             
 '''

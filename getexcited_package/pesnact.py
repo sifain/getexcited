@@ -110,7 +110,7 @@ def pesnact():
         if 'out_data_steps' in line:
             odata = np.int(line.split()[0][len('out_data_steps='):-1])
             if odata == 0:
-                print 'No data has been printed to files because out_data_steps = 0 in header.'
+                print 'No data have been printed to files because out_data_steps = 0 in header.'
                 sys.exit()
         num += 1
     if boflag == 1 and stateinit == None:

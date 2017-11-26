@@ -105,7 +105,7 @@ if funq == 2:
 if funq == 3:
     nexmd(header)
 if funq == 4:
-    newsim()
+    newsim(header)
 if funq == 5:
     population(header)
 if funq == 6:

@@ -109,11 +109,11 @@ if funq == 4:
 if funq == 5:
     population(header)
 if funq == 6:
-    pesnact()
+    pesnact(header)
 if funq == 7:
     restart(pathtopack,header)
 if funq == 8:
-    cleandir()
+    cleandir(header)
 if funq == 9:
     advq = input('\nSelect a task from the following list:\n\n[1] Calculate dihedral angle\n[2] Calculate bond lengths\n[3] Calculate bond length alternation\n[4] Calculate angle between two bonds\n\nEnter the number corresponding to the desired task: ')
     if advq not in [1,2,3,4]:

@@ -62,7 +62,7 @@ import glob
 
 cwd = os.getcwd()
 
-def pesnact():
+def pesnact(header):
 
     print 'Collecting pess and/or nacts.'
 

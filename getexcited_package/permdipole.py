@@ -98,10 +98,10 @@ def permdipole(pathtopack,header):
             sys.exit()
         header = header('%s/input.ceon' % (NEXMDir))
 
-    ## Adding + 1 to include the zeroth time-step ##
+    ## Adding + 1 to include zeroth time-step ##
     header.n_class_steps = header.n_class_steps + 1
 
-    ## Check to ensure state is set for BO dynamics ##
+    ## Check state is set for BO dynamics ##
     try:
         header.exc_state_init
         state_set = 1

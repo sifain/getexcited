@@ -47,7 +47,7 @@ import glob
 
 cwd = os.getcwd()
 
-def tdiagonal():
+def tdiagonal(header):
 
     print 'Calculating occupation of excitation as a function of time according to transition densities.'
 
@@ -133,30 +133,29 @@ def tdiagonal():
         if not os.path.exists('%s/header' % (NEXMDir)):
             print 'Path %s/header does not exist.' % (NEXMDir)
             sys.exit()
-        header = open('%s/header' % (NEXMDir),'r')
-        header = header.readlines()
+        header = header('%s/header' % (NEXMDir))
     if dynq == 1: ## single trajectory
         if not os.path.exists('%s/input.ceon' % (NEXMDir)):
             print 'Path %s/input.ceon does not exist.' % (NEXMDir)
             sys.exit()
-        header = open('%s/input.ceon' % (NEXMDir))
-        header = header.readlines()
-    stateinit = None
-    for line in header:
-        if 'bo_dynamics_flag' in line:
-            boflag = np.int(line.split()[0][len('bo_dynamics_flag='):-1])
-        if 'exc_state_init=' in line:
-            stateinit = np.int(line.split()[0][len('exc_state_init='):-1])
-        if 'time_init' in line:
-            tinith = np.float(line.split()[0][len('time_init='):-1])
-        if 'time_step' in line:
-            dt = np.float(line.split()[0][len('time-step='):-1])
-        if 'n_class_steps' in line:
-            tsmax = np.int(line.split()[0][len('n_class_steps='):-1]) + 1
-        if 'out_data_steps' in line:
-            odata = np.int(line.split()[0][len('out_data_steps='):-1])
-    if boflag == 1 and stateinit == None:
-        print 'Dynamics are set to Born-Oppenheimer, but the initial state is not set.\nPlease check bo_dynamics_flag and exc_state_init in header.'
+        header = header('%s/input.ceon' % (NEXMDir))
+
+    ## Adding + 1 to include zeroth time-step ##
+    header.n_class_steps = header.n_class_steps + 1
+
+    ## Check output data ##
+    if header.out_data_steps == 0:
+        print 'No data have been printed to files because out_data_steps = 0 in %s/header.' % (NEXMDir)
+        sys.exit()
+
+    ## Check state is set for BO dynamics ##
+    try:
+        header.exc_state_init
+        state_set = 1
+    except AttributeError:
+        state_set = 0
+    if header.bo_dynamics_flag == 1 and state_set == 0:
+        print 'Dynamics are set to Born-Oppenheimer (bo_dynamics_flag = 1), but the initial state is not set.\nPlease check bo_dynamics_flag and exc_state_init in header.'
         sys.exit()
 
     ## Collection time ##
@@ -173,13 +172,13 @@ def tdiagonal():
             sys.exit()
         tcoll = np.float(tcoll)
         nsteps = 1
-        while nsteps*dt <= tcoll:
+        while nsteps*header.time_step <= tcoll:
             nsteps += 1
-        tcoll = (nsteps - 1)*dt
-        if tcoll > (tsmax - 1)*dt:
-            tcoll = (tsmax - 1)*dt
+        tcoll = (nsteps - 1)*header.time_step
+        if tcoll > (header.n_class_steps - 1)*header.time_step:
+            tcoll = (header.n_class_steps - 1)*header.time_step
     if typeq == 1: ## all occupations
-        tcoll = (tsmax - 1)*dt
+        tcoll = (header.n_class_steps - 1)*header.time_step
     if typeq == 2: ## all up to user-defined time
         tcoll = input('Calculate occupation up to what time in femtoseconds? ')
         if isinstance(tcoll, int) == False and isinstance(tcoll, float) == False:
@@ -190,23 +189,23 @@ def tdiagonal():
             sys.exit()
         tcoll = np.float(tcoll)
         nsteps = 1
-        while nsteps*dt <= tcoll:
+        while nsteps*header.time_step <= tcoll:
             nsteps += 1
-        tcoll = (nsteps - 1)*dt
-        if tcoll > (tsmax - 1)*dt:
-            tcoll = (tsmax - 1)*dt
+        tcoll = (nsteps - 1)*header.time_step
+        if tcoll > (header.n_class_steps - 1)*header.time_step:
+            tcoll = (header.n_class_steps - 1)*header.time_step
 
     ## Number of classical steps ##
     tscol = 0
-    while tscol*dt*odata <= tcoll:
+    while tscol*header.time_step*header.out_data_steps <= tcoll:
         tscol += 1
         
     ## Line numbers and collection time array ##
     linenums = np.arange(tscol)
-    times = np.around(np.linspace(tinith, tcoll, tscol), decimals  = 3)
+    times = np.around(np.linspace(header.time_init, tcoll, tscol), decimals  = 3)
 
     ## Single adiabatic trajectory ##
-    if dynq == 1 and boflag == 1:
+    if dynq == 1 and header.bo_dynamics_flag == 1:
         ## All time-steps - single adiabatic trajectory ##
         if typeq == 1:
             ## Generate output file ##
@@ -270,13 +269,13 @@ def tdiagonal():
             with open('%s/td_raw_ensemble.out' % (cwd),'a') as output:
                 np.savetxt(output, data, fmt='%10s %07.2f '+ '%.3f ' * (nfrag + 2))
             ctraj += 1
-            if tsteps == tsmax:
+            if tsteps == header.n_class_steps:
                 etraj += 1
-            print '%s' % (NEXMDir), '%0*.2f' % (len(str(tsmax)) + 2, (tsteps - 1)*dt)
+            print '%s' % (NEXMDir), '%0*.2f' % (len(str(header.n_class_steps)) + 2, (tsteps - 1)*header.time_step)
             ttraj += 1
             ## Summary of results ##
             if ctraj == 0:
-                print 'No trajectories completed within %0*.2f fs.' % (len(str(tsmax)), tcoll)
+                print 'No trajectories completed within %0*.2f fs.' % (len(str(header.n_class_steps)), tcoll)
                 os.remove('%s/td_single.out' % (cwd))
             else:
                 print 'Total trajectories:', '%04d' % (ttraj)
@@ -347,13 +346,13 @@ def tdiagonal():
                 with open('%s/td_raw_ensemble.out' % (cwd),'a') as output:
                     np.savetxt(output, data, fmt='%10s %07.2f '+ '%.3f ' * (nfrag + 2))
                 ctraj += 1
-                if tsteps == tsmax:
+                if tsteps == header.n_class_steps:
                     etraj += 1
-            print '%s%04d' % (NEXMDir), '%0*.2f' % (len(str(tsmax)) + 2, (tsteps - 1)*dt)
+            print '%s%04d' % (NEXMDir), '%0*.2f' % (len(str(header.n_class_steps)) + 2, (tsteps - 1)*header.time_step)
             ttraj += 1
             ## Summary of results ##
             if ctraj == 0:
-                print 'No trajectories completed within %0*.2f fs.' % (len(str(tsmax)), tcoll)
+                print 'No trajectories completed within %0*.2f fs.' % (len(str(header.n_class_steps)), tcoll)
                 os.remove('%s/td_single.out' % (cwd))
             else:
                 print 'Total trajectories:', '%04d' % (ttraj)
@@ -361,7 +360,7 @@ def tdiagonal():
                 print 'Excellent trajectories:', '%04d' % (etraj)
 
     ## Single non-adiabatic trajectory ##
-    if dynq == 1 and boflag == 0:
+    if dynq == 1 and header.bo_dynamics_flag == 0:
         ## All time-steps - single non-adiabatic trajectory ##
         if typeq == 1:
             ## Generate output file ##
@@ -435,13 +434,13 @@ def tdiagonal():
             with open('%s/td_raw_ensemble.out' % (cwd),'a') as output:
                 np.savetxt(output, data, fmt='%10s %07.2f %d '+ '%.3f ' * (nfrag + 2))
             ctraj += 1
-            if tsteps == tsmax:
+            if tsteps == header.n_class_steps:
                 etraj += 1
-            print '%s' % (NEXMDir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+            print '%s' % (NEXMDir), '%0*.2f' % (len(str((header.n_class_steps))) + 2, (tsteps - 1)*header.time_step)
             ttraj += 1
             ## Summary of results ##
             if ctraj == 0:
-                print 'No trajectories completed within %0*.2f fs.' % (len(str(tsmax)), tcoll)
+                print 'No trajectories completed within %0*.2f fs.' % (len(str(header.n_class_steps)), tcoll)
                 os.remove('%s/td_single.out' % (cwd))
             else:
                 print 'Total trajectories:', '%04d' % (ttraj)
@@ -522,13 +521,13 @@ def tdiagonal():
                 with open('%s/td_raw_ensemble.out' % (cwd),'a') as output:
                     np.savetxt(output, data, fmt='%10s %07.2f %d '+ '%.3f ' * (nfrag + 2))
                 ctraj += 1
-                if tsteps == tsmax:
+                if tsteps == header.n_class_steps:
                     etraj += 1
-            print '%s%04d' % (NEXMDir), '%0*.2f' % (len(str(tsmax)) + 2, (tsteps - 1)*dt)
+            print '%s%04d' % (NEXMDir), '%0*.2f' % (len(str(header.n_class_steps)) + 2, (tsteps - 1)*header.time_step)
             ttraj += 1
             ## Summary of results ##
             if ctraj == 0:
-                print 'No trajectories completed within %0*.2f fs.' % (len(str(tsmax)), tcoll)
+                print 'No trajectories completed within %0*.2f fs.' % (len(str(header.n_class_steps)), tcoll)
                 os.remove('%s/td_single.out' % (cwd))
             else:
                 print 'Total trajectories:', '%04d' % (ttraj)
@@ -536,7 +535,7 @@ def tdiagonal():
                 print 'Excellent trajectories:', '%04d' % (etraj)
 
     ## Adiabatic ensemble ##
-    if dynq == 0 and boflag == 1:
+    if dynq == 0 and header.bo_dynamics_flag == 1:
         ## All time-steps - adiabatic ensemble ##
         if typeq == 1:
             ## Generate output/error files ##
@@ -617,13 +616,13 @@ def tdiagonal():
                     with open('%s/td_raw_ensemble.out' % (cwd),'a') as output:
                         np.savetxt(output, data, fmt='%10s %07.2f '+ '%.3f ' * (nfrag + 2))
                     ctraj += 1
-                    if tsteps == tsmax:
+                    if tsteps == header.n_class_steps:
                         etraj += 1
-                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((header.n_class_steps))) + 2, (tsteps - 1)*header.time_step)
                     ttraj += 1
             ## Summary of results ##
             if ctraj == 0:
-                print 'No trajectories completed within %0*.2f fs.' % (len(str(tsmax)), tcoll)
+                print 'No trajectories completed within %0*.2f fs.' % (len(str(header.n_class_steps)), tcoll)
                 os.remove('%s/td_raw_ensemble.out' % (cwd))
             else:
                 print 'Total trajectories:', '%04d' % (ttraj)
@@ -715,16 +714,16 @@ def tdiagonal():
                         with open('%s/td_raw_ensemble.out' % (cwd),'a') as output:
                             np.savetxt(output, data, fmt='%10s %07.2f '+ '%.3f ' * (nfrag + 2))
                         ctraj += 1
-                        if tsteps == tsmax:
+                        if tsteps == header.n_class_steps:
                             etraj += 1
                     else:
-                        print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(tsmax)) + 2, (tsteps - 1)*dt)
+                        print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(header.n_class_steps)) + 2, (tsteps - 1)*header.time_step)
                         errflag = 1
-                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(tsmax)) + 2, (tsteps - 1)*dt)
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(header.n_class_steps)) + 2, (tsteps - 1)*header.time_step)
                     ttraj += 1
             ## Summary of results ##
             if ctraj == 0:
-                print 'No trajectories completed within %0*.2f fs.' % (len(str(tsmax)), tcoll)
+                print 'No trajectories completed within %0*.2f fs.' % (len(str(header.n_class_steps)), tcoll)
                 os.remove('%s/td_raw_ensemble.out' % (cwd))
             else:
                 print 'Total trajectories:', '%04d' % (ttraj)
@@ -793,16 +792,16 @@ def tdiagonal():
                         final_occ += single_occ
                         final_exciton_com += exciton_com
                         ctraj += 1
-                        if tsteps == tsmax:
+                        if tsteps == header.n_class_steps:
                             etraj += 1
                     else:
-                        print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(tsmax)) + 2, (tsteps - 1)*dt)
+                        print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(header.n_class_steps)) + 2, (tsteps - 1)*header.time_step)
                         errflag = 1
-                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(tsmax)) + 2, (tsteps - 1)*dt)
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(header.n_class_steps)) + 2, (tsteps - 1)*header.time_step)
                     ttraj += 1
             ## Summary of results ##
             if ctraj == 0:
-                print 'No trajectories completed within %0*.2f fs.' % (len(str(tsmax)), tcoll)
+                print 'No trajectories completed within %0*.2f fs.' % (len(str(header.n_class_steps)), tcoll)
                 os.remove('%s/td_mean_ensemble.out' % (cwd))
             else:
                 ## Average occupation ##
@@ -826,14 +825,14 @@ def tdiagonal():
                 print >> output, 'Completed trajectories:', '%04d' % (ctraj)
                 print >> output, 'Excellent trajectories:', '%04d' % (etraj)
                 for tstep in np.arange(tscol):
-                    print >> output, '%0*.2f' % (len(str((tsmax))) + 2, tstep*dt), ' '.join(str('%.3f' % (x)) for x in frag_occ[tstep]), '%.3f' % (np.sum(frag_occ[tstep])), '%.3f' % (final_exciton_com[tstep])
+                    print >> output, '%0*.2f' % (len(str((header.n_class_steps))) + 2, tstep*header.time_step), ' '.join(str('%.3f' % (x)) for x in frag_occ[tstep]), '%.3f' % (np.sum(frag_occ[tstep])), '%.3f' % (final_exciton_com[tstep])
             if errflag == 1:
                 print 'One or more trajectories have experienced an error, check td_mean_ensemble.err'
             else:
                 os.remove('%s/td_mean_ensemble.err' % (cwd))
                 
     ## Non-adiabtic ensemble ##
-    if dynq == 0 and boflag == 0:
+    if dynq == 0 and header.bo_dynamics_flag == 0:
         ## All time-steps - non-adiabatic ensemble ##
         if typeq == 1:
             ## Generate output/error files ##
@@ -926,13 +925,13 @@ def tdiagonal():
                     with open('%s/td_raw_ensemble.out' % (cwd),'a') as output:
                         np.savetxt(output, data, fmt='%10s %07.2f %d '+ '%.3f ' * (nfrag + 2))
                     ctraj += 1
-                    if tsteps == tsmax:
+                    if tsteps == header.n_class_steps:
                         etraj += 1
-                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((tsmax))) + 2, (tsteps - 1)*dt)
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str((header.n_class_steps))) + 2, (tsteps - 1)*header.time_step)
                     ttraj += 1
             ## Summary of results ##
             if ctraj == 0:
-                print 'No trajectories completed within %0*.2f fs.' % (len(str(tsmax)), tcoll)
+                print 'No trajectories completed within %0*.2f fs.' % (len(str(header.n_class_steps)), tcoll)
                 os.remove('%s/td_raw_ensemble.out' % (cwd))
             else:
                 print 'Total trajectories:', '%04d' % (ttraj)
@@ -1036,16 +1035,16 @@ def tdiagonal():
                         with open('%s/td_raw_ensemble.out' % (cwd),'a') as output:
                             np.savetxt(output, data, fmt='%10s %07.2f %d '+ '%.3f ' * (nfrag + 2))
                         ctraj += 1
-                        if tsteps == tsmax:
+                        if tsteps == header.n_class_steps:
                             etraj += 1
                     else:
-                        print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(tsmax)) + 2, (tsteps - 1)*dt)
+                        print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(header.n_class_steps)) + 2, (tsteps - 1)*header.time_step)
                         errflag = 1
-                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(tsmax)) + 2, (tsteps - 1)*dt)
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(header.n_class_steps)) + 2, (tsteps - 1)*header.time_step)
                     ttraj += 1
             ## Summary of results ##
             if ctraj == 0:
-                print 'No trajectories completed within %0*.2f fs.' % (len(str(tsmax)), tcoll)
+                print 'No trajectories completed within %0*.2f fs.' % (len(str(header.n_class_steps)), tcoll)
                 os.remove('%s/td_raw_ensemble.out' % (cwd))
             else:
                 print 'Total trajectories:', '%04d' % (ttraj)
@@ -1114,16 +1113,16 @@ def tdiagonal():
                         final_occ += single_occ
                         final_exciton_com += exciton_com
                         ctraj += 1
-                        if tsteps == tsmax:
+                        if tsteps == header.n_class_steps:
                             etraj += 1
                     else:
-                        print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(tsmax)) + 2, (tsteps - 1)*dt)
+                        print >> error, '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(header.n_class_steps)) + 2, (tsteps - 1)*header.time_step)
                         errflag = 1
-                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(tsmax)) + 2, (tsteps - 1)*dt)
+                    print '%s%04d' % (NEXMD,dir), '%0*.2f' % (len(str(header.n_class_steps)) + 2, (tsteps - 1)*header.time_step)
                     ttraj += 1
             ## Summary of results ##
             if ctraj == 0:
-                print 'No trajectories completed within %0*.2f fs.' % (len(str(tsmax)), tcoll)
+                print 'No trajectories completed within %0*.2f fs.' % (len(str(header.n_class_steps)), tcoll)
                 os.remove('%s/td_mean_ensemble.out' % (cwd))
             else:
                 ## Average occupation ##
@@ -1147,7 +1146,7 @@ def tdiagonal():
                 print >> output, 'Completed trajectories:', '%04d' % (ctraj)
                 print >> output, 'Excellent trajectories:', '%04d' % (etraj)
                 for tstep in np.arange(tscol):
-                    print >> output, '%0*.2f' % (len(str((tsmax))) + 2, tstep*dt), ' '.join(str('%.3f' % (x)) for x in frag_occ[tstep]), '%.3f' % (np.sum(frag_occ[tstep])), '%.3f' % (final_exciton_com[tstep])
+                    print >> output, '%0*.2f' % (len(str((header.n_class_steps))) + 2, tstep*header.time_step), ' '.join(str('%.3f' % (x)) for x in frag_occ[tstep]), '%.3f' % (np.sum(frag_occ[tstep])), '%.3f' % (final_exciton_com[tstep])
             if errflag == 1:
                 print 'One or more trajectories have experienced an error, check td_mean_ensemble.err'
             else:

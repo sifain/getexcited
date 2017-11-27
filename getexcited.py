@@ -140,7 +140,7 @@ if funq == 11:
         print 'Answer must be 1.'
         sys.exit()
     if advq == 1:
-        tdiagonal()
+        tdiagonal(header)
 if funq == 12:
     sys.exit()
     advq = input('\nSelect a task from the following list:\n\n[1] Prepare input files for single-point calculations after pump-push delay time\n[2] Generate optical spectrum from single-point calculations after pump-push delay time\n[3] Prepare input files for NEXMD after push pulse\n\nEnter the number corresponding to the desired task: ')

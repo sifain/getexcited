@@ -74,7 +74,7 @@ def cleandir(header):
             print 'Path %sdirlist1 does not exist.' % (NEXMD)
             sys.exit()
         dirlist1 = np.int_(np.genfromtxt('%s/dirlist1' % (NEXMD)))
-        if isinstance(dirlist1,int) == true:
+        if isinstance(dirlist1,int) == True:
             dirlist1 = np.array([dirlist1])
         dirlist = open('%s/dirlist' % (NEXMD),'w')
         for dir in dirlist1:

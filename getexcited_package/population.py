@@ -37,24 +37,47 @@ def population(header):
 
     print 'Collecting populations.'
 
-    ## Directory names ##
-    NEXMDir = raw_input('NEXMD directory: ')
-    if not os.path.exists(NEXMDir):
-        print 'Path %s does not exist.' % (NEXMDir)
+    ## Type of calculation and directory check ##
+    dynq = input('Calculate populations along one trajectory or an ensemble of trajectories?\nAnswer one [1] or ensemble [0]: ')
+    if dynq not in [1,0]:
+        print 'Answer must be 1 or 0.'
         sys.exit()
-    ## Check if NEXMD folders exist ##
-    NEXMDs = glob.glob('%s/NEXMD*/' % (NEXMDir))
-    NEXMDs.sort()
-    if len(NEXMDs) == 0:
-        print 'There are no NEXMD folders in %s.' % (NEXMDir)
-        sys.exit()
+    if dynq == 0: ## ensemble
+        ## Directory names ##
+        NEXMDir = raw_input('NEXMD directory: ')
+        if not os.path.exists(NEXMDir):
+            print 'Path %s does not exist.' % (NEXMDir)
+            sys.exit()
+        ## Check if NEXMD folders exist ##
+        NEXMDs = glob.glob('%s/NEXMD*/' % (NEXMDir))
+        NEXMDs.sort()
+        if len(NEXMDs) == 0:
+            print 'There are no NEXMD folders in %s.' % (NEXMDir)
+            sys.exit()
+        ## Determine mean or all ##
+        typeq = input('Output mean populations in time or output populations at all time-steps and trajectories?\nAnswer mean[0] or all[1]: ')
+        if typeq not in [0,1]:
+            print 'Answer must be 0 or 1.'
+            sys.exit()
+    if dynq == 1: ## single trajectory
+        typeq = 0
+        NEXMDir = raw_input('Single trajectory directory: ')
+        if not os.path.exists(NEXMDir):
+            print 'Path %s does not exist.' % (NEXMDir)
+            sys.exit()
 
     ## Information from header ##
-    if not os.path.exists('%s/header' % (NEXMDir)):
-        print 'path %s/header does not exist.' % (NEXMDir)
-        sys.exit()
-    header = header('%s/header' % (NEXMDir))
-
+    if dynq == 0: ## ensemble
+        if not os.path.exists('%s/header' % (NEXMDir)):
+            print 'path %s/header does not exist.' % (NEXMDir)
+            sys.exit()
+        header = header('%s/header' % (NEXMDir))
+    if dynq == 1: ## single trajectory
+        if not os.path.exists('%s/input.ceon' % (NEXMDir)):
+            print 'Path %s/input.ceon does not exist.' % (NEXMDir)
+            sys.exit()
+        header = header('%s/input.ceon' % (NEXMDir))
+        
     ## Adding + 1 to include zeroth time-step ##
     header.n_class_steps = header.n_class_steps + 1
 
@@ -75,6 +98,27 @@ def population(header):
     while tscol*header.time_step*header.out_data_steps <= tcoll:
         tscol += 1
 
+    ## Collection time ##
+    if typeq == 0: ## mean population
+        if dynq == 0: ## ensemble
+            tcoll = input('Calculate populations up to what time in femtoseconds?\nNote that averaged results will only include trajectories that are complete up to this time: ')
+        if dynq == 1: ## single trajectory
+            tcoll = input('Calculate population up to what time in femtoseconds? ')
+        if isinstance(tcoll, int) == False and isinstance(tcoll, float) == False:
+            print 'Time must be integer or float.'
+            sys.exit()
+        if tcoll < 0:
+            print 'Time must be integer or float greater than zero.'
+            sys.exit()
+        tcoll = np.float(tcoll)
+        if tcoll > (header.n_class_steps - 1)*header.time_step:
+            tcoll = (header.n_class_steps -1)*header.time_step
+    if typeq == 1: ## all populations
+        tcoll = (header.n_class_steps - 1)*header.time_step
+
+    ## these need to go in the beginning of mean ##
+    
+    
     ## Collection time array ##
     times = np.around(np.linspace(header.time_init, tcoll, tscol), decimals = 3)
     fpoph = np.zeros((tscol,header.n_exc_states_propagate))
